@@ -7,96 +7,85 @@ function Navbar() {
   const { totalItems } = useCart();
   const { user, cerrarSesion } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [menuOpen, setMenuOpen]     = useState(false);
 
   return (
     <>
       <nav style={{
         backgroundColor: 'var(--color-marron)',
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
+        padding:         '1rem 1.5rem',
+        display:         'flex',
+        justifyContent:  'space-between',
+        alignItems:      'center',
+        position:        'sticky',
+        top:             0,
+        zIndex:          100,
       }}>
+        {/* Logo */}
         <a href="/" style={{
-          fontFamily: 'var(--font-heading)',
-          color: 'var(--color-crema)',
-          fontSize: '1.5rem',
-          fontWeight: '700',
+          fontFamily:     'var(--font-heading)',
+          color:          'var(--color-crema)',
+          fontSize:       '1.4rem',
+          fontWeight:     '700',
           textDecoration: 'none',
+          flexShrink:     0,
         }}>
-          Café & Cacao Perú
+          Lily's Caffe
         </a>
 
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <a href="/" style={{
-            color: 'var(--color-crema)',
-            fontSize: '0.95rem',
-            opacity: 0.9,
-          }}>
+        {/* Desktop menu */}
+        <div style={{
+          display:    'flex',
+          gap:        '1.5rem',
+          alignItems: 'center',
+        }} className="desktop-menu">
+          <a href="/" style={{ color: 'var(--color-crema)', fontSize: '0.95rem', opacity: 0.9 }}>
             Inicio
           </a>
 
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span style={{
-                color: 'var(--color-crema)',
-                fontSize: '0.85rem',
-                opacity: 0.8,
-              }}>
+            <>
+              <span style={{ color: 'var(--color-crema)', fontSize: '0.82rem', opacity: 0.75 }}>
                 {user.email}
               </span>
-              <button
-                onClick={cerrarSesion}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'var(--color-crema)',
-                  border: '1px solid rgba(250,246,239,0.4)',
-                  borderRadius: 'var(--radius-pill)',
-                  padding: '0.4rem 1rem',
-                  fontSize: '0.85rem',
-                  fontFamily: 'var(--font-body)',
-                  opacity: 0.9,
-                }}
-              >
+              <button onClick={cerrarSesion} style={{
+                backgroundColor: 'transparent',
+                color:           'var(--color-crema)',
+                border:          '1px solid rgba(250,246,239,0.4)',
+                borderRadius:    'var(--radius-pill)',
+                padding:         '0.4rem 1rem',
+                fontSize:        '0.85rem',
+                fontFamily:      'var(--font-body)',
+              }}>
                 Salir
               </button>
-            </div>
+            </>
           ) : (
-            <a href="/auth" style={{
-              color: 'var(--color-crema)',
-              fontSize: '0.95rem',
-              opacity: 0.9,
-            }}>
+            <a href="/auth" style={{ color: 'var(--color-crema)', fontSize: '0.95rem', opacity: 0.9 }}>
               Ingresar
             </a>
           )}
 
-          <button
-            onClick={() => setDrawerOpen(true)}
-            style={{
-              backgroundColor: 'var(--color-granate)',
-              color: 'var(--color-crema)',
-              border: 'none',
-              borderRadius: 'var(--radius-pill)',
-              padding: '0.5rem 1.2rem',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.9rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
+          <button onClick={() => setDrawerOpen(true)} style={{
+            backgroundColor: 'var(--color-granate)',
+            color:           'var(--color-crema)',
+            border:          'none',
+            borderRadius:    'var(--radius-pill)',
+            padding:         '0.5rem 1.2rem',
+            fontFamily:      'var(--font-body)',
+            fontSize:        '0.9rem',
+            display:         'flex',
+            alignItems:      'center',
+            gap:             '0.5rem',
+          }}>
             🛒
             {totalItems > 0 && (
               <span style={{
                 backgroundColor: 'var(--color-oliva)',
-                borderRadius: 'var(--radius-pill)',
-                padding: '0.1rem 0.5rem',
-                fontSize: '0.75rem',
-                fontWeight: '600',
+                borderRadius:    'var(--radius-pill)',
+                padding:         '0.1rem 0.5rem',
+                fontSize:        '0.75rem',
+                fontWeight:      '600',
               }}>
                 {totalItems}
               </span>
@@ -104,9 +93,99 @@ function Navbar() {
             Carrito
           </button>
         </div>
+
+        {/* Mobile: carrito + hamburguesa */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="mobile-menu">
+          <button onClick={() => setDrawerOpen(true)} style={{
+            backgroundColor: 'var(--color-granate)',
+            color:           'var(--color-crema)',
+            border:          'none',
+            borderRadius:    'var(--radius-pill)',
+            padding:         '0.45rem 1rem',
+            fontFamily:      'var(--font-body)',
+            fontSize:        '0.85rem',
+            display:         'flex',
+            alignItems:      'center',
+            gap:             '0.4rem',
+          }}>
+            🛒
+            {totalItems > 0 && (
+              <span style={{
+                backgroundColor: 'var(--color-oliva)',
+                borderRadius:    'var(--radius-pill)',
+                padding:         '0.1rem 0.45rem',
+                fontSize:        '0.72rem',
+                fontWeight:      '600',
+              }}>
+                {totalItems}
+              </span>
+            )}
+          </button>
+
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{
+            background: 'none',
+            border:     'none',
+            color:      'var(--color-crema)',
+            fontSize:   '1.5rem',
+            lineHeight: 1,
+            padding:    '0.25rem',
+          }}>
+            {menuOpen ? '✕' : '☰'}
+          </button>
+        </div>
       </nav>
 
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div style={{
+          backgroundColor: 'var(--color-marron-claro)',
+          padding:         '1rem 1.5rem',
+          display:         'flex',
+          flexDirection:   'column',
+          gap:             '1rem',
+          position:        'sticky',
+          top:             '60px',
+          zIndex:          99,
+        }} className="mobile-dropdown">
+          <a href="/" onClick={() => setMenuOpen(false)} style={{ color: 'var(--color-crema)', fontSize: '1rem' }}>
+            Inicio
+          </a>
+          {user ? (
+            <>
+              <span style={{ color: 'var(--color-crema)', fontSize: '0.85rem', opacity: 0.75 }}>
+                {user.email}
+              </span>
+              <button onClick={() => { cerrarSesion(); setMenuOpen(false); }} style={{
+                backgroundColor: 'transparent',
+                color:           'var(--color-crema)',
+                border:          '1px solid rgba(250,246,239,0.4)',
+                borderRadius:    'var(--radius-pill)',
+                padding:         '0.5rem 1rem',
+                fontFamily:      'var(--font-body)',
+                fontSize:        '0.9rem',
+                textAlign:       'left',
+              }}>
+                Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <a href="/auth" onClick={() => setMenuOpen(false)} style={{ color: 'var(--color-crema)', fontSize: '1rem' }}>
+              Ingresar
+            </a>
+          )}
+        </div>
+      )}
+
       <CartDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      <style>{`
+        .desktop-menu { display: flex !important; }
+        .mobile-menu  { display: none  !important; }
+        @media (max-width: 640px) {
+          .desktop-menu { display: none  !important; }
+          .mobile-menu  { display: flex  !important; }
+        }
+      `}</style>
     </>
   );
 }

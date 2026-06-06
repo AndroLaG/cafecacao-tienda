@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { crearPedido } from '../services/orderService';
 import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 
 function Checkout() {
   const { items, subtotal, costoEnvio, total, clearCart } = useCart();
@@ -60,15 +61,15 @@ function Checkout() {
   }
 
   const inputStyle = {
-    width:        '100%',
-    padding:      '0.75rem 1rem',
-    borderRadius: 'var(--radius-md)',
-    border:       '1px solid #e0d5c8',
-    fontFamily:   'var(--font-body)',
-    fontSize:     '0.95rem',
-    color:        'var(--color-texto)',
+    width:           '100%',
+    padding:         '0.75rem 1rem',
+    borderRadius:    'var(--radius-md)',
+    border:          '1px solid #e0d5c8',
+    fontFamily:      'var(--font-body)',
+    fontSize:        '0.95rem',
+    color:           'var(--color-texto)',
     backgroundColor: '#fff',
-    outline:      'none',
+    outline:         'none',
   };
 
   const labelStyle = {
@@ -79,11 +80,12 @@ function Checkout() {
     marginBottom: '0.4rem',
   };
 
+  // Carrito vacío
   if (items.length === 0 && !loading) {
     return (
-      <div>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Navbar />
-        <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-texto-muted)' }}>
+        <div style={{ flex: 1, textAlign: 'center', padding: '4rem 1.5rem', color: 'var(--color-texto-muted)' }}>
           <p style={{ fontSize: '1.1rem' }}>Tu carrito está vacío.</p>
           <a href="/" style={{
             display:         'inline-block',
@@ -97,36 +99,34 @@ function Checkout() {
             Ver productos
           </a>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <div style={{
-        maxWidth:  '900px',
-        margin:    '2rem auto',
-        padding:   '0 1.5rem',
-        display:   'grid',
-        gridTemplateColumns: '1fr 360px',
-        gap:       '2rem',
-        alignItems: 'start',
-      }}>
 
-        {/* Formulario de envío */}
-        <div>
-          <h2 style={{
-            fontFamily:    'var(--font-heading)',
-            color:         'var(--color-marron)',
-            fontSize:      '1.5rem',
-            marginBottom:  '1.5rem',
-          }}>
-            Datos de envío
-          </h2>
+      <main style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
+        <h2 style={{
+          fontFamily:   'var(--font-heading)',
+          color:        'var(--color-marron)',
+          fontSize:     '1.5rem',
+          marginBottom: '1.5rem',
+        }}>
+          Datos de envío
+        </h2>
 
+        <div style={{
+          display:             'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap:                 '2rem',
+          alignItems:          'start',
+        }}>
+          {/* Formulario de envío */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
               <div>
                 <label style={labelStyle}>Nombre completo</label>
                 <input
@@ -163,7 +163,7 @@ function Checkout() {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
               <div>
                 <label style={labelStyle}>Distrito</label>
                 <input
@@ -226,74 +226,77 @@ function Checkout() {
                 fontFamily:      'var(--font-body)',
                 marginTop:       '0.5rem',
                 transition:      'background-color 0.2s',
+                width:           '100%',
               }}
             >
-              {loading ? 'Procesando...' : 'Confirmar pedido — S/ ' + total.toFixed(2)}
+              {loading ? 'Procesando...' : `Confirmar pedido — S/ ${total.toFixed(2)}`}
             </button>
           </form>
-        </div>
 
-        {/* Resumen del pedido */}
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius:    'var(--radius-lg)',
-          boxShadow:       'var(--shadow-card)',
-          padding:         '1.5rem',
-          position:        'sticky',
-          top:             '90px',
-        }}>
-          <h3 style={{
-            fontFamily:   'var(--font-heading)',
-            color:        'var(--color-marron)',
-            fontSize:     '1.1rem',
-            marginBottom: '1rem',
+          {/* Resumen del pedido */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius:    'var(--radius-lg)',
+            boxShadow:       'var(--shadow-card)',
+            padding:         '1.5rem',
+            position:        'sticky',
+            top:             '80px',
           }}>
-            Resumen del pedido
-          </h3>
-
-          {items.map(item => (
-            <div key={item.id} style={{
-              display:       'flex',
-              justifyContent: 'space-between',
-              alignItems:    'center',
-              padding:       '0.5rem 0',
-              borderBottom:  '1px solid #f0e8de',
-              fontSize:      '0.875rem',
+            <h3 style={{
+              fontFamily:   'var(--font-heading)',
+              color:        'var(--color-marron)',
+              fontSize:     '1.1rem',
+              marginBottom: '1rem',
             }}>
-              <span style={{ color: 'var(--color-texto)' }}>
-                {item.nombre} × {item.cantidad}
-              </span>
-              <span style={{ fontWeight: '600', color: 'var(--color-marron)' }}>
-                S/ {(item.precio * item.cantidad).toFixed(2)}
-              </span>
-            </div>
-          ))}
+              Resumen del pedido
+            </h3>
 
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-              <span style={{ color: 'var(--color-texto-muted)' }}>Subtotal</span>
-              <span>S/ {subtotal.toFixed(2)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.9rem' }}>
-              <span style={{ color: 'var(--color-texto-muted)' }}>Envío</span>
-              <span style={{ color: costoEnvio === 0 ? 'green' : 'inherit' }}>
-                {costoEnvio === 0 ? 'Gratis' : `S/ ${costoEnvio.toFixed(2)}`}
-              </span>
-            </div>
-            <div style={{
-              display:        'flex',
-              justifyContent: 'space-between',
-              paddingTop:     '0.75rem',
-              borderTop:      '2px solid var(--color-marron)',
-            }}>
-              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', fontSize: '1.1rem' }}>Total</span>
-              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', fontSize: '1.1rem', color: 'var(--color-marron)' }}>
-                S/ {total.toFixed(2)}
-              </span>
+            {items.map(item => (
+              <div key={item.id} style={{
+                display:        'flex',
+                justifyContent: 'space-between',
+                alignItems:     'center',
+                padding:        '0.5rem 0',
+                borderBottom:   '1px solid #f0e8de',
+                fontSize:       '0.875rem',
+              }}>
+                <span style={{ color: 'var(--color-texto)' }}>
+                  {item.nombre} × {item.cantidad}
+                </span>
+                <span style={{ fontWeight: '600', color: 'var(--color-marron)' }}>
+                  S/ {(item.precio * item.cantidad).toFixed(2)}
+                </span>
+              </div>
+            ))}
+
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                <span style={{ color: 'var(--color-texto-muted)' }}>Subtotal</span>
+                <span>S/ {subtotal.toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                <span style={{ color: 'var(--color-texto-muted)' }}>Envío</span>
+                <span style={{ color: costoEnvio === 0 ? 'green' : 'inherit' }}>
+                  {costoEnvio === 0 ? 'Gratis' : `S/ ${costoEnvio.toFixed(2)}`}
+                </span>
+              </div>
+              <div style={{
+                display:        'flex',
+                justifyContent: 'space-between',
+                paddingTop:     '0.75rem',
+                borderTop:      '2px solid var(--color-marron)',
+              }}>
+                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', fontSize: '1.1rem' }}>Total</span>
+                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', fontSize: '1.1rem', color: 'var(--color-marron)' }}>
+                  S/ {total.toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

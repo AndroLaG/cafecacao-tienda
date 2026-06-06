@@ -78,7 +78,7 @@ function Auth() {
           marginBottom: '0.5rem',
           textAlign: 'center',
         }}>
-          Café & Cacao Perú
+          Lily's Caffe
         </h1>
 
         <p style={{

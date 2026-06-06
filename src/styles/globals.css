@@ -49,3 +49,20 @@ button {
   cursor: pointer;
   font-family: var(--font-body);
 }
+
+/* Responsive global */
+img {
+  max-width: 100%;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (max-width: 640px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.4rem;  }
+}

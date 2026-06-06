@@ -1,15 +1,11 @@
 import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 
 function OrdenExitosa() {
   return (
-    <div>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <div style={{
-        textAlign:  'center',
-        padding:    '5rem 2rem',
-        maxWidth:   '500px',
-        margin:     '0 auto',
-      }}>
+      <div style={{ flex: 1, textAlign: 'center', padding: '5rem 2rem', maxWidth: '500px', margin: '0 auto' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✅</div>
         <h1 style={{
           fontFamily:   'var(--font-heading)',
@@ -39,6 +35,7 @@ function OrdenExitosa() {
           Seguir comprando
         </a>
       </div>
+      <Footer />
     </div>
   );
 }
