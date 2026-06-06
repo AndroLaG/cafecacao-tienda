@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { crearPedido } from '../services/orderService';
+import { cargarSDKCulqi, abrirModalCulqi } from '../services/culqiService';
+import { supabase } from '../services/supabaseClient';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 
@@ -17,9 +19,12 @@ function Checkout() {
     provincia:    '',
     departamento: '',
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
+
+  useEffect(() => {
+    cargarSDKCulqi();
+  }, []);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -42,7 +47,7 @@ function Checkout() {
     setError(null);
 
     try {
-      await crearPedido({
+      const pedido = await crearPedido({
         clienteId:  user.id,
         items,
         subtotal,
@@ -51,13 +56,42 @@ function Checkout() {
         datosEnvio: form,
       });
 
-      clearCart();
-      window.location.href = '/orden-exitosa';
+      handlePago(pedido.id);
+
     } catch (err) {
       setError('Error al crear el pedido: ' + err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handlePago(pedidoId) {
+    abrirModalCulqi({
+      total: total,
+      email: user?.email ?? '',
+      onToken: async (token) => {
+        setLoading(true);
+        setError(null);
+        try {
+          const { data, error } = await supabase.functions.invoke('procesar-pago', {
+            body: { pedido_id: pedidoId, culqi_token: token },
+          });
+
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+
+          clearCart();
+          window.location.href = '/orden-exitosa';
+        } catch (err) {
+          setError('Error al procesar el pago: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      },
+      onError: (msg) => {
+        setError('Error en el pago: ' + msg);
+      },
+    });
   }
 
   const inputStyle = {
@@ -80,7 +114,6 @@ function Checkout() {
     marginBottom: '0.4rem',
   };
 
-  // Carrito vacío
   if (items.length === 0 && !loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -108,7 +141,13 @@ function Checkout() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
 
-      <main style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
+      <main style={{
+        flex:      1,
+        padding:   '2rem 1.5rem',
+        maxWidth:  '900px',
+        margin:    '0 auto',
+        width:     '100%',
+      }}>
         <h2 style={{
           fontFamily:   'var(--font-heading)',
           color:        'var(--color-marron)',
@@ -124,7 +163,7 @@ function Checkout() {
           gap:                 '2rem',
           alignItems:          'start',
         }}>
-          {/* Formulario de envío */}
+          {/* Formulario */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
               <div>
@@ -225,15 +264,15 @@ function Checkout() {
                 fontWeight:      '600',
                 fontFamily:      'var(--font-body)',
                 marginTop:       '0.5rem',
-                transition:      'background-color 0.2s',
                 width:           '100%',
+                transition:      'background-color 0.2s',
               }}
             >
-              {loading ? 'Procesando...' : `Confirmar pedido — S/ ${total.toFixed(2)}`}
+              {loading ? 'Procesando...' : `Confirmar y pagar — S/ ${total.toFixed(2)}`}
             </button>
           </form>
 
-          {/* Resumen del pedido */}
+          {/* Resumen */}
           <div style={{
             backgroundColor: '#fff',
             borderRadius:    'var(--radius-lg)',
