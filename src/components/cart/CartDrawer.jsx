@@ -22,7 +22,7 @@ function CartDrawer({ isOpen, onClose }) {
         top: 0,
         right: 0,
         height: '100vh',
-        width: '420px',
+        width: 'min(420px, 100vw)',
         backgroundColor: '#fff',
         zIndex: 201,
         transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
@@ -34,7 +34,7 @@ function CartDrawer({ isOpen, onClose }) {
 
         {/* Header */}
         <div style={{
-          padding: '1.25rem 1.5rem',
+          padding: '1rem',
           borderBottom: '1px solid #f0e8de',
           display: 'flex',
           justifyContent: 'space-between',
@@ -64,7 +64,7 @@ function CartDrawer({ isOpen, onClose }) {
         </div>
 
         {/* Items */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem'}}>
           {items.length === 0 ? (
             <div style={{
               textAlign: 'center',
@@ -170,7 +170,7 @@ function CartDrawer({ isOpen, onClose }) {
         {/* Footer con totales */}
         {items.length > 0 && (
           <div style={{
-            padding: '1.25rem 1.5rem',
+            padding: '1rem',
             borderTop: '1px solid #f0e8de',
             backgroundColor: 'var(--color-crema)',
           }}>
