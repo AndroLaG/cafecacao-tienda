@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --color-marron:        #83401d;
+  --color-marron-claro:  #97522d;
+  --color-oliva:         #83741b;
+  --color-oliva-claro:   #97862e;
+  --color-granate:       #8d2535;
+  --color-crema:         #faf6ef;
+  --color-texto:         #1a0f0a;
+  --color-texto-muted:   #6b4c38;
+
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   16px;
+  --radius-pill: 999px;
+
+  --shadow-card:  0 2px 12px rgba(131, 64, 29, 0.10);
+  --shadow-hover: 0 8px 24px rgba(131, 64, 29, 0.18);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-crema);
+  color: var(--color-texto);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  color: var(--color-marron);
+}
+
+a {
+  color: var(--color-marron);
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-body);
+}
