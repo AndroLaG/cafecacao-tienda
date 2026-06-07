@@ -8,7 +8,6 @@ const SABORES_CHOCOLATE = [
   'Maní',
   'Naranja',
   'Arándanos',
-  'Manteca de cacao',
 ];
 
 function ProductCard({ producto }) {
