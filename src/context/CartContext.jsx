@@ -103,7 +103,7 @@ export function CartProvider({ children }) {
   // ── Selectores derivados
   const totalItems    = state.items.reduce((acc, i) => acc + i.cantidad, 0);
   const subtotal      = state.items.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
-  const costoEnvio    = subtotal >= 150 ? 0 : 15; // Envío gratis desde S/150
+  const costoEnvio = subtotal >= 40 ? 0 : 15; // Envío gratis desde S/40
   const total         = subtotal + costoEnvio;
 
   const value = {
