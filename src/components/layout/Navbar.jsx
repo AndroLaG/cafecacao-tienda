@@ -22,11 +22,36 @@ function Navbar() {
     if (href.startsWith('/#')) {
       const id = href.replace('/#', '');
       const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = href;
+      }
     } else {
       window.location.href = href;
     }
   }
+
+  const linkStyle = (label) => ({
+    color:          'var(--color-crema)',
+    fontSize:       '0.95rem',
+    textDecoration: 'none',
+    position:       'relative',
+    paddingBottom:  '4px',
+    opacity:        hoveredLink === label ? 1 : 0.9,
+    transition:     'opacity 0.2s',
+  });
+
+  const underlineStyle = (label) => ({
+    position:        'absolute',
+    bottom:          0,
+    left:            0,
+    width:           hoveredLink === label ? '100%' : '0%',
+    height:          '2px',
+    backgroundColor: 'var(--color-crema)',
+    borderRadius:    'var(--radius-pill)',
+    transition:      'width 0.25s ease',
+  });
 
   return (
     <>
@@ -57,11 +82,7 @@ function Navbar() {
         </a>
 
         {/* Desktop menu */}
-        <div className="desktop-menu" style={{
-          display:    'flex',
-          gap:        '1.5rem',
-          alignItems: 'center',
-        }}>
+        <div className="desktop-menu" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           {enlaces.map(({ label, href }) => (
             <a
               key={label}
@@ -69,36 +90,30 @@ function Navbar() {
               onClick={e => { e.preventDefault(); handleNavClick(href); }}
               onMouseEnter={() => setHoveredLink(label)}
               onMouseLeave={() => setHoveredLink(null)}
-              style={{
-                color:          'var(--color-crema)',
-                fontSize:       '0.95rem',
-                textDecoration: 'none',
-                position:       'relative',
-                paddingBottom:  '4px',
-                opacity:        hoveredLink === label ? 1 : 0.9,
-                transition:     'opacity 0.2s',
-              }}
+              style={linkStyle(label)}
             >
               {label}
-              {/* underline animada */}
-              <span style={{
-                position:        'absolute',
-                bottom:          0,
-                left:            0,
-                width:           hoveredLink === label ? '100%' : '0%',
-                height:          '2px',
-                backgroundColor: 'var(--color-crema)',
-                borderRadius:    'var(--radius-pill)',
-                transition:      'width 0.25s ease',
-              }} />
+              <span style={underlineStyle(label)} />
             </a>
           ))}
 
           {user ? (
             <>
+              {/* Mis Pedidos — solo si está logueado */}
+              <a
+                href="/mis-pedidos"
+                onMouseEnter={() => setHoveredLink('mis-pedidos')}
+                onMouseLeave={() => setHoveredLink(null)}
+                style={linkStyle('mis-pedidos')}
+              >
+                Mis Pedidos
+                <span style={underlineStyle('mis-pedidos')} />
+              </a>
+
               <span style={{ color: 'var(--color-crema)', fontSize: '0.82rem', opacity: 0.75 }}>
                 {user.email}
               </span>
+
               <button
                 onClick={cerrarSesion}
                 style={{
@@ -128,26 +143,10 @@ function Navbar() {
               href="/auth"
               onMouseEnter={() => setHoveredLink('ingresar')}
               onMouseLeave={() => setHoveredLink(null)}
-              style={{
-                color:         'var(--color-crema)',
-                fontSize:      '0.95rem',
-                position:      'relative',
-                paddingBottom: '4px',
-                opacity:       hoveredLink === 'ingresar' ? 1 : 0.9,
-                transition:    'opacity 0.2s',
-              }}
+              style={linkStyle('ingresar')}
             >
               Ingresar
-              <span style={{
-                position:        'absolute',
-                bottom:          0,
-                left:            0,
-                width:           hoveredLink === 'ingresar' ? '100%' : '0%',
-                height:          '2px',
-                backgroundColor: 'var(--color-crema)',
-                borderRadius:    'var(--radius-pill)',
-                transition:      'width 0.25s ease',
-              }} />
+              <span style={underlineStyle('ingresar')} />
             </a>
           )}
 
@@ -261,20 +260,25 @@ function Navbar() {
               key={label}
               href={href}
               onClick={e => { e.preventDefault(); handleNavClick(href); }}
-              style={{
-                color:          'var(--color-crema)',
-                fontSize:       '1rem',
-                textDecoration: 'none',
-                transition:     'opacity 0.2s, padding-left 0.2s',
-              }}
+              style={{ color: 'var(--color-crema)', fontSize: '1rem', textDecoration: 'none', transition: 'opacity 0.2s, padding-left 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.75'; e.currentTarget.style.paddingLeft = '6px'; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1';    e.currentTarget.style.paddingLeft = '0px'; }}
             >
               {label}
             </a>
           ))}
+
           {user ? (
             <>
+              <a
+                href="/mis-pedidos"
+                onClick={() => setMenuOpen(false)}
+                style={{ color: 'var(--color-crema)', fontSize: '1rem', textDecoration: 'none', transition: 'opacity 0.2s, padding-left 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.75'; e.currentTarget.style.paddingLeft = '6px'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1';    e.currentTarget.style.paddingLeft = '0px'; }}
+              >
+                Mis Pedidos
+              </a>
               <span style={{ color: 'var(--color-crema)', fontSize: '0.85rem', opacity: 0.75 }}>
                 {user.email}
               </span>
@@ -301,11 +305,7 @@ function Navbar() {
             <a
               href="/auth"
               onClick={() => setMenuOpen(false)}
-              style={{
-                color:      'var(--color-crema)',
-                fontSize:   '1rem',
-                transition: 'opacity 0.2s',
-              }}
+              style={{ color: 'var(--color-crema)', fontSize: '1rem', transition: 'opacity 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
             >
