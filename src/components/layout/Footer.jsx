@@ -107,21 +107,17 @@ function Footer() {
             Contacto
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <a
-              href="tel:+51924029050"
-              style={linkStyle}
-              onMouseEnter={onLinkEnter}
-              onMouseLeave={onLinkLeave}
-            >
+            <a href="tel:+51924029050" style={linkStyle} onMouseEnter={onLinkEnter} onMouseLeave={onLinkLeave}>
               📞 +51 924 029 050
             </a>
-            <a
-              href="mailto:contacto@lilyscaffe.pe"
-              style={linkStyle}
-              onMouseEnter={onLinkEnter}
-              onMouseLeave={onLinkLeave}
-            >
-              ✉️ contacto@lilyscaffe.pe
+            <a href="tel:+51982276924" style={linkStyle} onMouseEnter={onLinkEnter} onMouseLeave={onLinkLeave}>
+              📞 +51 982 276 924
+            </a>
+            <a href="tel:+51960745253" style={linkStyle} onMouseEnter={onLinkEnter} onMouseLeave={onLinkLeave}>
+              📞 +51 960 745 253
+            </a>
+            <a href="mailto:lilyscaffe26@gmail.com" style={linkStyle} onMouseEnter={onLinkEnter} onMouseLeave={onLinkLeave}>
+              ✉️ lilyscaffe26@gmail.com
             </a>
           </div>
         </div>
@@ -138,9 +134,8 @@ function Footer() {
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {[
-              { dia: 'Lunes — Viernes', hora: '9:00 am — 6:00 pm' },
-              { dia: 'Sábado',          hora: '9:00 am — 2:00 pm' },
-              { dia: 'Domingo',         hora: 'Cerrado'            },
+              { dia: 'Lunes — Domingo', hora: '9:00 am — 6:00 pm' },
+              { dia: 'Sábado',          hora: 'Cerrado'            },
             ].map(({ dia, hora }) => (
               <div key={dia} style={{ fontSize: '0.875rem', opacity: 0.8 }}>
                 <span style={{ fontWeight: '600' }}>{dia}</span><br />
@@ -165,7 +160,7 @@ function Footer() {
           © {new Date().getFullYear()} Lily's Caffe. Todos los derechos reservados.
         </p>
         <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-          Hecho con ❤️ en Perú
+          Hecho con mucho café y amor en Perú ❤️
         </p>
       </div>
     </footer>
