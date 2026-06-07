@@ -13,6 +13,24 @@ function Footer() {
     }
   }
 
+  const linkStyle = {
+    color:          'var(--color-crema)',
+    opacity:        0.8,
+    fontSize:       '0.875rem',
+    textDecoration: 'none',
+    transition:     'opacity 0.2s, padding-left 0.2s',
+    display:        'inline-block',
+  };
+
+  function onLinkEnter(e) {
+    e.currentTarget.style.opacity     = '1';
+    e.currentTarget.style.paddingLeft = '6px';
+  }
+  function onLinkLeave(e) {
+    e.currentTarget.style.opacity     = '0.8';
+    e.currentTarget.style.paddingLeft = '0px';
+  }
+
   return (
     <footer style={{
       backgroundColor: 'var(--color-marron)',
@@ -68,12 +86,9 @@ function Footer() {
                 key={label}
                 href={href}
                 onClick={e => handleNavClick(e, href)}
-                style={{
-                  color:          'var(--color-crema)',
-                  opacity:        0.8,
-                  fontSize:       '0.875rem',
-                  textDecoration: 'none',
-                }}
+                style={linkStyle}
+                onMouseEnter={onLinkEnter}
+                onMouseLeave={onLinkLeave}
               >
                 {label}
               </a>
@@ -92,10 +107,20 @@ function Footer() {
             Contacto
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <a href="tel:+51924029050" style={{ color: 'var(--color-crema)', opacity: 0.8, fontSize: '0.875rem', textDecoration: 'none' }}>
+            <a
+              href="tel:+51924029050"
+              style={linkStyle}
+              onMouseEnter={onLinkEnter}
+              onMouseLeave={onLinkLeave}
+            >
               📞 +51 924 029 050
             </a>
-            <a href="mailto:contacto@lilyscaffe.pe" style={{ color: 'var(--color-crema)', opacity: 0.8, fontSize: '0.875rem', textDecoration: 'none' }}>
+            <a
+              href="mailto:contacto@lilyscaffe.pe"
+              style={linkStyle}
+              onMouseEnter={onLinkEnter}
+              onMouseLeave={onLinkLeave}
+            >
               ✉️ contacto@lilyscaffe.pe
             </a>
           </div>

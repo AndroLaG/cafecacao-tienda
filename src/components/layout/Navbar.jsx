@@ -8,6 +8,7 @@ function Navbar() {
   const { user, cerrarSesion } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuOpen, setMenuOpen]     = useState(false);
+  const [hoveredLink, setHoveredLink] = useState(null);
 
   const enlaces = [
     { label: 'Inicio',    href: '/'          },
@@ -47,7 +48,11 @@ function Navbar() {
           fontWeight:     '700',
           textDecoration: 'none',
           flexShrink:     0,
-        }}>
+          transition:     'opacity 0.2s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        >
           Lily's Caffe
         </a>
 
@@ -62,14 +67,30 @@ function Navbar() {
               key={label}
               href={href}
               onClick={e => { e.preventDefault(); handleNavClick(href); }}
+              onMouseEnter={() => setHoveredLink(label)}
+              onMouseLeave={() => setHoveredLink(null)}
               style={{
                 color:          'var(--color-crema)',
                 fontSize:       '0.95rem',
-                opacity:        0.9,
                 textDecoration: 'none',
+                position:       'relative',
+                paddingBottom:  '4px',
+                opacity:        hoveredLink === label ? 1 : 0.9,
+                transition:     'opacity 0.2s',
               }}
             >
               {label}
+              {/* underline animada */}
+              <span style={{
+                position:        'absolute',
+                bottom:          0,
+                left:            0,
+                width:           hoveredLink === label ? '100%' : '0%',
+                height:          '2px',
+                backgroundColor: 'var(--color-crema)',
+                borderRadius:    'var(--radius-pill)',
+                transition:      'width 0.25s ease',
+              }} />
             </a>
           ))}
 
@@ -78,36 +99,82 @@ function Navbar() {
               <span style={{ color: 'var(--color-crema)', fontSize: '0.82rem', opacity: 0.75 }}>
                 {user.email}
               </span>
-              <button onClick={cerrarSesion} style={{
-                backgroundColor: 'transparent',
-                color:           'var(--color-crema)',
-                border:          '1px solid rgba(250,246,239,0.4)',
-                borderRadius:    'var(--radius-pill)',
-                padding:         '0.4rem 1rem',
-                fontSize:        '0.85rem',
-                fontFamily:      'var(--font-body)',
-              }}>
+              <button
+                onClick={cerrarSesion}
+                style={{
+                  backgroundColor: 'transparent',
+                  color:           'var(--color-crema)',
+                  border:          '1px solid rgba(250,246,239,0.4)',
+                  borderRadius:    'var(--radius-pill)',
+                  padding:         '0.4rem 1rem',
+                  fontSize:        '0.85rem',
+                  fontFamily:      'var(--font-body)',
+                  transition:      'background-color 0.2s, border-color 0.2s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = 'rgba(250,246,239,0.15)';
+                  e.currentTarget.style.borderColor = 'rgba(250,246,239,0.8)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = 'rgba(250,246,239,0.4)';
+                }}
+              >
                 Salir
               </button>
             </>
           ) : (
-            <a href="/auth" style={{ color: 'var(--color-crema)', fontSize: '0.95rem', opacity: 0.9 }}>
+            <a
+              href="/auth"
+              onMouseEnter={() => setHoveredLink('ingresar')}
+              onMouseLeave={() => setHoveredLink(null)}
+              style={{
+                color:         'var(--color-crema)',
+                fontSize:      '0.95rem',
+                position:      'relative',
+                paddingBottom: '4px',
+                opacity:       hoveredLink === 'ingresar' ? 1 : 0.9,
+                transition:    'opacity 0.2s',
+              }}
+            >
               Ingresar
+              <span style={{
+                position:        'absolute',
+                bottom:          0,
+                left:            0,
+                width:           hoveredLink === 'ingresar' ? '100%' : '0%',
+                height:          '2px',
+                backgroundColor: 'var(--color-crema)',
+                borderRadius:    'var(--radius-pill)',
+                transition:      'width 0.25s ease',
+              }} />
             </a>
           )}
 
-          <button onClick={() => setDrawerOpen(true)} style={{
-            backgroundColor: 'var(--color-granate)',
-            color:           'var(--color-crema)',
-            border:          'none',
-            borderRadius:    'var(--radius-pill)',
-            padding:         '0.5rem 1.2rem',
-            fontFamily:      'var(--font-body)',
-            fontSize:        '0.9rem',
-            display:         'flex',
-            alignItems:      'center',
-            gap:             '0.5rem',
-          }}>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            style={{
+              backgroundColor: 'var(--color-granate)',
+              color:           'var(--color-crema)',
+              border:          'none',
+              borderRadius:    'var(--radius-pill)',
+              padding:         '0.5rem 1.2rem',
+              fontFamily:      'var(--font-body)',
+              fontSize:        '0.9rem',
+              display:         'flex',
+              alignItems:      'center',
+              gap:             '0.5rem',
+              transition:      'background-color 0.2s, transform 0.15s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#a32b3e';
+              e.currentTarget.style.transform = 'scale(1.04)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = 'var(--color-granate)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
             🛒
             {totalItems > 0 && (
               <span style={{
@@ -126,18 +193,24 @@ function Navbar() {
 
         {/* Mobile */}
         <div className="mobile-menu" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button onClick={() => setDrawerOpen(true)} style={{
-            backgroundColor: 'var(--color-granate)',
-            color:           'var(--color-crema)',
-            border:          'none',
-            borderRadius:    'var(--radius-pill)',
-            padding:         '0.45rem 1rem',
-            fontFamily:      'var(--font-body)',
-            fontSize:        '0.85rem',
-            display:         'flex',
-            alignItems:      'center',
-            gap:             '0.4rem',
-          }}>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            style={{
+              backgroundColor: 'var(--color-granate)',
+              color:           'var(--color-crema)',
+              border:          'none',
+              borderRadius:    'var(--radius-pill)',
+              padding:         '0.45rem 1rem',
+              fontFamily:      'var(--font-body)',
+              fontSize:        '0.85rem',
+              display:         'flex',
+              alignItems:      'center',
+              gap:             '0.4rem',
+              transition:      'background-color 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a32b3e'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-granate)'}
+          >
             🛒
             {totalItems > 0 && (
               <span style={{
@@ -152,14 +225,20 @@ function Navbar() {
             )}
           </button>
 
-          <button onClick={() => setMenuOpen(!menuOpen)} style={{
-            background: 'none',
-            border:     'none',
-            color:      'var(--color-crema)',
-            fontSize:   '1.5rem',
-            lineHeight: 1,
-            padding:    '0.25rem',
-          }}>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              background:  'none',
+              border:      'none',
+              color:       'var(--color-crema)',
+              fontSize:    '1.5rem',
+              lineHeight:  1,
+              padding:     '0.25rem',
+              transition:  'opacity 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
             {menuOpen ? '✕' : '☰'}
           </button>
         </div>
@@ -182,7 +261,14 @@ function Navbar() {
               key={label}
               href={href}
               onClick={e => { e.preventDefault(); handleNavClick(href); }}
-              style={{ color: 'var(--color-crema)', fontSize: '1rem', textDecoration: 'none' }}
+              style={{
+                color:          'var(--color-crema)',
+                fontSize:       '1rem',
+                textDecoration: 'none',
+                transition:     'opacity 0.2s, padding-left 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.75'; e.currentTarget.style.paddingLeft = '6px'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1';    e.currentTarget.style.paddingLeft = '0px'; }}
             >
               {label}
             </a>
@@ -192,21 +278,37 @@ function Navbar() {
               <span style={{ color: 'var(--color-crema)', fontSize: '0.85rem', opacity: 0.75 }}>
                 {user.email}
               </span>
-              <button onClick={() => { cerrarSesion(); setMenuOpen(false); }} style={{
-                backgroundColor: 'transparent',
-                color:           'var(--color-crema)',
-                border:          '1px solid rgba(250,246,239,0.4)',
-                borderRadius:    'var(--radius-pill)',
-                padding:         '0.5rem 1rem',
-                fontFamily:      'var(--font-body)',
-                fontSize:        '0.9rem',
-                textAlign:       'left',
-              }}>
+              <button
+                onClick={() => { cerrarSesion(); setMenuOpen(false); }}
+                style={{
+                  backgroundColor: 'transparent',
+                  color:           'var(--color-crema)',
+                  border:          '1px solid rgba(250,246,239,0.4)',
+                  borderRadius:    'var(--radius-pill)',
+                  padding:         '0.5rem 1rem',
+                  fontFamily:      'var(--font-body)',
+                  fontSize:        '0.9rem',
+                  textAlign:       'left',
+                  transition:      'background-color 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(250,246,239,0.12)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
                 Cerrar sesión
               </button>
             </>
           ) : (
-            <a href="/auth" onClick={() => setMenuOpen(false)} style={{ color: 'var(--color-crema)', fontSize: '1rem' }}>
+            <a
+              href="/auth"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                color:      'var(--color-crema)',
+                fontSize:   '1rem',
+                transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >
               Ingresar
             </a>
           )}

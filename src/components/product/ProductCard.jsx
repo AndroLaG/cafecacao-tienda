@@ -10,12 +10,17 @@ const SABORES_CHOCOLATE = [
   'Arándanos',
 ];
 
+// Umbral: si la descripción supera este nº de caracteres, mostramos el botón
+const DESC_LIMITE = 100;
+
 function ProductCard({ producto }) {
   const { addItem } = useCart();
   const [saborSeleccionado, setSaborSeleccionado] = useState('');
-  const [errorSabor, setErrorSabor] = useState(false);
+  const [errorSabor, setErrorSabor]               = useState(false);
+  const [descExpanded, setDescExpanded]           = useState(false);
 
-  const esChocolate = producto.nombre === "Chocolate Kiatari's";
+  const esChocolate     = producto.nombre === "Chocolate Kiatari's";
+  const descLarga       = producto.descripcion && producto.descripcion.length > DESC_LIMITE;
 
   const categoriaColor = {
     cafe:   'var(--color-marron)',
@@ -29,32 +34,31 @@ function ProductCard({ producto }) {
       return;
     }
     setErrorSabor(false);
-
     const itemParaCarrito = esChocolate
       ? { ...producto, nombre: `${producto.nombre} — ${saborSeleccionado}` }
       : producto;
-
     addItem(itemParaCarrito);
     if (esChocolate) setSaborSeleccionado('');
   }
 
   return (
-    <div style={{
-      backgroundColor: '#fff',
-      borderRadius:    'var(--radius-lg)',
-      overflow:        'hidden',
-      boxShadow:       'var(--shadow-card)',
-      transition:      'transform 0.2s, box-shadow 0.2s',
-      display:         'flex',
-      flexDirection:   'column',
-    }}
+    <div
+      style={{
+        backgroundColor: '#fff',
+        borderRadius:    'var(--radius-lg)',
+        overflow:        'hidden',
+        boxShadow:       'var(--shadow-card)',
+        transition:      'transform 0.2s, box-shadow 0.2s',
+        display:         'flex',
+        flexDirection:   'column',
+      }}
       onMouseEnter={e => {
-        e.currentTarget.style.transform  = 'translateY(-4px)';
-        e.currentTarget.style.boxShadow  = 'var(--shadow-hover)';
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-hover)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.transform  = 'translateY(0)';
-        e.currentTarget.style.boxShadow  = 'var(--shadow-card)';
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-card)';
       }}
     >
       {/* Imagen */}
@@ -90,17 +94,45 @@ function ProductCard({ producto }) {
           {producto.nombre}
         </h3>
 
-        <p style={{
-          color:              'var(--color-texto-muted)',
-          fontSize:           '0.875rem',
-          lineHeight:         '1.5',
-          display:            '-webkit-box',
-          WebkitLineClamp:    2,
-          WebkitBoxOrient:    'vertical',
-          overflow:           'hidden',
-        }}>
-          {producto.descripcion}
-        </p>
+        {/* Descripción con Leer más */}
+        <div>
+          <p style={{
+            color:      'var(--color-texto-muted)',
+            fontSize:   '0.875rem',
+            lineHeight: '1.5',
+            // Si está colapsada Y es larga, cortamos con clamp
+            ...(!descExpanded && descLarga ? {
+              display:            '-webkit-box',
+              WebkitLineClamp:    2,
+              WebkitBoxOrient:    'vertical',
+              overflow:           'hidden',
+            } : {}),
+          }}>
+            {producto.descripcion}
+          </p>
+
+          {descLarga && (
+            <button
+              onClick={() => setDescExpanded(prev => !prev)}
+              style={{
+                background:  'none',
+                border:      'none',
+                padding:     '0.2rem 0',
+                marginTop:   '0.2rem',
+                color:       'var(--color-oliva)',
+                fontSize:    '0.8rem',
+                fontWeight:  '600',
+                fontFamily:  'var(--font-body)',
+                cursor:      'pointer',
+                transition:  'color 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--color-marron)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--color-oliva)'}
+            >
+              {descExpanded ? '▲ Leer menos' : '▼ Leer más'}
+            </button>
+          )}
+        </div>
 
         {/* Notas — solo si no es chocolate */}
         {producto.notas_cata && !esChocolate && (
@@ -193,10 +225,16 @@ function ProductCard({ producto }) {
               padding:         '0.6rem 1.2rem',
               fontSize:        '0.875rem',
               fontWeight:      '600',
-              transition:      'background-color 0.2s',
+              transition:      'background-color 0.2s, transform 0.15s',
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-marron)'}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)';
+              e.currentTarget.style.transform = 'scale(1.04)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = 'var(--color-marron)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
             Añadir
           </button>
