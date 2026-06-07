@@ -9,6 +9,24 @@ function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuOpen, setMenuOpen]     = useState(false);
 
+  const enlaces = [
+    { label: 'Inicio',    href: '/'          },
+    { label: 'Productos', href: '/#productos' },
+    { label: 'Nosotros',  href: '/#nosotros'  },
+    { label: 'Contacto',  href: '/#contacto'  },
+  ];
+
+  function handleNavClick(href) {
+    setMenuOpen(false);
+    if (href.startsWith('/#')) {
+      const id = href.replace('/#', '');
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = href;
+    }
+  }
+
   return (
     <>
       <nav style={{
@@ -34,14 +52,26 @@ function Navbar() {
         </a>
 
         {/* Desktop menu */}
-        <div style={{
+        <div className="desktop-menu" style={{
           display:    'flex',
           gap:        '1.5rem',
           alignItems: 'center',
-        }} className="desktop-menu">
-          <a href="/" style={{ color: 'var(--color-crema)', fontSize: '0.95rem', opacity: 0.9 }}>
-            Inicio
-          </a>
+        }}>
+          {enlaces.map(({ label, href }) => (
+            
+              key={label}
+              href={href}
+              onClick={e => { e.preventDefault(); handleNavClick(href); }}
+              style={{
+                color:          'var(--color-crema)',
+                fontSize:       '0.95rem',
+                opacity:        0.9,
+                textDecoration: 'none',
+              }}
+            >
+              {label}
+            </a>
+          ))}
 
           {user ? (
             <>
@@ -94,8 +124,8 @@ function Navbar() {
           </button>
         </div>
 
-        {/* Mobile: carrito + hamburguesa */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="mobile-menu">
+        {/* Mobile */}
+        <div className="mobile-menu" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button onClick={() => setDrawerOpen(true)} style={{
             backgroundColor: 'var(--color-granate)',
             color:           'var(--color-crema)',
@@ -146,10 +176,17 @@ function Navbar() {
           position:        'sticky',
           top:             '60px',
           zIndex:          99,
-        }} className="mobile-dropdown">
-          <a href="/" onClick={() => setMenuOpen(false)} style={{ color: 'var(--color-crema)', fontSize: '1rem' }}>
-            Inicio
-          </a>
+        }}>
+          {enlaces.map(({ label, href }) => (
+            
+              key={label}
+              href={href}
+              onClick={e => { e.preventDefault(); handleNavClick(href); }}
+              style={{ color: 'var(--color-crema)', fontSize: '1rem', textDecoration: 'none' }}
+            >
+              {label}
+            </a>
+          ))}
           {user ? (
             <>
               <span style={{ color: 'var(--color-crema)', fontSize: '0.85rem', opacity: 0.75 }}>

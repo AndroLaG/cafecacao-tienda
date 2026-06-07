@@ -69,7 +69,7 @@ function SeccionNosotros() {
             {[
               { numero: '100%', texto: 'Orgánico' },
               { numero: '2+',   texto: 'Años de experiencia' },
-              { numero: '50+',  texto: 'Familias beneficiadas' },
+              { numero: '100+',  texto: 'Clientes satisfechos' },
               { numero: '4',    texto: 'Productos únicos' },
             ].map(({ numero, texto }) => (
               <div key={texto} style={{
