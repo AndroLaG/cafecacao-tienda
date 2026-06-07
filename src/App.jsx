@@ -4,6 +4,7 @@ import Auth         from './pages/Auth';
 import Checkout     from './pages/Checkout';
 import OrdenExitosa from './pages/OrdenExitosa';
 import MisPedidos   from './pages/MisPedidos';
+import Admin        from './pages/Admin';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/checkout"      element={<Checkout />}     />
         <Route path="/orden-exitosa" element={<OrdenExitosa />} />
         <Route path="/mis-pedidos"   element={<MisPedidos />}   />
+        <Route path="/admin"         element={<Admin />}        />
       </Routes>
     </BrowserRouter>
   );
