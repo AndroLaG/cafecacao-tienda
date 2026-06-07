@@ -23,13 +23,40 @@ function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
-  useEffect(() => {
-    cargarSDKCulqi();
-    // Si el usuario está logueado pre-rellenar el email
-    if (user?.email) {
-      setForm(f => ({ ...f, email: user.email }));
+useEffect(() => {
+  cargarSDKCulqi();
+
+  async function preRellenarDatos() {
+    if (!user) return;
+
+    // Pre-rellenar email
+    setForm(f => ({ ...f, email: user.email }));
+
+    // Buscar el último pedido del usuario para autocompletar dirección
+    const { data: ultimoPedido } = await supabase
+      .from('pedidos')
+      .select('envio_nombre, envio_telefono, envio_direccion, envio_distrito, envio_provincia, envio_departamento')
+      .eq('cliente_id', user.id)
+      .not('envio_nombre', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (ultimoPedido) {
+      setForm(f => ({
+        ...f,
+        nombre:       ultimoPedido.envio_nombre       ?? '',
+        telefono:     ultimoPedido.envio_telefono     ?? '',
+        direccion:    ultimoPedido.envio_direccion    ?? '',
+        distrito:     ultimoPedido.envio_distrito     ?? '',
+        provincia:    ultimoPedido.envio_provincia    ?? '',
+        departamento: ultimoPedido.envio_departamento ?? '',
+      }));
     }
-  }, [user]);
+  }
+
+  preRellenarDatos();
+}, [user]);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -180,6 +207,25 @@ function Checkout() {
             Comprando como <strong>{user.email}</strong>
           </p>
         )}
+
+        {/* Aviso de cobertura de envío */}
+<div style={{
+  backgroundColor: '#fff8e1',
+  border:          '1px solid #f59e0b',
+  borderRadius:    'var(--radius-md)',
+  padding:         '0.75rem 1rem',
+  marginBottom:    '1.5rem',
+  display:         'flex',
+  alignItems:      'flex-start',
+  gap:             '0.5rem',
+}}>
+  <span style={{ fontSize: '1rem', flexShrink: 0 }}>🚚</span>
+  <p style={{ fontSize: '0.85rem', color: '#92400e', margin: 0, lineHeight: 1.5 }}>
+    <strong>Zona de cobertura:</strong> Por el momento Lily's Caffe realiza envíos
+    únicamente dentro de <strong>Lima Metropolitana</strong>. Si te encuentras en
+    provincia, puedes contactarnos para coordinar una alternativa.
+  </p>
+</div>
 
         <div style={{
           display:             'grid',
