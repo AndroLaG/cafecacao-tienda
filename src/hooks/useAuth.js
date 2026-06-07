@@ -2,20 +2,33 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 
 export function useAuth() {
-  const [user, setUser]       = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user,        setUser]        = useState(null);
+  const [perfil,      setPerfil]      = useState(null);
+  const [loading,     setLoading]     = useState(true);
+
+  async function cargarPerfil(userId) {
+    if (!userId) { setPerfil(null); return; }
+    const { data } = await supabase
+      .from('clientes')
+      .select('nombre_completo')
+      .eq('id', userId)
+      .single();
+    setPerfil(data ?? null);
+  }
 
   useEffect(() => {
-    // Obtener sesión actual al cargar
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      await cargarPerfil(u?.id);
       setLoading(false);
     });
 
-    // Escuchar cambios de sesión en tiempo real
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
+      async (_event, session) => {
+        const u = session?.user ?? null;
+        setUser(u);
+        await cargarPerfil(u?.id);
       }
     );
 
@@ -27,5 +40,10 @@ export function useAuth() {
     window.location.href = '/';
   }
 
-  return { user, loading, cerrarSesion };
+  // Extrae solo el primer nombre de "Andrés Sánchez" → "Andrés"
+  const primerNombre = perfil?.nombre_completo
+    ? perfil.nombre_completo.trim().split(' ')[0]
+    : null;
+
+  return { user, perfil, primerNombre, loading, cerrarSesion };
 }

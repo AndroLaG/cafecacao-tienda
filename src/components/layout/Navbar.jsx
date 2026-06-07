@@ -5,10 +5,10 @@ import CartDrawer from '../cart/CartDrawer';
 
 function Navbar() {
   const { totalItems } = useCart();
-  const { user, cerrarSesion } = useAuth();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [menuOpen, setMenuOpen]     = useState(false);
-  const [hoveredLink, setHoveredLink] = useState(null);
+  const { user, primerNombre, cerrarSesion } = useAuth();
+  const [drawerOpen,   setDrawerOpen]   = useState(false);
+  const [menuOpen,     setMenuOpen]     = useState(false);
+  const [hoveredLink,  setHoveredLink]  = useState(null);
 
   const enlaces = [
     { label: 'Inicio',    href: '/'          },
@@ -99,7 +99,6 @@ function Navbar() {
 
           {user ? (
             <>
-              {/* Mis Pedidos — solo si está logueado */}
               <a
                 href="/mis-pedidos"
                 onMouseEnter={() => setHoveredLink('mis-pedidos')}
@@ -110,8 +109,14 @@ function Navbar() {
                 <span style={underlineStyle('mis-pedidos')} />
               </a>
 
-              <span style={{ color: 'var(--color-crema)', fontSize: '0.82rem', opacity: 0.75 }}>
-                {user.email}
+              {/* Saludo con primer nombre */}
+              <span style={{
+                color:      'var(--color-crema)',
+                fontSize:   '0.88rem',
+                opacity:    0.85,
+                fontWeight: '500',
+              }}>
+                Hola, {primerNombre ?? user.email.split('@')[0]} 👋
               </span>
 
               <button
@@ -279,9 +284,11 @@ function Navbar() {
               >
                 Mis Pedidos
               </a>
-              <span style={{ color: 'var(--color-crema)', fontSize: '0.85rem', opacity: 0.75 }}>
-                {user.email}
+
+              <span style={{ color: 'var(--color-crema)', fontSize: '0.9rem', opacity: 0.85, fontWeight: '500' }}>
+                Hola, {primerNombre ?? user.email.split('@')[0]} 👋
               </span>
+
               <button
                 onClick={() => { cerrarSesion(); setMenuOpen(false); }}
                 style={{
