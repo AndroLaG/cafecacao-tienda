@@ -137,7 +137,7 @@ function Footer() {
         gap:            '0.75rem',
       }}>
         <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-          © {new Date().getFullYear()} Lils Caffe. Todos los derechos reservados.
+          © {new Date().getFullYear()} Lily's Caffe. Todos los derechos reservados.
         </p>
         <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
           Hecho con ❤️ en Perú
