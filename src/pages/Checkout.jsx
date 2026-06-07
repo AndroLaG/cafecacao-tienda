@@ -11,29 +11,25 @@ function Checkout() {
   const { items, subtotal, costoEnvio, total, clearCart } = useCart();
   const { user } = useAuth();
 
-  // Estados del formulario de envío
   const [form, setForm] = useState({
-    nombre:       '',
-    telefono:     '',
-    direccion:    '',
-    distrito:     '',
-    provincia:    '',
-    departamento: '',
+    nombre:        '',
+    email:         '',
+    telefono:      '',
+    direccion:     '',
+    distrito:      '',
+    provincia:     '',
+    departamento:  '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
-  // Estados del formulario de auth
-  const [authModo, setAuthModo]         = useState('login');
-  const [authEmail, setAuthEmail]       = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authNombre, setAuthNombre]     = useState('');
-  const [authLoading, setAuthLoading]   = useState(false);
-  const [authError, setAuthError]       = useState(null);
-
   useEffect(() => {
     cargarSDKCulqi();
-  }, []);
+    // Si el usuario está logueado pre-rellenar el email
+    if (user?.email) {
+      setForm(f => ({ ...f, email: user.email }));
+    }
+  }, [user]);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -41,32 +37,24 @@ function Checkout() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-
-    if (!user) return;
-
-    if (items.length === 0) {
-      setError('Tu carrito está vacío.');
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
       const pedido = await crearPedido({
-        clienteId:  user.id,
+        clienteId:     user?.id ?? null,
+        emailInvitado: user ? null : form.email,
         items,
         subtotal,
         costoEnvio,
         total,
-        datosEnvio: form,
+        datosEnvio:    form,
       });
 
       handlePago(pedido.id);
 
     } catch (err) {
       setError('Error al crear el pedido: ' + err.message);
-    } finally {
       setLoading(false);
     }
   }
@@ -74,7 +62,7 @@ function Checkout() {
   async function handlePago(pedidoId) {
     abrirModalCulqi({
       total: total,
-      email: user?.email ?? '',
+      email: user?.email ?? form.email,
       onToken: async (token) => {
         setLoading(true);
         setError(null);
@@ -100,36 +88,6 @@ function Checkout() {
     });
   }
 
-  async function handleAuth(e) {
-    e.preventDefault();
-    setAuthLoading(true);
-    setAuthError(null);
-
-    if (authModo === 'registro') {
-      const { data, error } = await supabase.auth.signUp({
-        email:    authEmail,
-        password: authPassword,
-      });
-
-      if (error) {
-        setAuthError(error.message);
-      } else {
-        await supabase.from('clientes').insert({
-          id:              data.user.id,
-          nombre_completo: authNombre,
-        });
-      }
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email:    authEmail,
-        password: authPassword,
-      });
-      if (error) setAuthError('Correo o contraseña incorrectos.');
-    }
-
-    setAuthLoading(false);
-  }
-
   const inputStyle = {
     width:           '100%',
     padding:         '0.75rem 1rem',
@@ -150,7 +108,6 @@ function Checkout() {
     marginBottom: '0.4rem',
   };
 
-  // Carrito vacío
   if (items.length === 0 && !loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -194,10 +151,35 @@ function Checkout() {
           fontFamily:   'var(--font-heading)',
           color:        'var(--color-marron)',
           fontSize:     '1.5rem',
-          marginBottom: '1.5rem',
+          marginBottom: '0.5rem',
         }}>
           Datos de envío
         </h2>
+
+        {/* Mensaje si no está logueado */}
+        {!user && (
+          <p style={{
+            fontSize:     '0.875rem',
+            color:        'var(--color-texto-muted)',
+            marginBottom: '1.5rem',
+          }}>
+            ¿Ya tienes cuenta?{' '}
+            <a href="/auth" style={{ color: 'var(--color-marron)', fontWeight: '600' }}>
+              Inicia sesión
+            </a>{' '}
+            para autocompletar tus datos. O continúa como invitado.
+          </p>
+        )}
+
+        {user && (
+          <p style={{
+            fontSize:     '0.875rem',
+            color:        'var(--color-texto-muted)',
+            marginBottom: '1.5rem',
+          }}>
+            Comprando como <strong>{user.email}</strong>
+          </p>
+        )}
 
         <div style={{
           display:             'grid',
@@ -205,247 +187,140 @@ function Checkout() {
           gap:                 '2rem',
           alignItems:          'start',
         }}>
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-          {/* Columna izquierda */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Email — siempre visible */}
+            <div>
+              <label style={labelStyle}>Correo electrónico</label>
+              <input
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="correo@ejemplo.com"
+                required
+                readOnly={!!user}
+                style={{
+                  ...inputStyle,
+                  backgroundColor: user ? '#f5f0e8' : '#fff',
+                }}
+              />
+            </div>
 
-            {/* Bloque auth si no está logueado */}
-            {!user && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+              <div>
+                <label style={labelStyle}>Nombre completo</label>
+                <input
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={handleChange}
+                  placeholder="Andrés Sánchez"
+                  required
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Teléfono</label>
+                <input
+                  name="telefono"
+                  value={form.telefono}
+                  onChange={handleChange}
+                  placeholder="999 999 999"
+                  required
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Dirección</label>
+              <input
+                name="direccion"
+                value={form.direccion}
+                onChange={handleChange}
+                placeholder="Av. Ejemplo 123, Dpto 4B"
+                required
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
+              <div>
+                <label style={labelStyle}>Distrito</label>
+                <input
+                  name="distrito"
+                  value={form.distrito}
+                  onChange={handleChange}
+                  placeholder="Miraflores"
+                  required
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Provincia</label>
+                <input
+                  name="provincia"
+                  value={form.provincia}
+                  onChange={handleChange}
+                  placeholder="Lima"
+                  required
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Departamento</label>
+                <input
+                  name="departamento"
+                  value={form.departamento}
+                  onChange={handleChange}
+                  placeholder="Lima"
+                  required
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            {error && (
               <div style={{
-                backgroundColor: '#fff',
-                borderRadius:    'var(--radius-lg)',
-                boxShadow:       'var(--shadow-card)',
-                padding:         '1.5rem',
-                border:          '2px solid var(--color-marron)',
+                backgroundColor: '#fef2f2',
+                border:          '1px solid #fecaca',
+                borderRadius:    'var(--radius-md)',
+                padding:         '0.75rem 1rem',
+                color:           'var(--color-granate)',
+                fontSize:        '0.875rem',
               }}>
-                <p style={{
-                  fontFamily:   'var(--font-heading)',
-                  color:        'var(--color-marron)',
-                  fontSize:     '1rem',
-                  marginBottom: '1rem',
-                  fontWeight:   '700',
-                }}>
-                  Para continuar necesitas una cuenta
-                </p>
-
-                {/* Tabs login/registro */}
-                <div style={{
-                  display:         'flex',
-                  borderRadius:    'var(--radius-md)',
-                  backgroundColor: 'var(--color-crema)',
-                  padding:         '4px',
-                  marginBottom:    '1rem',
-                }}>
-                  {['login', 'registro'].map(m => (
-                    <button
-                      key={m}
-                      onClick={() => { setAuthModo(m); setAuthError(null); }}
-                      style={{
-                        flex:            1,
-                        padding:         '0.5rem',
-                        borderRadius:    'var(--radius-md)',
-                        border:          'none',
-                        fontFamily:      'var(--font-body)',
-                        fontSize:        '0.875rem',
-                        fontWeight:      '600',
-                        backgroundColor: authModo === m ? 'var(--color-marron)' : 'transparent',
-                        color:           authModo === m ? 'var(--color-crema)' : 'var(--color-texto-muted)',
-                        transition:      'all 0.2s',
-                      }}
-                    >
-                      {m === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
-                    </button>
-                  ))}
-                </div>
-
-                <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {authModo === 'registro' && (
-                    <div>
-                      <label style={labelStyle}>Nombre completo</label>
-                      <input
-                        type="text"
-                        value={authNombre}
-                        onChange={e => setAuthNombre(e.target.value)}
-                        placeholder="Andrés Sánchez"
-                        required
-                        style={inputStyle}
-                      />
-                    </div>
-                  )}
-
-                  <div>
-                    <label style={labelStyle}>Correo electrónico</label>
-                    <input
-                      type="email"
-                      value={authEmail}
-                      onChange={e => setAuthEmail(e.target.value)}
-                      placeholder="correo@ejemplo.com"
-                      required
-                      style={inputStyle}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>Contraseña</label>
-                    <input
-                      type="password"
-                      value={authPassword}
-                      onChange={e => setAuthPassword(e.target.value)}
-                      placeholder="Mínimo 6 caracteres"
-                      required
-                      minLength={6}
-                      style={inputStyle}
-                    />
-                  </div>
-
-                  {authError && (
-                    <div style={{
-                      backgroundColor: '#fef2f2',
-                      border:          '1px solid #fecaca',
-                      borderRadius:    'var(--radius-md)',
-                      padding:         '0.75rem 1rem',
-                      color:           'var(--color-granate)',
-                      fontSize:        '0.875rem',
-                    }}>
-                      {authError}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={authLoading}
-                    style={{
-                      backgroundColor: authLoading ? 'var(--color-texto-muted)' : 'var(--color-oliva)',
-                      color:           'var(--color-crema)',
-                      border:          'none',
-                      borderRadius:    'var(--radius-md)',
-                      padding:         '0.75rem',
-                      fontSize:        '0.95rem',
-                      fontWeight:      '600',
-                      fontFamily:      'var(--font-body)',
-                      width:           '100%',
-                    }}
-                  >
-                    {authLoading
-                      ? 'Cargando...'
-                      : authModo === 'login'
-                      ? 'Iniciar sesión'
-                      : 'Crear cuenta'}
-                  </button>
-                </form>
+                {error}
               </div>
             )}
 
-            {/* Formulario de envío — solo si está logueado */}
-            {user && (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
-                  <div>
-                    <label style={labelStyle}>Nombre completo</label>
-                    <input
-                      name="nombre"
-                      value={form.nombre}
-                      onChange={handleChange}
-                      placeholder="Andrés Sánchez"
-                      required
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Teléfono</label>
-                    <input
-                      name="telefono"
-                      value={form.telefono}
-                      onChange={handleChange}
-                      placeholder="999 999 999"
-                      required
-                      style={inputStyle}
-                    />
-                  </div>
-                </div>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                backgroundColor: loading ? 'var(--color-texto-muted)' : 'var(--color-marron)',
+                color:           'var(--color-crema)',
+                border:          'none',
+                borderRadius:    'var(--radius-md)',
+                padding:         '0.875rem',
+                fontSize:        '1rem',
+                fontWeight:      '600',
+                fontFamily:      'var(--font-body)',
+                width:           '100%',
+                transition:      'background-color 0.2s',
+              }}
+            >
+              {loading ? 'Procesando...' : `Confirmar y pagar — S/ ${total.toFixed(2)}`}
+            </button>
 
-                <div>
-                  <label style={labelStyle}>Dirección</label>
-                  <input
-                    name="direccion"
-                    value={form.direccion}
-                    onChange={handleChange}
-                    placeholder="Av. Ejemplo 123, Dpto 4B"
-                    required
-                    style={inputStyle}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
-                  <div>
-                    <label style={labelStyle}>Distrito</label>
-                    <input
-                      name="distrito"
-                      value={form.distrito}
-                      onChange={handleChange}
-                      placeholder="Miraflores"
-                      required
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Provincia</label>
-                    <input
-                      name="provincia"
-                      value={form.provincia}
-                      onChange={handleChange}
-                      placeholder="Lima"
-                      required
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Departamento</label>
-                    <input
-                      name="departamento"
-                      value={form.departamento}
-                      onChange={handleChange}
-                      placeholder="Lima"
-                      required
-                      style={inputStyle}
-                    />
-                  </div>
-                </div>
-
-                {error && (
-                  <div style={{
-                    backgroundColor: '#fef2f2',
-                    border:          '1px solid #fecaca',
-                    borderRadius:    'var(--radius-md)',
-                    padding:         '0.75rem 1rem',
-                    color:           'var(--color-granate)',
-                    fontSize:        '0.875rem',
-                  }}>
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{
-                    backgroundColor: loading ? 'var(--color-texto-muted)' : 'var(--color-marron)',
-                    color:           'var(--color-crema)',
-                    border:          'none',
-                    borderRadius:    'var(--radius-md)',
-                    padding:         '0.875rem',
-                    fontSize:        '1rem',
-                    fontWeight:      '600',
-                    fontFamily:      'var(--font-body)',
-                    width:           '100%',
-                    transition:      'background-color 0.2s',
-                  }}
-                >
-                  {loading ? 'Procesando...' : `Confirmar y pagar — S/ ${total.toFixed(2)}`}
-                </button>
-              </form>
-            )}
-          </div>
+            <p style={{
+              fontSize:  '0.75rem',
+              color:     'var(--color-texto-muted)',
+              textAlign: 'center',
+            }}>
+              🔒 Pago seguro procesado por Culqi
+            </p>
+          </form>
 
           {/* Resumen del pedido */}
           <div style={{

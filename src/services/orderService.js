@@ -1,11 +1,12 @@
 import { supabase } from './supabaseClient';
 
-export async function crearPedido({ clienteId, items, subtotal, costoEnvio, total, datosEnvio }) {
+export async function crearPedido({ clienteId, items, subtotal, costoEnvio, total, datosEnvio, emailInvitado }) {
   // Paso 1: Insertar el pedido
   const { data: pedido, error: pedidoError } = await supabase
     .from('pedidos')
     .insert({
-      cliente_id:         clienteId,
+      cliente_id:         clienteId ?? null,
+      email_invitado:     clienteId ? null : emailInvitado,
       subtotal,
       costo_envio:        costoEnvio,
       total,
@@ -22,7 +23,7 @@ export async function crearPedido({ clienteId, items, subtotal, costoEnvio, tota
 
   if (pedidoError) throw pedidoError;
 
-  // Paso 2: Insertar los items del pedido
+  // Paso 2: Insertar los items
   const pedidoItems = items.map(item => ({
     pedido_id:       pedido.id,
     producto_id:     item.id,
