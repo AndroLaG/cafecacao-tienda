@@ -58,7 +58,7 @@ function Navbar() {
           alignItems: 'center',
         }}>
           {enlaces.map(({ label, href }) => (
-            
+            <a
               key={label}
               href={href}
               onClick={e => { e.preventDefault(); handleNavClick(href); }}
@@ -178,7 +178,7 @@ function Navbar() {
           zIndex:          99,
         }}>
           {enlaces.map(({ label, href }) => (
-            
+            <a
               key={label}
               href={href}
               onClick={e => { e.preventDefault(); handleNavClick(href); }}

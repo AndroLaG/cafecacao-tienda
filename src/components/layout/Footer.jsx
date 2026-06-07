@@ -64,7 +64,7 @@ function Footer() {
               { label: 'Contacto',  href: '/#contacto'  },
               { label: 'Mi cuenta', href: '/auth'       },
             ].map(({ label, href }) => (
-              
+              <a
                 key={label}
                 href={href}
                 onClick={e => handleNavClick(e, href)}
