@@ -6,11 +6,22 @@ const SERVICE_ROLE_KEY = Deno.env.get('SERVICE_ROLE_KEY');
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 Deno.serve(async (req) => {
+  // Manejar preflight CORS
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Método no permitido' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      status:  405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -45,7 +56,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         amount:        totalCentimos,
         currency_code: 'PEN',
-        email:         pedido.envio_nombre ?? 'cliente@lilyscaffe.pe',
+        email: 'cliente@lilyscaffe.pe',
         source_id:     culqi_token,
         description:   `Pedido #${pedido_id.slice(0, 8).toUpperCase()}`,
         capture:       true,
@@ -85,7 +96,7 @@ Deno.serve(async (req) => {
       estado:    'pagado',
     }), {
       status:  200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (err) {
@@ -97,6 +108,6 @@ Deno.serve(async (req) => {
 function errorResponse(message, status) {
   return new Response(JSON.stringify({ error: message }), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
