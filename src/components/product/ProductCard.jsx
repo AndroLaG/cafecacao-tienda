@@ -9,7 +9,6 @@ const SABORES_CHOCOLATE = [
   'Naranja',
   'Arándanos',
   'Manteca de cacao',
-  'Estevia',
 ];
 
 function ProductCard({ producto }) {
