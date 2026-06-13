@@ -118,22 +118,19 @@ function Navbar() {
 
         {/* Desktop menu */}
         <div className="desktop-menu" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-{enlaces.map((enlace) => {
-  const { label, href } = enlace;
-  return (
-    
-      key={label}
-      href={href}
-      onClick={e => { e.preventDefault(); handleNavClick(href); }}
-      onMouseEnter={() => setHoveredLink(label)}
-      onMouseLeave={() => setHoveredLink(null)}
-      style={linkStyle(label)}
-    >
-      {label}
-      <span style={underlineStyle(label)} />
-    </a>
-  );
-})}
+          {enlaces.map((enlace) => (
+            
+              key={enlace.label}
+              href={enlace.href}
+              onClick={e => { e.preventDefault(); handleNavClick(enlace.href); }}
+              onMouseEnter={() => setHoveredLink(enlace.label)}
+              onMouseLeave={() => setHoveredLink(null)}
+              style={linkStyle(enlace.label)}
+            >
+              {enlace.label}
+              <span style={underlineStyle(enlace.label)} />
+            </a>
+          ))}
 
           {user ? (
             <div ref={submenuRef} style={{ position: 'relative' }}>
@@ -358,21 +355,18 @@ function Navbar() {
           top:             '60px',
           zIndex:          99,
         }}>
-{enlaces.map((enlace) => {
-  const { label, href } = enlace;
-  return (
-    
-      key={label}
-      href={href}
-      onClick={e => { e.preventDefault(); handleNavClick(href); }}
-      style={{ color: 'var(--color-crema)', fontSize: '1rem', textDecoration: 'none' }}
-      onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
-      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-    >
-      {label}
-    </a>
-  );
-})}
+          {enlaces.map((enlace) => (
+            
+              key={enlace.label}
+              href={enlace.href}
+              onClick={e => { e.preventDefault(); handleNavClick(enlace.href); }}
+              style={{ color: 'var(--color-crema)', fontSize: '1rem', textDecoration: 'none' }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >
+              {enlace.label}
+            </a>
+          ))}
 
           {user ? (
             <>
