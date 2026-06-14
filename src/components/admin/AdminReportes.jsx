@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import * as XLSX from 'xlsx';
 import { supabase } from '../../services/supabaseClient';
 
 function AdminReportes() {
@@ -37,179 +36,242 @@ function AdminReportes() {
     setLoading(false);
   }
 
-  function exportarExcel() {
+  async function exportarExcel() {
     if (!datos) return;
+    const ExcelJS = (await import('exceljs')).default;
     const { pedidos, productos, totalVentas, pedidosPorEstado } = datos;
-    const wb = XLSX.utils.book_new();
 
-    // ── Colores por estado ──────────────────────────────────────────────
+    const wb = new ExcelJS.Workbook();
+    wb.creator  = "Lily's Caffe";
+    wb.created  = new Date();
+
+    // ── Paleta de colores ─────────────────────────────────────────────
+    const MARRON       = '83401D';
+    const MARRON_CLARO = '97522D';
+    const CREMA        = 'FAF6EF';
+    const BLANCO       = 'FFFFFF';
+
     const colorEstado = {
-      pagado:     'C6EFCE', // verde claro
-      preparando: 'FFEB9C', // amarillo
-      enviado:    'BDD7EE', // azul claro
-      entregado:  'D9EAD3', // verde suave
-      pendiente:  'FCE4D6', // naranja claro
-      cancelado:  'F4CCCC', // rojo claro
+      pagado:     { bg: 'C6EFCE', fg: '166534' },
+      preparando: { bg: 'FFEB9C', fg: '92400E' },
+      enviado:    { bg: 'BDD7EE', fg: '1E3A5F' },
+      entregado:  { bg: 'D9EAD3', fg: '14532D' },
+      pendiente:  { bg: 'FCE4D6', fg: '991B1B' },
+      cancelado:  { bg: 'F4CCCC', fg: '7F1D1D' },
     };
+
+    function estiloEncabezado(bg, fg) {
+      var bgColor = bg || MARRON;
+      var fgColor = fg || BLANCO;
+      return {
+        font:      { bold: true, color: { argb: fgColor }, size: 11 },
+        fill:      { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } },
+        alignment: { horizontal: 'center', vertical: 'middle' },
+        border: {
+          top:    { style: 'thin', color: { argb: MARRON_CLARO } },
+          bottom: { style: 'thin', color: { argb: MARRON_CLARO } },
+          left:   { style: 'thin', color: { argb: MARRON_CLARO } },
+          right:  { style: 'thin', color: { argb: MARRON_CLARO } },
+        },
+      };
+    }
+
+    function estiloCelda(bg, alineacion) {
+      var bgColor = bg || BLANCO;
+      var align   = alineacion || 'left';
+      return {
+        fill:      { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } },
+        alignment: { horizontal: align, vertical: 'middle' },
+        border: {
+          top:    { style: 'hair', color: { argb: 'E0D5C8' } },
+          bottom: { style: 'hair', color: { argb: 'E0D5C8' } },
+          left:   { style: 'hair', color: { argb: 'E0D5C8' } },
+          right:  { style: 'hair', color: { argb: 'E0D5C8' } },
+        },
+      };
+    }
 
     // ══════════════════════════════════════════════════════════════════
     // HOJA 1 — RESUMEN
     // ══════════════════════════════════════════════════════════════════
-    const fechaReporte = new Date().toLocaleDateString('es-PE', {
-      day: '2-digit', month: 'long', year: 'numeric',
+    var wsResumen = wb.addWorksheet('Resumen');
+    wsResumen.columns = [{ width: 32 }, { width: 20 }, { width: 16 }];
+
+    wsResumen.mergeCells('A1:C1');
+    var titulo = wsResumen.getCell('A1');
+    titulo.value = "REPORTE DE VENTAS — LILY'S CAFFE";
+    titulo.style = {
+      font:      { bold: true, size: 16, color: { argb: BLANCO } },
+      fill:      { type: 'pattern', pattern: 'solid', fgColor: { argb: MARRON } },
+      alignment: { horizontal: 'center', vertical: 'middle' },
+    };
+    wsResumen.getRow(1).height = 36;
+
+    wsResumen.mergeCells('A2:C2');
+    var subtitulo = wsResumen.getCell('A2');
+    subtitulo.value = 'Generado el ' + new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
+    subtitulo.style = {
+      font:      { italic: true, color: { argb: MARRON_CLARO }, size: 10 },
+      fill:      { type: 'pattern', pattern: 'solid', fgColor: { argb: CREMA } },
+      alignment: { horizontal: 'center' },
+    };
+    wsResumen.getRow(2).height = 20;
+    wsResumen.addRow([]);
+
+    wsResumen.mergeCells('A4:C4');
+    var secMetricas = wsResumen.getCell('A4');
+    secMetricas.value = 'MÉTRICAS GENERALES';
+    secMetricas.style = {
+      font: { bold: true, size: 12, color: { argb: MARRON } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CREMA } },
+    };
+    wsResumen.getRow(4).height = 22;
+
+    var encMetricas = wsResumen.addRow(['Indicador', 'Valor', '']);
+    encMetricas.eachCell(function(cell, col) {
+      if (col <= 2) cell.style = estiloEncabezado();
+    });
+    wsResumen.getRow(5).height = 20;
+
+    var metricas = [
+      ['Ventas totales (S/)', 'S/ ' + totalVentas.toFixed(2)],
+      ['Total de pedidos',    pedidos.length],
+      ['Productos activos',   productos.filter(function(p) { return p.activo; }).length],
+    ];
+    metricas.forEach(function(fila, i) {
+      var row = wsResumen.addRow([fila[0], fila[1], '']);
+      var bg  = i % 2 === 0 ? BLANCO : CREMA;
+      row.getCell(1).style = Object.assign({}, estiloCelda(bg));
+      row.getCell(2).style = Object.assign({}, estiloCelda(bg, 'center'), { font: { bold: true, color: { argb: MARRON } } });
+      row.height = 18;
     });
 
-    const resumenData = [
-      ["REPORTE DE VENTAS — LILY'S CAFFE"],
-      [`Generado el ${fechaReporte}`],
-      [],
-      ['MÉTRICAS GENERALES'],
-      ['Indicador', 'Valor'],
-      ['Ventas totales (S/)', totalVentas.toFixed(2)],
-      ['Total de pedidos', pedidos.length],
-      ['Productos activos', productos.filter(p => p.activo).length],
-      [],
-      ['PEDIDOS POR ESTADO'],
-      ['Estado', 'Cantidad', '% del total'],
-      ...Object.entries(pedidosPorEstado).map(([estado, cantidad]) => [
+    wsResumen.addRow([]);
+
+    var nextRow = wsResumen.rowCount + 1;
+    wsResumen.mergeCells('A' + nextRow + ':C' + nextRow);
+    var secEstados = wsResumen.getCell('A' + nextRow);
+    secEstados.value = 'PEDIDOS POR ESTADO';
+    secEstados.style = {
+      font: { bold: true, size: 12, color: { argb: MARRON } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CREMA } },
+    };
+
+    var encEstados = wsResumen.addRow(['Estado', 'Cantidad', '% del total']);
+    encEstados.eachCell(function(cell) { cell.style = estiloEncabezado(); });
+
+    Object.entries(pedidosPorEstado).forEach(function(entry, i) {
+      var estado   = entry[0];
+      var cantidad = entry[1];
+      var pct  = ((cantidad / pedidos.length) * 100).toFixed(1) + '%';
+      var bg   = i % 2 === 0 ? BLANCO : CREMA;
+      var col  = colorEstado[estado] || { bg: BLANCO, fg: '000000' };
+      var row  = wsResumen.addRow([
         estado.charAt(0).toUpperCase() + estado.slice(1),
         cantidad,
-        ((cantidad / pedidos.length) * 100).toFixed(1) + '%',
-      ]),
-    ];
-
-    const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
-
-    // Estilos hoja Resumen
-    wsResumen['A1'] = { v: "REPORTE DE VENTAS — LILY'S CAFFE", t: 's',
-      s: { font: { bold: true, sz: 16, color: { rgb: '83401D' } } } };
-    wsResumen['A4'] = { v: 'MÉTRICAS GENERALES', t: 's',
-      s: { font: { bold: true, sz: 12, color: { rgb: '83401D' } } } };
-    wsResumen['A10'] = { v: 'PEDIDOS POR ESTADO', t: 's',
-      s: { font: { bold: true, sz: 12, color: { rgb: '83401D' } } } };
-
-    // Encabezados de tablas en negrita
-    ['A5', 'B5', 'A11', 'B11', 'C11'].forEach(cell => {
-      if (wsResumen[cell]) {
-        wsResumen[cell].s = { font: { bold: true }, fill: { fgColor: { rgb: 'F5EDE0' } } };
-      }
+        pct,
+      ]);
+      row.getCell(1).style = Object.assign({}, estiloCelda(col.bg), { font: { bold: true, color: { argb: col.fg } } });
+      row.getCell(2).style = Object.assign({}, estiloCelda(bg, 'center'), { font: { bold: true } });
+      row.getCell(3).style = estiloCelda(bg, 'center');
+      row.height = 18;
     });
-
-    wsResumen['!cols'] = [{ wch: 30 }, { wch: 18 }, { wch: 15 }];
-    XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
 
     // ══════════════════════════════════════════════════════════════════
     // HOJA 2 — PEDIDOS
     // ══════════════════════════════════════════════════════════════════
-    const encabezadosPedidos = [
-      'N° Pedido', 'Fecha', 'Hora', 'Cliente', 'Email',
-      'Teléfono', 'Dirección', 'Distrito', 'Subtotal (S/)',
-      'Envío (S/)', 'Total (S/)', 'Estado',
+    var wsPedidos = wb.addWorksheet('Pedidos');
+    wsPedidos.columns = [
+      { header: 'N° Pedido',    key: 'id',        width: 13 },
+      { header: 'Fecha',        key: 'fecha',      width: 13 },
+      { header: 'Hora',         key: 'hora',       width: 9  },
+      { header: 'Cliente',      key: 'cliente',    width: 22 },
+      { header: 'Email',        key: 'email',      width: 28 },
+      { header: 'Teléfono',     key: 'telefono',   width: 13 },
+      { header: 'Dirección',    key: 'direccion',  width: 34 },
+      { header: 'Distrito',     key: 'distrito',   width: 18 },
+      { header: 'Subtotal (S/)',key: 'subtotal',   width: 14 },
+      { header: 'Envío (S/)',   key: 'envio',      width: 11 },
+      { header: 'Total (S/)',   key: 'total',      width: 12 },
+      { header: 'Estado',       key: 'estado',     width: 13 },
     ];
 
-    const filasPedidos = pedidos.map(p => [
-      p.id.slice(0, 8).toUpperCase(),
-      new Date(p.created_at).toLocaleDateString('es-PE'),
-      new Date(p.created_at).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
-      p.envio_nombre      ?? '—',
-      p.email_invitado    ?? '—',
-      p.envio_telefono    ?? '—',
-      p.envio_direccion   ?? '—',
-      p.envio_distrito    ?? '—',
-      Number(p.subtotal   ?? 0).toFixed(2),
-      Number(p.costo_envio ?? 0).toFixed(2),
-      Number(p.total).toFixed(2),
-      p.estado.charAt(0).toUpperCase() + p.estado.slice(1),
-    ]);
+    wsPedidos.getRow(1).eachCell(function(cell) { cell.style = estiloEncabezado(); });
+    wsPedidos.getRow(1).height = 22;
+    wsPedidos.views = [{ state: 'frozen', ySplit: 1 }];
 
-    const wsPedidos = XLSX.utils.aoa_to_sheet([encabezadosPedidos, ...filasPedidos]);
-
-    // Encabezado en negrita con fondo marrón claro
-    encabezadosPedidos.forEach((_, i) => {
-      const cell = XLSX.utils.encode_cell({ r: 0, c: i });
-      wsPedidos[cell] = {
-        v: encabezadosPedidos[i],
-        t: 's',
-        s: {
-          font: { bold: true, color: { rgb: 'FFFFFF' } },
-          fill: { fgColor: { rgb: '83401D' } },
-          alignment: { horizontal: 'center' },
-        },
-      };
-    });
-
-    // Color de fila según estado
-    pedidos.forEach((p, rowIdx) => {
-      const color = colorEstado[p.estado] ?? 'FFFFFF';
-      encabezadosPedidos.forEach((_, colIdx) => {
-        const cell = XLSX.utils.encode_cell({ r: rowIdx + 1, c: colIdx });
-        if (wsPedidos[cell]) {
-          wsPedidos[cell].s = {
-            fill: { fgColor: { rgb: color } },
-            alignment: { horizontal: colIdx >= 8 ? 'right' : 'left' },
-          };
-        }
+    pedidos.forEach(function(p) {
+      var col = colorEstado[p.estado] || { bg: BLANCO, fg: '000000' };
+      var row = wsPedidos.addRow({
+        id:        p.id.slice(0, 8).toUpperCase(),
+        fecha:     new Date(p.created_at).toLocaleDateString('es-PE'),
+        hora:      new Date(p.created_at).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+        cliente:   p.envio_nombre      || '—',
+        email:     p.email_invitado    || '—',
+        telefono:  p.envio_telefono    || '—',
+        direccion: p.envio_direccion   || '—',
+        distrito:  p.envio_distrito    || '—',
+        subtotal:  Number(p.subtotal   || 0).toFixed(2),
+        envio:     Number(p.costo_envio || 0).toFixed(2),
+        total:     Number(p.total).toFixed(2),
+        estado:    p.estado.charAt(0).toUpperCase() + p.estado.slice(1),
       });
+      row.eachCell(function(cell, colNum) {
+        var esNumero = colNum >= 9 && colNum <= 11;
+        var esEstado = colNum === 12;
+        cell.style = Object.assign({}, estiloCelda(col.bg, esNumero ? 'right' : 'left'), {
+          font: esEstado
+            ? { bold: true, color: { argb: col.fg } }
+            : { color: { argb: '333333' } },
+        });
+      });
+      row.height = 17;
     });
-
-    wsPedidos['!cols'] = [
-      { wch: 12 }, { wch: 12 }, { wch: 8 },  { wch: 22 },
-      { wch: 28 }, { wch: 12 }, { wch: 32 }, { wch: 16 },
-      { wch: 13 }, { wch: 10 }, { wch: 11 }, { wch: 12 },
-    ];
-
-    // Congelar fila de encabezado
-    wsPedidos['!freeze'] = { xSplit: 0, ySplit: 1 };
-
-    XLSX.utils.book_append_sheet(wb, wsPedidos, 'Pedidos');
 
     // ══════════════════════════════════════════════════════════════════
     // HOJA 3 — INVENTARIO
     // ══════════════════════════════════════════════════════════════════
-    const encabezadosInventario = ['Producto', 'Precio (S/)', 'Stock', 'Estado'];
+    var wsInventario = wb.addWorksheet('Inventario');
+    wsInventario.columns = [
+      { header: 'Producto',    key: 'nombre', width: 30 },
+      { header: 'Precio (S/)',key: 'precio', width: 14 },
+      { header: 'Stock',       key: 'stock',  width: 10 },
+      { header: 'Estado',      key: 'estado', width: 12 },
+    ];
 
-    const filasInventario = productos.map(p => [
-      p.nombre,
-      Number(p.precio).toFixed(2),
-      p.stock,
-      p.activo ? 'Activo' : 'Inactivo',
-    ]);
+    wsInventario.getRow(1).eachCell(function(cell) { cell.style = estiloEncabezado(); });
+    wsInventario.getRow(1).height = 22;
+    wsInventario.views = [{ state: 'frozen', ySplit: 1 }];
 
-    const wsInventario = XLSX.utils.aoa_to_sheet([encabezadosInventario, ...filasInventario]);
-
-    // Encabezado en negrita
-    encabezadosInventario.forEach((_, i) => {
-      const cell = XLSX.utils.encode_cell({ r: 0, c: i });
-      wsInventario[cell] = {
-        v: encabezadosInventario[i],
-        t: 's',
-        s: {
-          font: { bold: true, color: { rgb: 'FFFFFF' } },
-          fill: { fgColor: { rgb: '83401D' } },
-          alignment: { horizontal: 'center' },
-        },
-      };
-    });
-
-    // Color filas según stock bajo o inactivo
-    productos.forEach((p, rowIdx) => {
-      const color = !p.activo ? 'F4CCCC' : p.stock < 10 ? 'FCE4D6' : 'FFFFFF';
-      encabezadosInventario.forEach((_, colIdx) => {
-        const cell = XLSX.utils.encode_cell({ r: rowIdx + 1, c: colIdx });
-        if (wsInventario[cell]) {
-          wsInventario[cell].s = { fill: { fgColor: { rgb: color } } };
-        }
+    productos.forEach(function(p, i) {
+      var bg  = !p.activo ? 'F4CCCC' : p.stock < 10 ? 'FCE4D6' : i % 2 === 0 ? BLANCO : CREMA;
+      var row = wsInventario.addRow({
+        nombre: p.nombre,
+        precio: Number(p.precio).toFixed(2),
+        stock:  p.stock,
+        estado: p.activo ? 'Activo' : 'Inactivo',
       });
+      row.eachCell(function(cell, colNum) {
+        cell.style = Object.assign({}, estiloCelda(bg, colNum >= 2 ? 'center' : 'left'), {
+          font: colNum === 3 && p.stock < 10
+            ? { bold: true, color: { argb: '991B1B' } }
+            : { color: { argb: '333333' } },
+        });
+      });
+      row.height = 17;
     });
 
-    wsInventario['!cols'] = [{ wch: 30 }, { wch: 13 }, { wch: 10 }, { wch: 12 }];
-    wsInventario['!freeze'] = { xSplit: 0, ySplit: 1 };
-
-    XLSX.utils.book_append_sheet(wb, wsInventario, 'Inventario');
-
-    // ── Descargar ───────────────────────────────────────────────────
-    const fecha = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, `lilyscaffe-reporte-${fecha}.xlsx`, { cellStyles: true });
+    // ── Descargar ────────────────────────────────────────────────────
+    var buffer = await wb.xlsx.writeBuffer();
+    var blob   = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    var url = URL.createObjectURL(blob);
+    var a   = document.createElement('a');
+    a.href     = url;
+    a.download = 'lilyscaffe-reporte-' + new Date().toISOString().slice(0, 10) + '.xlsx';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   if (loading) return (
@@ -233,7 +295,6 @@ function AdminReportes() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
-      {/* Botón exportar */}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button
           onClick={exportarExcel}
@@ -256,7 +317,6 @@ function AdminReportes() {
         </button>
       </div>
 
-      {/* Tarjetas resumen */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
         <div style={cardStyle}>
           <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--color-marron)', fontFamily: 'var(--font-heading)' }}>
@@ -290,7 +350,6 @@ function AdminReportes() {
         </div>
       </div>
 
-      {/* Gráfica de ventas por día */}
       {Object.keys(ventasPorDia).length > 0 && (
         <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
           <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '1.25rem' }}>
@@ -316,7 +375,6 @@ function AdminReportes() {
         </div>
       )}
 
-      {/* Pedidos por estado */}
       <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
         <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '1.25rem' }}>
           Pedidos por estado
@@ -343,7 +401,6 @@ function AdminReportes() {
         </div>
       </div>
 
-      {/* Inventario */}
       <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
         <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '1.25rem' }}>
           Inventario actual
