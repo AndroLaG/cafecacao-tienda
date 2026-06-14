@@ -5,6 +5,7 @@ import Checkout     from './pages/Checkout';
 import OrdenExitosa from './pages/OrdenExitosa';
 import MisPedidos   from './pages/MisPedidos';
 import Admin        from './pages/Admin';
+import Perfil       from './pages/Perfil';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/orden-exitosa" element={<OrdenExitosa />} />
         <Route path="/mis-pedidos"   element={<MisPedidos />}   />
         <Route path="/admin"         element={<Admin />}        />
+        <Route path="/perfil"        element={<Perfil />}       />
       </Routes>
     </BrowserRouter>
   );
