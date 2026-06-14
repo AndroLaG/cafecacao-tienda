@@ -207,7 +207,7 @@ function Checkout() {
             marginBottom: '1.5rem',
           }}>
             ¿Ya tienes cuenta?{' '}
-            <a href="/auth" style={{ color: 'var(--color-marron)', fontWeight: '600' }}>
+            <a href="/auth?from=checkout" style={{ color: 'var(--color-marron)', fontWeight: '600' }}>
               Inicia sesión
             </a>{' '}
             para autocompletar tus datos. O continúa como invitado.

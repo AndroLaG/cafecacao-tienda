@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 
 function Auth() {
+  // ✅ NUEVO: leer param ?from=checkout para redirigir después del login
+  const params     = new URLSearchParams(window.location.search);
+  const redirectTo = params.get('from') === 'checkout' ? '/checkout' : '/';
+
   const [modo, setModo]         = useState('login');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
@@ -22,19 +26,20 @@ function Auth() {
       if (error) {
         setError(error.message);
       } else {
-        await supabase.from('clientes').insert({
+        await supabase.from('clientes').upsert({
           id:              data.user.id,
           nombre_completo: nombre,
-        });
-        setMensaje('Cuenta creada exitosamente. Ya puedes iniciar sesión.');
-        setModo('login');
+        }, { onConflict: 'id' });
+        // ✅ NUEVO: redirigir a checkout si viene de ahí, si no al home
+        window.location.href = redirectTo;
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         setError('Correo o contraseña incorrectos.');
       } else {
-        window.location.href = '/';
+        // ✅ NUEVO: redirigir a checkout si viene de ahí, si no al home
+        window.location.href = redirectTo;
       }
     }
 
@@ -47,14 +52,14 @@ function Auth() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        // ✅ NUEVO: Google también redirige a checkout si viene de ahí
+        redirectTo: `${window.location.origin}${redirectTo}`,
       },
     });
     if (error) {
       setError('No se pudo conectar con Google. Intenta de nuevo.');
       setLoadingGoogle(false);
     }
-    // Si no hay error, Google redirige automáticamente
   }
 
   async function handleOlvidePassword() {
@@ -155,7 +160,6 @@ function Auth() {
             e.currentTarget.style.borderColor = '#e0d5c8';
           }}
         >
-          {/* Ícono Google SVG */}
           <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
