@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import { supabase } from '../../services/supabaseClient';
 
 function AdminReportes() {
@@ -16,7 +17,7 @@ function AdminReportes() {
     ]);
 
     const totalVentas = pedidos
-      ?.filter(p => p.estado === 'pagado' || p.estado === 'entregado' || p.estado === 'enviado' || p.estado === 'preparando')
+      ?.filter(p => ['pagado', 'entregado', 'enviado', 'preparando'].includes(p.estado))
       .reduce((acc, p) => acc + Number(p.total), 0) ?? 0;
 
     const pedidosPorEstado = pedidos?.reduce((acc, p) => {
@@ -36,28 +37,179 @@ function AdminReportes() {
     setLoading(false);
   }
 
-  function exportarCSV() {
+  function exportarExcel() {
     if (!datos) return;
-    const filas = [
-      ['ID', 'Fecha', 'Cliente', 'Email', 'Distrito', 'Total', 'Estado'],
-      ...datos.pedidos.map(p => [
-        p.id.slice(0, 8).toUpperCase(),
-        new Date(p.created_at).toLocaleDateString('es-PE'),
-        p.envio_nombre ?? '—',
-        p.email_invitado ?? '—',
-        p.envio_distrito ?? '—',
-        Number(p.total).toFixed(2),
-        p.estado,
+    const { pedidos, productos, totalVentas, pedidosPorEstado } = datos;
+    const wb = XLSX.utils.book_new();
+
+    // ── Colores por estado ──────────────────────────────────────────────
+    const colorEstado = {
+      pagado:     'C6EFCE', // verde claro
+      preparando: 'FFEB9C', // amarillo
+      enviado:    'BDD7EE', // azul claro
+      entregado:  'D9EAD3', // verde suave
+      pendiente:  'FCE4D6', // naranja claro
+      cancelado:  'F4CCCC', // rojo claro
+    };
+
+    // ══════════════════════════════════════════════════════════════════
+    // HOJA 1 — RESUMEN
+    // ══════════════════════════════════════════════════════════════════
+    const fechaReporte = new Date().toLocaleDateString('es-PE', {
+      day: '2-digit', month: 'long', year: 'numeric',
+    });
+
+    const resumenData = [
+      ["REPORTE DE VENTAS — LILY'S CAFFE"],
+      [`Generado el ${fechaReporte}`],
+      [],
+      ['MÉTRICAS GENERALES'],
+      ['Indicador', 'Valor'],
+      ['Ventas totales (S/)', totalVentas.toFixed(2)],
+      ['Total de pedidos', pedidos.length],
+      ['Productos activos', productos.filter(p => p.activo).length],
+      [],
+      ['PEDIDOS POR ESTADO'],
+      ['Estado', 'Cantidad', '% del total'],
+      ...Object.entries(pedidosPorEstado).map(([estado, cantidad]) => [
+        estado.charAt(0).toUpperCase() + estado.slice(1),
+        cantidad,
+        ((cantidad / pedidos.length) * 100).toFixed(1) + '%',
       ]),
     ];
-    const csv = filas.map(f => f.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `lilyscaffe-pedidos-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+
+    // Estilos hoja Resumen
+    wsResumen['A1'] = { v: "REPORTE DE VENTAS — LILY'S CAFFE", t: 's',
+      s: { font: { bold: true, sz: 16, color: { rgb: '83401D' } } } };
+    wsResumen['A4'] = { v: 'MÉTRICAS GENERALES', t: 's',
+      s: { font: { bold: true, sz: 12, color: { rgb: '83401D' } } } };
+    wsResumen['A10'] = { v: 'PEDIDOS POR ESTADO', t: 's',
+      s: { font: { bold: true, sz: 12, color: { rgb: '83401D' } } } };
+
+    // Encabezados de tablas en negrita
+    ['A5', 'B5', 'A11', 'B11', 'C11'].forEach(cell => {
+      if (wsResumen[cell]) {
+        wsResumen[cell].s = { font: { bold: true }, fill: { fgColor: { rgb: 'F5EDE0' } } };
+      }
+    });
+
+    wsResumen['!cols'] = [{ wch: 30 }, { wch: 18 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+
+    // ══════════════════════════════════════════════════════════════════
+    // HOJA 2 — PEDIDOS
+    // ══════════════════════════════════════════════════════════════════
+    const encabezadosPedidos = [
+      'N° Pedido', 'Fecha', 'Hora', 'Cliente', 'Email',
+      'Teléfono', 'Dirección', 'Distrito', 'Subtotal (S/)',
+      'Envío (S/)', 'Total (S/)', 'Estado',
+    ];
+
+    const filasPedidos = pedidos.map(p => [
+      p.id.slice(0, 8).toUpperCase(),
+      new Date(p.created_at).toLocaleDateString('es-PE'),
+      new Date(p.created_at).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+      p.envio_nombre      ?? '—',
+      p.email_invitado    ?? '—',
+      p.envio_telefono    ?? '—',
+      p.envio_direccion   ?? '—',
+      p.envio_distrito    ?? '—',
+      Number(p.subtotal   ?? 0).toFixed(2),
+      Number(p.costo_envio ?? 0).toFixed(2),
+      Number(p.total).toFixed(2),
+      p.estado.charAt(0).toUpperCase() + p.estado.slice(1),
+    ]);
+
+    const wsPedidos = XLSX.utils.aoa_to_sheet([encabezadosPedidos, ...filasPedidos]);
+
+    // Encabezado en negrita con fondo marrón claro
+    encabezadosPedidos.forEach((_, i) => {
+      const cell = XLSX.utils.encode_cell({ r: 0, c: i });
+      wsPedidos[cell] = {
+        v: encabezadosPedidos[i],
+        t: 's',
+        s: {
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          fill: { fgColor: { rgb: '83401D' } },
+          alignment: { horizontal: 'center' },
+        },
+      };
+    });
+
+    // Color de fila según estado
+    pedidos.forEach((p, rowIdx) => {
+      const color = colorEstado[p.estado] ?? 'FFFFFF';
+      encabezadosPedidos.forEach((_, colIdx) => {
+        const cell = XLSX.utils.encode_cell({ r: rowIdx + 1, c: colIdx });
+        if (wsPedidos[cell]) {
+          wsPedidos[cell].s = {
+            fill: { fgColor: { rgb: color } },
+            alignment: { horizontal: colIdx >= 8 ? 'right' : 'left' },
+          };
+        }
+      });
+    });
+
+    wsPedidos['!cols'] = [
+      { wch: 12 }, { wch: 12 }, { wch: 8 },  { wch: 22 },
+      { wch: 28 }, { wch: 12 }, { wch: 32 }, { wch: 16 },
+      { wch: 13 }, { wch: 10 }, { wch: 11 }, { wch: 12 },
+    ];
+
+    // Congelar fila de encabezado
+    wsPedidos['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+    XLSX.utils.book_append_sheet(wb, wsPedidos, 'Pedidos');
+
+    // ══════════════════════════════════════════════════════════════════
+    // HOJA 3 — INVENTARIO
+    // ══════════════════════════════════════════════════════════════════
+    const encabezadosInventario = ['Producto', 'Precio (S/)', 'Stock', 'Estado'];
+
+    const filasInventario = productos.map(p => [
+      p.nombre,
+      Number(p.precio).toFixed(2),
+      p.stock,
+      p.activo ? 'Activo' : 'Inactivo',
+    ]);
+
+    const wsInventario = XLSX.utils.aoa_to_sheet([encabezadosInventario, ...filasInventario]);
+
+    // Encabezado en negrita
+    encabezadosInventario.forEach((_, i) => {
+      const cell = XLSX.utils.encode_cell({ r: 0, c: i });
+      wsInventario[cell] = {
+        v: encabezadosInventario[i],
+        t: 's',
+        s: {
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          fill: { fgColor: { rgb: '83401D' } },
+          alignment: { horizontal: 'center' },
+        },
+      };
+    });
+
+    // Color filas según stock bajo o inactivo
+    productos.forEach((p, rowIdx) => {
+      const color = !p.activo ? 'F4CCCC' : p.stock < 10 ? 'FCE4D6' : 'FFFFFF';
+      encabezadosInventario.forEach((_, colIdx) => {
+        const cell = XLSX.utils.encode_cell({ r: rowIdx + 1, c: colIdx });
+        if (wsInventario[cell]) {
+          wsInventario[cell].s = { fill: { fgColor: { rgb: color } } };
+        }
+      });
+    });
+
+    wsInventario['!cols'] = [{ wch: 30 }, { wch: 13 }, { wch: 10 }, { wch: 12 }];
+    wsInventario['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+    XLSX.utils.book_append_sheet(wb, wsInventario, 'Inventario');
+
+    // ── Descargar ───────────────────────────────────────────────────
+    const fecha = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `lilyscaffe-reporte-${fecha}.xlsx`, { cellStyles: true });
   }
 
   if (loading) return (
@@ -84,7 +236,7 @@ function AdminReportes() {
       {/* Botón exportar */}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button
-          onClick={exportarCSV}
+          onClick={exportarExcel}
           style={{
             backgroundColor: 'var(--color-oliva)',
             color:           '#fff',
@@ -95,9 +247,12 @@ function AdminReportes() {
             fontWeight:      '600',
             fontFamily:      'var(--font-body)',
             cursor:          'pointer',
+            display:         'flex',
+            alignItems:      'center',
+            gap:             '0.5rem',
           }}
         >
-          Exportar CSV
+          <span>📊</span> Exportar Excel
         </button>
       </div>
 
