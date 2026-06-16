@@ -19,6 +19,7 @@ function Checkout() {
     distrito:      '',
     provincia:     '',
     departamento:  '',
+    codigo_postal: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
@@ -29,13 +30,11 @@ function Checkout() {
     async function preRellenarDatos() {
       if (!user) return;
 
-      // Pre-rellenar email
       setForm(f => ({ ...f, email: user.email }));
 
-      // Buscar el último pedido del usuario para autocompletar dirección
       const { data: ultimoPedido } = await supabase
         .from('pedidos')
-        .select('envio_nombre, envio_telefono, envio_direccion, envio_distrito, envio_provincia, envio_departamento')
+        .select('envio_nombre, envio_telefono, envio_direccion, envio_distrito, envio_provincia, envio_departamento, envio_codigo_postal')
         .eq('cliente_id', user.id)
         .not('envio_nombre', 'is', null)
         .order('created_at', { ascending: false })
@@ -45,12 +44,13 @@ function Checkout() {
       if (ultimoPedido) {
         setForm(f => ({
           ...f,
-          nombre:       ultimoPedido.envio_nombre       ?? '',
-          telefono:     ultimoPedido.envio_telefono     ?? '',
-          direccion:    ultimoPedido.envio_direccion    ?? '',
-          distrito:     ultimoPedido.envio_distrito     ?? '',
-          provincia:    ultimoPedido.envio_provincia    ?? '',
-          departamento: ultimoPedido.envio_departamento ?? '',
+          nombre:        ultimoPedido.envio_nombre          ?? '',
+          telefono:      ultimoPedido.envio_telefono        ?? '',
+          direccion:     ultimoPedido.envio_direccion       ?? '',
+          distrito:      ultimoPedido.envio_distrito        ?? '',
+          provincia:     ultimoPedido.envio_provincia       ?? '',
+          departamento:  ultimoPedido.envio_departamento    ?? '',
+          codigo_postal: ultimoPedido.envio_codigo_postal   ?? '',
         }));
       }
     }
@@ -101,8 +101,7 @@ function Checkout() {
           if (error) throw error;
           if (data?.error) throw new Error(data.error);
 
-          // ✅ NUEVO: guardar datos de envío en el perfil del cliente
-          // Solo si el usuario está logueado. No bloqueamos el flujo si falla.
+          // Guardar datos en perfil del cliente
           if (user) {
             await supabase
               .from('clientes')
@@ -114,6 +113,7 @@ function Checkout() {
                 distrito:        form.distrito,
                 provincia:       form.provincia,
                 departamento:    form.departamento,
+                codigo_postal:   form.codigo_postal,
               }, { onConflict: 'id' });
           }
 
@@ -199,7 +199,6 @@ function Checkout() {
           Datos de envío
         </h2>
 
-        {/* Mensaje si no está logueado */}
         {!user && (
           <p style={{
             fontSize:     '0.875rem',
@@ -224,7 +223,7 @@ function Checkout() {
           </p>
         )}
 
-        {/* Aviso de cobertura de envío */}
+        {/* Aviso cobertura */}
         <div style={{
           backgroundColor: '#fff8e1',
           border:          '1px solid #f59e0b',
@@ -252,7 +251,7 @@ function Checkout() {
           {/* Formulario */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-            {/* Email — siempre visible */}
+            {/* Email */}
             <div>
               <label style={labelStyle}>Correo electrónico</label>
               <input
@@ -270,6 +269,7 @@ function Checkout() {
               />
             </div>
 
+            {/* Nombre y Teléfono */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
               <div>
                 <label style={labelStyle}>Nombre completo</label>
@@ -295,6 +295,7 @@ function Checkout() {
               </div>
             </div>
 
+            {/* Dirección */}
             <div>
               <label style={labelStyle}>Dirección</label>
               <input
@@ -307,6 +308,7 @@ function Checkout() {
               />
             </div>
 
+            {/* Distrito, Provincia, Departamento, Código postal */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
               <div>
                 <label style={labelStyle}>Distrito</label>
@@ -338,6 +340,16 @@ function Checkout() {
                   onChange={handleChange}
                   placeholder="Lima"
                   required
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Código postal</label>
+                <input
+                  name="codigo_postal"
+                  value={form.codigo_postal}
+                  onChange={handleChange}
+                  placeholder="15001"
                   style={inputStyle}
                 />
               </div>

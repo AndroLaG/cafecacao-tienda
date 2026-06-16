@@ -5,18 +5,19 @@ export async function crearPedido({ clienteId, items, subtotal, costoEnvio, tota
   const { data: pedido, error: pedidoError } = await supabase
     .from('pedidos')
     .insert({
-      cliente_id:         clienteId ?? null,
-      email_invitado:     clienteId ? null : emailInvitado,
+      cliente_id:          clienteId ?? null,
+      email_invitado:      clienteId ? null : emailInvitado,
       subtotal,
-      costo_envio:        costoEnvio,
+      costo_envio:         costoEnvio,
       total,
-      estado:             'pendiente',
-      envio_nombre:       datosEnvio.nombre,
-      envio_telefono:     datosEnvio.telefono,
-      envio_direccion:    datosEnvio.direccion,
-      envio_distrito:     datosEnvio.distrito,
-      envio_provincia:    datosEnvio.provincia,
-      envio_departamento: datosEnvio.departamento,
+      estado:              'pendiente',
+      envio_nombre:        datosEnvio.nombre,
+      envio_telefono:      datosEnvio.telefono,
+      envio_direccion:     datosEnvio.direccion,
+      envio_distrito:      datosEnvio.distrito,
+      envio_provincia:     datosEnvio.provincia,
+      envio_departamento:  datosEnvio.departamento,
+      envio_codigo_postal: datosEnvio.codigo_postal ?? null, // ✅ NUEVO
     })
     .select()
     .single();
