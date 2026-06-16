@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 
 function AdminProductos() {
-  const [productos, setProductos] = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [editando,  setEditando]  = useState(null);
-  const [form,      setForm]      = useState({});
-  const [guardando, setGuardando] = useState(false);
-  const [mensaje,   setMensaje]   = useState(null);
+  const [productos,    setProductos]    = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [editando,     setEditando]     = useState(null);
+  const [form,         setForm]         = useState({});
+  const [guardando,    setGuardando]    = useState(false);
+  const [mensaje,      setMensaje]      = useState(null);
+  const [mostrarNuevo, setMostrarNuevo] = useState(false);
+  const [formNuevo,    setFormNuevo]    = useState({
+    nombre:      '',
+    descripcion: '',
+    precio:      '',
+    stock:       '',
+  });
+  const [guardandoNuevo, setGuardandoNuevo] = useState(false);
 
   useEffect(() => { cargarProductos(); }, []);
 
@@ -23,6 +31,7 @@ function AdminProductos() {
 
   function iniciarEdicion(producto) {
     setEditando(producto.id);
+    setMostrarNuevo(false);
     setForm({
       nombre:      producto.nombre,
       descripcion: producto.descripcion,
@@ -61,6 +70,35 @@ function AdminProductos() {
     setTimeout(() => setMensaje(null), 3000);
   }
 
+  async function guardarNuevoProducto() {
+    if (!formNuevo.nombre || !formNuevo.precio || !formNuevo.stock) {
+      setMensaje({ tipo: 'error', texto: 'Nombre, precio y stock son obligatorios.' });
+      setTimeout(() => setMensaje(null), 3000);
+      return;
+    }
+    setGuardandoNuevo(true);
+    const { error } = await supabase
+      .from('productos')
+      .insert({
+        nombre:      formNuevo.nombre.trim(),
+        descripcion: formNuevo.descripcion.trim(),
+        precio:      parseFloat(formNuevo.precio),
+        stock:       parseInt(formNuevo.stock),
+        activo:      true,
+      });
+
+    if (error) {
+      setMensaje({ tipo: 'error', texto: 'Error al crear producto: ' + error.message });
+    } else {
+      setMensaje({ tipo: 'ok', texto: 'Producto creado correctamente.' });
+      setMostrarNuevo(false);
+      setFormNuevo({ nombre: '', descripcion: '', precio: '', stock: '' });
+      cargarProductos();
+    }
+    setGuardandoNuevo(false);
+    setTimeout(() => setMensaje(null), 3000);
+  }
+
   async function toggleActivo(id, activo) {
     await supabase
       .from('productos')
@@ -81,6 +119,14 @@ function AdminProductos() {
     outline:         'none',
   };
 
+  const labelStyle = {
+    fontSize:     '0.78rem',
+    fontWeight:   '600',
+    color:        'var(--color-texto-muted)',
+    display:      'block',
+    marginBottom: '0.3rem',
+  };
+
   if (loading) return (
     <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-texto-muted)' }}>
       Cargando productos...
@@ -89,6 +135,7 @@ function AdminProductos() {
 
   return (
     <div>
+      {/* Mensaje de éxito/error */}
       {mensaje && (
         <div style={{
           backgroundColor: mensaje.tipo === 'ok' ? '#dcfce7' : '#fee2e2',
@@ -103,6 +150,138 @@ function AdminProductos() {
         </div>
       )}
 
+      {/* Botón agregar producto */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        <button
+          onClick={() => { setMostrarNuevo(!mostrarNuevo); setEditando(null); }}
+          style={{
+            backgroundColor: mostrarNuevo ? '#fee2e2' : 'var(--color-marron)',
+            color:           mostrarNuevo ? '#991b1b' : 'var(--color-crema)',
+            border:          'none',
+            borderRadius:    'var(--radius-md)',
+            padding:         '0.6rem 1.5rem',
+            fontSize:        '0.875rem',
+            fontWeight:      '600',
+            fontFamily:      'var(--font-body)',
+            cursor:          'pointer',
+            display:         'flex',
+            alignItems:      'center',
+            gap:             '0.5rem',
+          }}
+        >
+          {mostrarNuevo ? '✕ Cancelar' : '＋ Agregar producto'}
+        </button>
+      </div>
+
+      {/* Formulario nuevo producto */}
+      {mostrarNuevo && (
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius:    'var(--radius-lg)',
+          padding:         '1.5rem',
+          boxShadow:       'var(--shadow-card)',
+          marginBottom:    '1.5rem',
+          border:          '2px solid var(--color-marron)',
+        }}>
+          <h3 style={{
+            fontFamily:   'var(--font-heading)',
+            color:        'var(--color-marron)',
+            fontSize:     '1rem',
+            marginBottom: '1.25rem',
+          }}>
+            Nuevo producto
+          </h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+              <div>
+                <label style={labelStyle}>Nombre *</label>
+                <input
+                  value={formNuevo.nombre}
+                  onChange={e => setFormNuevo({ ...formNuevo, nombre: e.target.value })}
+                  placeholder="Café Kametsa"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Precio (S/) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formNuevo.precio}
+                  onChange={e => setFormNuevo({ ...formNuevo, precio: e.target.value })}
+                  placeholder="20.00"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Stock *</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formNuevo.stock}
+                  onChange={e => setFormNuevo({ ...formNuevo, stock: e.target.value })}
+                  placeholder="50"
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Descripción</label>
+              <textarea
+                value={formNuevo.descripcion}
+                onChange={e => setFormNuevo({ ...formNuevo, descripcion: e.target.value })}
+                placeholder="Describe el producto, origen, notas de cata..."
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+            </div>
+
+            <p style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', margin: 0 }}>
+              * La imagen del producto se puede agregar directamente desde Supabase Storage.
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setMostrarNuevo(false); setFormNuevo({ nombre: '', descripcion: '', precio: '', stock: '' }); }}
+                style={{
+                  backgroundColor: 'transparent',
+                  color:           'var(--color-texto-muted)',
+                  border:          '1px solid #e0d5c8',
+                  borderRadius:    'var(--radius-md)',
+                  padding:         '0.5rem 1.25rem',
+                  fontSize:        '0.875rem',
+                  fontFamily:      'var(--font-body)',
+                  cursor:          'pointer',
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={guardarNuevoProducto}
+                disabled={guardandoNuevo}
+                style={{
+                  backgroundColor: guardandoNuevo ? 'var(--color-texto-muted)' : 'var(--color-marron)',
+                  color:           'var(--color-crema)',
+                  border:          'none',
+                  borderRadius:    'var(--radius-md)',
+                  padding:         '0.5rem 1.5rem',
+                  fontSize:        '0.875rem',
+                  fontWeight:      '600',
+                  fontFamily:      'var(--font-body)',
+                  cursor:          guardandoNuevo ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {guardandoNuevo ? 'Guardando...' : 'Crear producto'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lista de productos */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {productos.map(producto => (
           <div key={producto.id} style={{
@@ -114,18 +293,35 @@ function AdminProductos() {
             opacity:         producto.activo ? 1 : 0.7,
           }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              <img
-                src={producto.imagen_url}
-                alt={producto.nombre}
-                style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: 'var(--radius-md)', flexShrink: 0 }}
-              />
+              {producto.imagen_url && (
+                <img
+                  src={producto.imagen_url}
+                  alt={producto.nombre}
+                  style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: 'var(--radius-md)', flexShrink: 0 }}
+                />
+              )}
+              {!producto.imagen_url && (
+                <div style={{
+                  width:           '80px',
+                  height:          '80px',
+                  borderRadius:    'var(--radius-md)',
+                  backgroundColor: 'var(--color-crema)',
+                  display:         'flex',
+                  alignItems:      'center',
+                  justifyContent:  'center',
+                  fontSize:        '1.5rem',
+                  flexShrink:      0,
+                }}>
+                  📦
+                </div>
+              )}
 
               <div style={{ flex: 1 }}>
                 {editando === producto.id ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
                       <div>
-                        <label style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.3rem' }}>Nombre</label>
+                        <label style={labelStyle}>Nombre</label>
                         <input
                           value={form.nombre}
                           onChange={e => setForm({ ...form, nombre: e.target.value })}
@@ -133,19 +329,21 @@ function AdminProductos() {
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.3rem' }}>Precio (S/)</label>
+                        <label style={labelStyle}>Precio (S/)</label>
                         <input
                           type="number"
                           step="0.01"
+                          min="0"
                           value={form.precio}
                           onChange={e => setForm({ ...form, precio: e.target.value })}
                           style={inputStyle}
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.3rem' }}>Stock</label>
+                        <label style={labelStyle}>Stock</label>
                         <input
                           type="number"
+                          min="0"
                           value={form.stock}
                           onChange={e => setForm({ ...form, stock: e.target.value })}
                           style={inputStyle}
@@ -153,7 +351,7 @@ function AdminProductos() {
                       </div>
                     </div>
                     <div>
-                      <label style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.3rem' }}>Descripción</label>
+                      <label style={labelStyle}>Descripción</label>
                       <textarea
                         value={form.descripcion}
                         onChange={e => setForm({ ...form, descripcion: e.target.value })}
@@ -166,7 +364,7 @@ function AdminProductos() {
                         onClick={() => guardarCambios(producto.id)}
                         disabled={guardando}
                         style={{
-                          backgroundColor: 'var(--color-oliva)',
+                          backgroundColor: guardando ? 'var(--color-texto-muted)' : 'var(--color-oliva)',
                           color:           '#fff',
                           border:          'none',
                           borderRadius:    'var(--radius-md)',
@@ -174,7 +372,7 @@ function AdminProductos() {
                           fontSize:        '0.875rem',
                           fontWeight:      '600',
                           fontFamily:      'var(--font-body)',
-                          cursor:          'pointer',
+                          cursor:          guardando ? 'not-allowed' : 'pointer',
                         }}
                       >
                         {guardando ? 'Guardando...' : 'Guardar'}
