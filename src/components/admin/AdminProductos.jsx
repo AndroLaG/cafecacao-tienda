@@ -1,20 +1,26 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 
+const CATEGORIAS = ['cafe', 'cacao'];
+const BUCKET     = 'Productos';
+
 function AdminProductos() {
-  const [productos,    setProductos]    = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [editando,     setEditando]     = useState(null);
-  const [form,         setForm]         = useState({});
-  const [guardando,    setGuardando]    = useState(false);
-  const [mensaje,      setMensaje]      = useState(null);
-  const [mostrarNuevo, setMostrarNuevo] = useState(false);
-  const [formNuevo,    setFormNuevo]    = useState({
+  const [productos,      setProductos]      = useState([]);
+  const [loading,        setLoading]        = useState(true);
+  const [editando,       setEditando]       = useState(null);
+  const [form,           setForm]           = useState({});
+  const [guardando,      setGuardando]      = useState(false);
+  const [mensaje,        setMensaje]        = useState(null);
+  const [mostrarNuevo,   setMostrarNuevo]   = useState(false);
+  const [formNuevo,      setFormNuevo]      = useState({
     nombre:      '',
     descripcion: '',
     precio:      '',
     stock:       '',
+    categoria:   'cafe',
   });
+  const [imagenNuevo,    setImagenNuevo]    = useState(null);
+  const [previaNuevo,    setPreviaNuevo]    = useState(null);
   const [guardandoNuevo, setGuardandoNuevo] = useState(false);
 
   useEffect(() => { cargarProductos(); }, []);
@@ -37,6 +43,7 @@ function AdminProductos() {
       descripcion: producto.descripcion,
       precio:      producto.precio,
       stock:       producto.stock,
+      categoria:   producto.categoria,
       activo:      producto.activo,
     });
   }
@@ -44,6 +51,24 @@ function AdminProductos() {
   function cancelarEdicion() {
     setEditando(null);
     setForm({});
+  }
+
+  function handleImagenNuevo(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImagenNuevo(file);
+    setPreviaNuevo(URL.createObjectURL(file));
+  }
+
+  async function subirImagen(file, nombre) {
+    const ext      = file.name.split('.').pop();
+    const fileName = nombre.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now() + '.' + ext;
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(fileName, file, { upsert: true });
+    if (error) throw error;
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(fileName);
+    return data.publicUrl;
   }
 
   async function guardarCambios(id) {
@@ -55,6 +80,7 @@ function AdminProductos() {
         descripcion: form.descripcion,
         precio:      parseFloat(form.precio),
         stock:       parseInt(form.stock),
+        categoria:   form.categoria,
         activo:      form.activo,
       })
       .eq('id', id);
@@ -77,33 +103,41 @@ function AdminProductos() {
       return;
     }
     setGuardandoNuevo(true);
-    const { error } = await supabase
-      .from('productos')
-      .insert({
-        nombre:      formNuevo.nombre.trim(),
-        descripcion: formNuevo.descripcion.trim(),
-        precio:      parseFloat(formNuevo.precio),
-        stock:       parseInt(formNuevo.stock),
-        activo:      true,
-      });
+    try {
+      let imagen_url = null;
+      if (imagenNuevo) {
+        imagen_url = await subirImagen(imagenNuevo, formNuevo.nombre);
+      }
 
-    if (error) {
-      setMensaje({ tipo: 'error', texto: 'Error al crear producto: ' + error.message });
-    } else {
+      const { error } = await supabase
+        .from('productos')
+        .insert({
+          nombre:      formNuevo.nombre.trim(),
+          descripcion: formNuevo.descripcion.trim(),
+          precio:      parseFloat(formNuevo.precio),
+          stock:       parseInt(formNuevo.stock),
+          categoria:   formNuevo.categoria,
+          activo:      true,
+          imagen_url,
+        });
+
+      if (error) throw error;
+
       setMensaje({ tipo: 'ok', texto: 'Producto creado correctamente.' });
       setMostrarNuevo(false);
-      setFormNuevo({ nombre: '', descripcion: '', precio: '', stock: '' });
+      setFormNuevo({ nombre: '', descripcion: '', precio: '', stock: '', categoria: 'cafe' });
+      setImagenNuevo(null);
+      setPreviaNuevo(null);
       cargarProductos();
+    } catch (err) {
+      setMensaje({ tipo: 'error', texto: 'Error al crear producto: ' + err.message });
     }
     setGuardandoNuevo(false);
-    setTimeout(() => setMensaje(null), 3000);
+    setTimeout(() => setMensaje(null), 4000);
   }
 
   async function toggleActivo(id, activo) {
-    await supabase
-      .from('productos')
-      .update({ activo: !activo })
-      .eq('id', id);
+    await supabase.from('productos').update({ activo: !activo }).eq('id', id);
     cargarProductos();
   }
 
@@ -127,6 +161,11 @@ function AdminProductos() {
     marginBottom: '0.3rem',
   };
 
+  const selectStyle = {
+    ...inputStyle,
+    cursor: 'pointer',
+  };
+
   if (loading) return (
     <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-texto-muted)' }}>
       Cargando productos...
@@ -135,7 +174,7 @@ function AdminProductos() {
 
   return (
     <div>
-      {/* Mensaje de éxito/error */}
+      {/* Mensaje éxito/error */}
       {mensaje && (
         <div style={{
           backgroundColor: mensaje.tipo === 'ok' ? '#dcfce7' : '#fee2e2',
@@ -150,7 +189,7 @@ function AdminProductos() {
         </div>
       )}
 
-      {/* Botón agregar producto */}
+      {/* Botón agregar */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
         <button
           onClick={() => { setMostrarNuevo(!mostrarNuevo); setEditando(null); }}
@@ -193,7 +232,62 @@ function AdminProductos() {
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+
+            {/* Imagen */}
+            <div>
+              <label style={labelStyle}>Imagen del producto</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                {previaNuevo && (
+                  <img
+                    src={previaNuevo}
+                    alt="Vista previa"
+                    style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid #e0d5c8' }}
+                  />
+                )}
+                {!previaNuevo && (
+                  <div style={{
+                    width:           '80px',
+                    height:          '80px',
+                    borderRadius:    'var(--radius-md)',
+                    backgroundColor: 'var(--color-crema)',
+                    border:          '2px dashed #e0d5c8',
+                    display:         'flex',
+                    alignItems:      'center',
+                    justifyContent:  'center',
+                    fontSize:        '1.5rem',
+                  }}>
+                    📷
+                  </div>
+                )}
+                <label style={{
+                  backgroundColor: 'var(--color-crema)',
+                  color:           'var(--color-marron)',
+                  border:          '1px solid #e0d5c8',
+                  borderRadius:    'var(--radius-md)',
+                  padding:         '0.5rem 1rem',
+                  fontSize:        '0.825rem',
+                  fontWeight:      '600',
+                  fontFamily:      'var(--font-body)',
+                  cursor:          'pointer',
+                }}>
+                  {imagenNuevo ? '📷 Cambiar imagen' : '📷 Seleccionar imagen'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImagenNuevo}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                {imagenNuevo && (
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)' }}>
+                    {imagenNuevo.name}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Nombre, Precio, Stock, Categoría */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
               <div>
                 <label style={labelStyle}>Nombre *</label>
                 <input
@@ -226,8 +320,23 @@ function AdminProductos() {
                   style={inputStyle}
                 />
               </div>
+              <div>
+                <label style={labelStyle}>Categoría *</label>
+                <select
+                  value={formNuevo.categoria}
+                  onChange={e => setFormNuevo({ ...formNuevo, categoria: e.target.value })}
+                  style={selectStyle}
+                >
+                  {CATEGORIAS.map(c => (
+                    <option key={c} value={c}>
+                      {c.charAt(0).toUpperCase() + c.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
+            {/* Descripción */}
             <div>
               <label style={labelStyle}>Descripción</label>
               <textarea
@@ -239,13 +348,15 @@ function AdminProductos() {
               />
             </div>
 
-            <p style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', margin: 0 }}>
-              * La imagen del producto se puede agregar directamente desde Supabase Storage.
-            </p>
-
+            {/* Botones */}
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
               <button
-                onClick={() => { setMostrarNuevo(false); setFormNuevo({ nombre: '', descripcion: '', precio: '', stock: '' }); }}
+                onClick={() => {
+                  setMostrarNuevo(false);
+                  setFormNuevo({ nombre: '', descripcion: '', precio: '', stock: '', categoria: 'cafe' });
+                  setImagenNuevo(null);
+                  setPreviaNuevo(null);
+                }}
                 style={{
                   backgroundColor: 'transparent',
                   color:           'var(--color-texto-muted)',
@@ -293,14 +404,15 @@ function AdminProductos() {
             opacity:         producto.activo ? 1 : 0.7,
           }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              {producto.imagen_url && (
+
+              {/* Imagen o placeholder */}
+              {producto.imagen_url ? (
                 <img
                   src={producto.imagen_url}
                   alt={producto.nombre}
                   style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: 'var(--radius-md)', flexShrink: 0 }}
                 />
-              )}
-              {!producto.imagen_url && (
+              ) : (
                 <div style={{
                   width:           '80px',
                   height:          '80px',
@@ -319,7 +431,7 @@ function AdminProductos() {
               <div style={{ flex: 1 }}>
                 {editando === producto.id ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
                       <div>
                         <label style={labelStyle}>Nombre</label>
                         <input
@@ -348,6 +460,20 @@ function AdminProductos() {
                           onChange={e => setForm({ ...form, stock: e.target.value })}
                           style={inputStyle}
                         />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Categoría</label>
+                        <select
+                          value={form.categoria}
+                          onChange={e => setForm({ ...form, categoria: e.target.value })}
+                          style={selectStyle}
+                        >
+                          {CATEGORIAS.map(c => (
+                            <option key={c} value={c}>
+                              {c.charAt(0).toUpperCase() + c.slice(1)}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                     <div>
@@ -395,68 +521,77 @@ function AdminProductos() {
                     </div>
                   </div>
                 ) : (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      <div>
-                        <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '0.25rem' }}>
-                          {producto.nombre}
-                        </h3>
-                        <p style={{ fontSize: '0.825rem', color: 'var(--color-texto-muted)', marginBottom: '0.5rem' }}>
-                          {producto.descripcion}
-                        </p>
-                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--color-marron)' }}>
-                            S/ {Number(producto.precio).toFixed(2)}
-                          </span>
-                          <span style={{ fontSize: '0.875rem', color: 'var(--color-texto-muted)' }}>
-                            Stock: <strong>{producto.stock}</strong>
-                          </span>
-                          <span style={{
-                            fontSize:        '0.78rem',
-                            fontWeight:      '600',
-                            padding:         '0.2rem 0.6rem',
-                            borderRadius:    'var(--radius-pill)',
-                            backgroundColor: producto.activo ? '#dcfce7' : '#fee2e2',
-                            color:           producto.activo ? '#166534' : '#991b1b',
-                          }}>
-                            {producto.activo ? 'Activo' : 'Inactivo'}
-                          </span>
-                        </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '0.25rem' }}>
+                        {producto.nombre}
+                      </h3>
+                      <p style={{ fontSize: '0.825rem', color: 'var(--color-texto-muted)', marginBottom: '0.5rem' }}>
+                        {producto.descripcion}
+                      </p>
+                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--color-marron)' }}>
+                          S/ {Number(producto.precio).toFixed(2)}
+                        </span>
+                        <span style={{ fontSize: '0.875rem', color: 'var(--color-texto-muted)' }}>
+                          Stock: <strong>{producto.stock}</strong>
+                        </span>
+                        <span style={{
+                          fontSize:        '0.78rem',
+                          fontWeight:      '600',
+                          padding:         '0.2rem 0.6rem',
+                          borderRadius:    'var(--radius-pill)',
+                          backgroundColor: 'var(--color-crema)',
+                          color:           'var(--color-oliva)',
+                          textTransform:   'capitalize',
+                        }}>
+                          {producto.categoria}
+                        </span>
+                        <span style={{
+                          fontSize:        '0.78rem',
+                          fontWeight:      '600',
+                          padding:         '0.2rem 0.6rem',
+                          borderRadius:    'var(--radius-pill)',
+                          backgroundColor: producto.activo ? '#dcfce7' : '#fee2e2',
+                          color:           producto.activo ? '#166534' : '#991b1b',
+                        }}>
+                          {producto.activo ? 'Activo' : 'Inactivo'}
+                        </span>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-                        <button
-                          onClick={() => iniciarEdicion(producto)}
-                          style={{
-                            backgroundColor: 'var(--color-crema)',
-                            color:           'var(--color-marron)',
-                            border:          '1px solid #e0d5c8',
-                            borderRadius:    'var(--radius-md)',
-                            padding:         '0.4rem 1rem',
-                            fontSize:        '0.825rem',
-                            fontWeight:      '600',
-                            fontFamily:      'var(--font-body)',
-                            cursor:          'pointer',
-                          }}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => toggleActivo(producto.id, producto.activo)}
-                          style={{
-                            backgroundColor: producto.activo ? '#fee2e2' : '#dcfce7',
-                            color:           producto.activo ? '#991b1b' : '#166534',
-                            border:          'none',
-                            borderRadius:    'var(--radius-md)',
-                            padding:         '0.4rem 1rem',
-                            fontSize:        '0.825rem',
-                            fontWeight:      '600',
-                            fontFamily:      'var(--font-body)',
-                            cursor:          'pointer',
-                          }}
-                        >
-                          {producto.activo ? 'Desactivar' : 'Activar'}
-                        </button>
-                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                      <button
+                        onClick={() => iniciarEdicion(producto)}
+                        style={{
+                          backgroundColor: 'var(--color-crema)',
+                          color:           'var(--color-marron)',
+                          border:          '1px solid #e0d5c8',
+                          borderRadius:    'var(--radius-md)',
+                          padding:         '0.4rem 1rem',
+                          fontSize:        '0.825rem',
+                          fontWeight:      '600',
+                          fontFamily:      'var(--font-body)',
+                          cursor:          'pointer',
+                        }}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => toggleActivo(producto.id, producto.activo)}
+                        style={{
+                          backgroundColor: producto.activo ? '#fee2e2' : '#dcfce7',
+                          color:           producto.activo ? '#991b1b' : '#166534',
+                          border:          'none',
+                          borderRadius:    'var(--radius-md)',
+                          padding:         '0.4rem 1rem',
+                          fontSize:        '0.825rem',
+                          fontWeight:      '600',
+                          fontFamily:      'var(--font-body)',
+                          cursor:          'pointer',
+                        }}
+                      >
+                        {producto.activo ? 'Desactivar' : 'Activar'}
+                      </button>
                     </div>
                   </div>
                 )}
