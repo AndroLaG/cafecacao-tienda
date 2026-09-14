@@ -15,9 +15,9 @@ const PASOS_CAFE = [
     numero: '01',
     titulo: 'Cultivo',
     descripcion:
-      'Nuestros cafetales crecen en las tierras de Pangoa, a más de 1 600 m s. n. m., bajo sombra de árboles nativos.',
+      'Nuestros cafetales crecen en las tierras de Quinpintilla, Pangoa, a más de 1 600 m s. n. m., bajo sombra de árboles nativos.',
     // reemplaza con la URL real de tu imagen en Supabase Storage:
-    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/videos/Hero-Cacao2.mp4',
+    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Productos/cacao-polvo-atsiri.jpg',
   },
   {
     numero: '02',
