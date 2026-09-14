@@ -81,18 +81,22 @@ function Footer() {
               { label: 'Nosotros',  href: '/#nosotros'  },
               { label: 'Contacto',  href: '/#contacto'  },
               { label: 'Mi cuenta', href: '/auth'       },
-            ].map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                onClick={e => handleNavClick(e, href)}
-                style={linkStyle}
-                onMouseEnter={onLinkEnter}
-                onMouseLeave={onLinkLeave}
-              >
-                {label}
-              </a>
-            ))}
+            ].map(function(item) {
+              var label = item.label;
+              var href  = item.href;
+              return (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={function(e) { handleNavClick(e, href); }}
+                  style={linkStyle}
+                  onMouseEnter={onLinkEnter}
+                  onMouseLeave={onLinkLeave}
+                >
+                  {label}
+                </a>
+              );
+            })}
           </div>
         </div>
 
@@ -107,6 +111,9 @@ function Footer() {
             Contacto
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <a href="https://www.tiktok.com/@lilys_caffee?lang=es-419" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-crema)', opacity: 0.8, fontSize: '0.875rem', textDecoration: 'none' }}>
+              🎵 TikTok — @lilys_caffee
+            </a>
             <a href="tel:+51924029050" style={linkStyle} onMouseEnter={onLinkEnter} onMouseLeave={onLinkLeave}>
               📞 +51 924 029 050
             </a>
@@ -136,16 +143,21 @@ function Footer() {
             {[
               { dia: 'Lunes — Domingo', hora: '9:00 am — 6:00 pm' },
               { dia: 'Sábado',          hora: 'Cerrado'            },
-            ].map(({ dia, hora }) => (
-              <div key={dia} style={{ fontSize: '0.875rem', opacity: 0.8 }}>
-                <span style={{ fontWeight: '600' }}>{dia}</span><br />
-                <span>{hora}</span>
-              </div>
-            ))}
+            ].map(function(item) {
+              var dia  = item.dia;
+              var hora = item.hora;
+              return (
+                <div key={dia} style={{ fontSize: '0.875rem', opacity: 0.8 }}>
+                  <span style={{ fontWeight: '600' }}>{dia}</span><br />
+                  <span>{hora}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
+      {/* Parte inferior */}
       <div style={{
         maxWidth:       '1200px',
         margin:         '0 auto',
@@ -159,6 +171,27 @@ function Footer() {
         <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
           © {new Date().getFullYear()} Lily's Caffe. Todos los derechos reservados.
         </p>
+
+        {/* ✅ NUEVO: links legales */}
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <a
+            href="/terminos"
+            style={{ fontSize: '0.8rem', opacity: 0.6, color: 'var(--color-crema)', textDecoration: 'none' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+          >
+            Términos y condiciones
+          </a>
+          <a
+            href="/reclamaciones"
+            style={{ fontSize: '0.8rem', opacity: 0.6, color: 'var(--color-crema)', textDecoration: 'none' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+          >
+            Libro de reclamaciones
+          </a>
+        </div>
+
         <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>
           Hecho con mucho café y amor en Perú ❤️
         </p>
