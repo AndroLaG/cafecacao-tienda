@@ -15,7 +15,7 @@ const PASOS_CAFE = [
     numero: '01',
     titulo: 'Cultivo',
     descripcion:
-      'Nuestros cafetales crecen en las tierras de Quinpintilla, Pangoa, a más de 1 600 m s. n. m., bajo sombra de árboles nativos.',
+      'Nuestros cafetales crecen en las tierras de Pangoa en Perú a más de 1 600 m s. n. m. Esto permite que los granos maduren lentamente, desarrollando un perfil mas aromático.',
     // reemplaza con la URL real de tu imagen en Supabase Storage:
     imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Productos/cacao-polvo-atsiri.jpg',
   },
@@ -617,17 +617,42 @@ function SeccionNosotros() {
   );
 }
 
-// ─────────────────────────────────────────────
-// SECCIÓN CONTACTO — sin cambios
-// ─────────────────────────────────────────────
 function SeccionContacto() {
   const formRef = useRef(null);
+  const [enviando,  setEnviando]  = useState(false);
+  const [enviado,   setEnviado]   = useState(false);
+  const [error,     setError]     = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const data = new FormData(e.target);
-    alert(`¡Mensaje recibido! Nos contactaremos con ${data.get('nombre')} pronto.`);
-    e.target.reset();
+    setEnviando(true);
+    setError(null);
+
+    const data     = new FormData(e.target);
+    const nombre   = data.get('nombre');
+    const email    = data.get('email');
+    const telefono = data.get('telefono');
+    const tipo     = data.get('tipo');
+    const mensaje  = data.get('mensaje');
+
+    try {
+      const { error: fnError } = await supabase.functions.invoke('enviar-contacto', {
+        body: {
+          nombre,
+          email,
+          mensaje: `<strong>Teléfono:</strong> ${telefono}<br/><strong>Tipo:</strong> ${tipo}<br/><br/>${mensaje}`,
+        },
+      });
+
+      if (fnError) throw fnError;
+
+      setEnviado(true);
+      e.target.reset();
+    } catch (err) {
+      setError('No se pudo enviar el mensaje. Por favor inténtalo de nuevo.');
+    }
+
+    setEnviando(false);
   }
 
   const inputStyle = {
@@ -681,73 +706,127 @@ function SeccionContacto() {
           ¿Tienes un pedido personalizado o alguna consulta? Escríbenos.
         </p>
 
-        <form ref={formRef} onSubmit={handleSubmit} style={{
-          backgroundColor: '#fff',
-          borderRadius:    'var(--radius-lg)',
-          boxShadow:       'var(--shadow-card)',
-          padding:         '2rem',
-          display:         'flex',
-          flexDirection:   'column',
-          gap:             '1rem',
-        }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <div>
-              <label style={labelStyle}>Nombre</label>
-              <input name="nombre" type="text" placeholder="Tu nombre" required style={inputStyle} />
+        {/* ✅ Mensaje de éxito */}
+        {enviado && (
+          <div style={{
+            backgroundColor: '#f0fdf4',
+            border:          '1px solid #bbf7d0',
+            borderRadius:    'var(--radius-lg)',
+            padding:         '2rem',
+            textAlign:       'center',
+            marginBottom:    '1.5rem',
+          }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✅</div>
+            <h3 style={{ fontFamily: 'var(--font-heading)', color: '#166534', marginBottom: '0.5rem' }}>
+              ¡Mensaje enviado!
+            </h3>
+            <p style={{ color: '#166534', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Nos contactaremos contigo a la brevedad.
+            </p>
+            <button
+              onClick={() => setEnviado(false)}
+              style={{
+                backgroundColor: 'var(--color-marron)',
+                color:           '#fff',
+                border:          'none',
+                borderRadius:    'var(--radius-md)',
+                padding:         '0.6rem 1.5rem',
+                fontSize:        '0.875rem',
+                fontWeight:      '600',
+                fontFamily:      'var(--font-body)',
+                cursor:          'pointer',
+              }}
+            >
+              Enviar otro mensaje
+            </button>
+          </div>
+        )}
+
+        {!enviado && (
+          <form ref={formRef} onSubmit={handleSubmit} style={{
+            backgroundColor: '#fff',
+            borderRadius:    'var(--radius-lg)',
+            boxShadow:       'var(--shadow-card)',
+            padding:         '2rem',
+            display:         'flex',
+            flexDirection:   'column',
+            gap:             '1rem',
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div>
+                <label style={labelStyle}>Nombre</label>
+                <input name="nombre" type="text" placeholder="Tu nombre" required style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Teléfono</label>
+                <input name="telefono" type="tel" placeholder="999 999 999" required style={inputStyle} />
+              </div>
             </div>
+
             <div>
-              <label style={labelStyle}>Teléfono</label>
-              <input name="telefono" type="tel" placeholder="999 999 999" required style={inputStyle} />
+              <label style={labelStyle}>Correo electrónico</label>
+              <input name="email" type="email" placeholder="correo@ejemplo.com" required style={inputStyle} />
             </div>
-          </div>
 
-          <div>
-            <label style={labelStyle}>Correo electrónico</label>
-            <input name="email" type="email" placeholder="correo@ejemplo.com" required style={inputStyle} />
-          </div>
+            <div>
+              <label style={labelStyle}>Tipo de consulta</label>
+              <select name="tipo" required style={inputStyle}>
+                <option value="">Selecciona una opción...</option>
+                <option value="pedido-personalizado">Pedido personalizado</option>
+                <option value="mayorista">Compra mayorista</option>
+                <option value="distribucion">Distribución</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
 
-          <div>
-            <label style={labelStyle}>Tipo de consulta</label>
-            <select name="tipo" required style={inputStyle}>
-              <option value="">Selecciona una opción...</option>
-              <option value="pedido-personalizado">Pedido personalizado</option>
-              <option value="mayorista">Compra mayorista</option>
-              <option value="distribucion">Distribución</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
+            <div>
+              <label style={labelStyle}>Mensaje</label>
+              <textarea
+                name="mensaje"
+                placeholder="Cuéntanos en qué podemos ayudarte..."
+                required
+                rows={4}
+                style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.5' }}
+              />
+            </div>
 
-          <div>
-            <label style={labelStyle}>Mensaje</label>
-            <textarea
-              name="mensaje"
-              placeholder="Cuéntanos en qué podemos ayudarte..."
-              required
-              rows={4}
-              style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.5' }}
-            />
-          </div>
+            {/* Error */}
+            {error && (
+              <div style={{
+                backgroundColor: '#fef2f2',
+                border:          '1px solid #fecaca',
+                borderRadius:    'var(--radius-md)',
+                padding:         '0.75rem 1rem',
+                color:           'var(--color-granate)',
+                fontSize:        '0.875rem',
+              }}>
+                {error}
+              </div>
+            )}
 
-          <button
-            type="submit"
-            style={{
-              backgroundColor: 'var(--color-marron)',
-              color:           'var(--color-crema)',
-              border:          'none',
-              borderRadius:    'var(--radius-md)',
-              padding:         '0.875rem',
-              fontSize:        '1rem',
-              fontWeight:      '600',
-              fontFamily:      'var(--font-body)',
-              width:           '100%',
-              transition:      'background-color 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-marron)'}
-          >
-            Enviar mensaje
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={enviando}
+              style={{
+                backgroundColor: enviando ? 'var(--color-texto-muted)' : 'var(--color-marron)',
+                color:           'var(--color-crema)',
+                border:          'none',
+                borderRadius:    'var(--radius-md)',
+                padding:         '0.875rem',
+                fontSize:        '1rem',
+                fontWeight:      '600',
+                fontFamily:      'var(--font-body)',
+                width:           '100%',
+                transition:      'background-color 0.2s',
+                cursor:          enviando ? 'not-allowed' : 'pointer',
+              }}
+              onMouseEnter={e => { if (!enviando) e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)'; }}
+              onMouseLeave={e => { if (!enviando) e.currentTarget.style.backgroundColor = 'var(--color-marron)'; }}
+            >
+              {enviando ? 'Enviando...' : 'Enviar mensaje'}
+            </button>
+          </form>
+        )}
       </div>
     </section>
   );
