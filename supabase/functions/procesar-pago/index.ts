@@ -13,19 +13,31 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// ── Envía el email de confirmación al cliente
-async function enviarEmailConfirmacion(pedido, items) {
-  try {
-    const numeroCorto   = pedido.id.slice(0, 8).toUpperCase();
-    const nombreCliente = pedido.envio_nombre || 'Cliente';
-    const emailCliente  = pedido.email_invitado; // ← columna real
+// ── Obtener email del cliente logueado
+async function obtenerEmailCliente(pedido) {
+  // Si es invitado, usar email_invitado
+  if (pedido.email_invitado) return pedido.email_invitado;
 
+  // Si está logueado, buscar en auth.users
+  if (pedido.cliente_id) {
+    const { data } = await supabase.auth.admin.getUserById(pedido.cliente_id);
+    return data?.user?.email ?? null;
+  }
+
+  return null;
+}
+
+// ── Email de confirmación al cliente
+async function enviarEmailConfirmacion(pedido, items, emailCliente) {
+  try {
     if (!emailCliente) {
-      console.log('Sin email_invitado, no se envía confirmación.');
+      console.log('Sin email del cliente, no se envía confirmación.');
       return;
     }
 
-    // Filas de productos
+    const numeroCorto   = pedido.id.slice(0, 8).toUpperCase();
+    const nombreCliente = pedido.envio_nombre || 'Cliente';
+
     const filasProductos = items.map(item => `
       <tr>
         <td style="padding:10px 12px;border-bottom:1px solid #f0e8dc;color:#1a0f0a;font-size:14px;">
@@ -47,7 +59,6 @@ async function enviarEmailConfirmacion(pedido, items) {
     const envio    = pedido.costo_envio ?? 0;
     const total    = subtotal + envio;
 
-    // Dirección completa
     const direccionLineas = [
       pedido.envio_direccion,
       [pedido.envio_distrito, pedido.envio_provincia, pedido.envio_departamento]
@@ -65,7 +76,6 @@ async function enviarEmailConfirmacion(pedido, items) {
 <body style="margin:0;padding:0;background-color:#faf6ef;font-family:'Helvetica Neue',Arial,sans-serif;">
   <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(108,41,23,0.10);">
 
-    <!-- Header -->
     <div style="background:linear-gradient(135deg,#6c2917 0%,#97522d 100%);padding:36px 32px;text-align:center;">
       <h1 style="margin:0;color:#faf6ef;font-size:28px;font-weight:700;letter-spacing:-0.5px;">
         Lily's Caffe
@@ -75,7 +85,6 @@ async function enviarEmailConfirmacion(pedido, items) {
       </p>
     </div>
 
-    <!-- Mensaje principal -->
     <div style="padding:32px 32px 0;text-align:center;">
       <div style="font-size:48px;margin-bottom:12px;">✅</div>
       <h2 style="margin:0 0 8px;color:#6c2917;font-size:22px;font-weight:700;">
@@ -86,7 +95,6 @@ async function enviarEmailConfirmacion(pedido, items) {
       </p>
     </div>
 
-    <!-- Número de pedido -->
     <div style="padding:20px 32px 0;">
       <div style="background:#faf6ef;border-radius:10px;padding:16px;text-align:center;">
         <p style="margin:0 0 4px;color:#6b4c38;font-size:12px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
@@ -98,7 +106,6 @@ async function enviarEmailConfirmacion(pedido, items) {
       </div>
     </div>
 
-    <!-- Detalle de productos -->
     <div style="padding:24px 32px 0;">
       <h3 style="margin:0 0 12px;color:#6c2917;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">
         Detalle de tu pedido
@@ -117,7 +124,6 @@ async function enviarEmailConfirmacion(pedido, items) {
         </tbody>
       </table>
 
-      <!-- Totales -->
       <div style="border-top:2px solid #f0e8dc;margin-top:4px;padding-top:12px;">
         <div style="display:flex;justify-content:space-between;padding:4px 12px;color:#6b4c38;font-size:14px;">
           <span>Subtotal</span><span>S/ ${subtotal.toFixed(2)}</span>
@@ -133,7 +139,6 @@ async function enviarEmailConfirmacion(pedido, items) {
       </div>
     </div>
 
-    <!-- Dirección de envío -->
     <div style="padding:24px 32px 0;">
       <h3 style="margin:0 0 10px;color:#6c2917;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">
         Dirección de envío
@@ -142,22 +147,21 @@ async function enviarEmailConfirmacion(pedido, items) {
         <strong>${nombreCliente}</strong><br/>
         ${direccionLineas}
         ${pedido.envio_telefono ? `<br/>📞 ${pedido.envio_telefono}` : ''}
+        ${pedido.envio_codigo_postal ? `<br/>CP: ${pedido.envio_codigo_postal}` : ''}
       </div>
     </div>
 
-    <!-- Mensaje de cierre -->
     <div style="padding:28px 32px;text-align:center;color:#6b4c38;font-size:14px;line-height:1.7;">
       <p style="margin:0 0 8px;">
         Nos pondremos en contacto contigo pronto para coordinar la entrega. 🚀
       </p>
       <p style="margin:0;">
         ¿Dudas? Escríbenos a
-        <a href="mailto:lilyscaffe26@gmail.com" style="color:#6c2917;font-weight:600;">lilyscaffe26@gmail.com</a>
+        <a href="mailto:contacto@lilyscaffe.com" style="color:#6c2917;font-weight:600;">contacto@lilyscaffe.com</a>
         o llámanos al <strong>+51 924 029 050</strong>.
       </p>
     </div>
 
-    <!-- Footer -->
     <div style="background:#6c2917;padding:20px 32px;text-align:center;">
       <p style="margin:0;color:rgba(250,246,239,0.7);font-size:12px;">
         © ${new Date().getFullYear()} Lily's Caffe — Hecho con mucho café y amor en Perú ❤️
@@ -175,7 +179,7 @@ async function enviarEmailConfirmacion(pedido, items) {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        from:    "Lily's Caffe <onboarding@resend.dev>",
+        from:    "Lily's Caffe <contacto@lilyscaffe.com>",
         to:      [emailCliente],
         subject: `✅ Pedido #${numeroCorto} confirmado — Lily's Caffe`,
         html,
@@ -184,13 +188,173 @@ async function enviarEmailConfirmacion(pedido, items) {
 
     if (!resendRes.ok) {
       const err = await resendRes.text();
-      console.error('Resend error:', err);
+      console.error('Resend error (cliente):', err);
     } else {
-      console.log('Email enviado a:', emailCliente);
+      console.log('Email confirmación enviado a:', emailCliente);
     }
 
   } catch (err) {
-    console.error('Error enviando email:', err);
+    console.error('Error enviando email confirmación:', err);
+  }
+}
+
+// ── ✅ NUEVO: Email de notificación interna a Lily's Caffe
+async function enviarEmailAdmin(pedido, items, emailCliente) {
+  try {
+    const numeroCorto = pedido.id.slice(0, 8).toUpperCase();
+    const subtotal    = items.reduce((acc, i) => acc + i.cantidad * i.precio_unitario, 0);
+    const envio       = pedido.costo_envio ?? 0;
+    const total       = subtotal + envio;
+
+    const filasProductos = items.map(item => `
+      <tr>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0e8dc;color:#1a0f0a;font-size:14px;">
+          ${item.nombre_producto}
+        </td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0e8dc;text-align:center;color:#6b4c38;font-size:14px;">
+          ${item.cantidad}
+        </td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0e8dc;text-align:right;font-weight:600;color:#6c2917;font-size:14px;">
+          S/ ${(item.cantidad * item.precio_unitario).toFixed(2)}
+        </td>
+      </tr>
+    `).join('');
+
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Nuevo pedido — Lily's Caffe</title>
+</head>
+<body style="margin:0;padding:0;background-color:#faf6ef;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(108,41,23,0.10);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#83401d 0%,#97522d 100%);padding:28px 32px;text-align:center;">
+      <h1 style="margin:0;color:#faf6ef;font-size:22px;font-weight:700;">
+        🛍️ Nuevo pedido recibido
+      </h1>
+      <p style="margin:6px 0 0;color:rgba(250,246,239,0.85);font-size:13px;">
+        Panel interno — Lily's Caffe
+      </p>
+    </div>
+
+    <!-- Número de pedido -->
+    <div style="padding:24px 32px 0;text-align:center;">
+      <div style="background:#faf6ef;border-radius:10px;padding:14px;display:inline-block;min-width:200px;">
+        <p style="margin:0 0 4px;color:#6b4c38;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+          Pedido
+        </p>
+        <p style="margin:0;color:#6c2917;font-size:24px;font-weight:700;font-family:monospace;letter-spacing:2px;">
+          #${numeroCorto}
+        </p>
+        <p style="margin:4px 0 0;color:#6b4c38;font-size:12px;">
+          ${new Date().toLocaleString('es-PE', { timeZone: 'America/Lima', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </p>
+      </div>
+    </div>
+
+    <!-- Datos del cliente -->
+    <div style="padding:24px 32px 0;">
+      <h3 style="margin:0 0 12px;color:#6c2917;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">
+        📋 Datos del cliente
+      </h3>
+      <div style="background:#faf6ef;border-radius:10px;padding:16px;font-size:14px;line-height:2;color:#1a0f0a;">
+        <div><strong>Nombre:</strong> ${pedido.envio_nombre ?? '—'}</div>
+        <div><strong>Email:</strong> ${emailCliente ?? '—'}</div>
+        <div><strong>Teléfono:</strong> ${pedido.envio_telefono ?? '—'}</div>
+      </div>
+    </div>
+
+    <!-- Dirección de envío -->
+    <div style="padding:20px 32px 0;">
+      <h3 style="margin:0 0 12px;color:#6c2917;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">
+        🚚 Dirección de envío
+      </h3>
+      <div style="background:#fff8e1;border:1px solid #f59e0b;border-radius:10px;padding:16px;font-size:14px;line-height:2;color:#1a0f0a;">
+        <div><strong>Dirección:</strong> ${pedido.envio_direccion ?? '—'}</div>
+        <div><strong>Distrito:</strong> ${pedido.envio_distrito ?? '—'}</div>
+        <div><strong>Provincia:</strong> ${pedido.envio_provincia ?? '—'}</div>
+        <div><strong>Departamento:</strong> ${pedido.envio_departamento ?? '—'}</div>
+        ${pedido.envio_codigo_postal ? `<div><strong>Código postal:</strong> ${pedido.envio_codigo_postal}</div>` : ''}
+      </div>
+    </div>
+
+    <!-- Productos -->
+    <div style="padding:20px 32px 0;">
+      <h3 style="margin:0 0 12px;color:#6c2917;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">
+        📦 Productos pedidos
+      </h3>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#faf6ef;">
+            <th style="padding:10px 12px;text-align:left;color:#6b4c38;font-size:12px;font-weight:600;text-transform:uppercase;">Producto</th>
+            <th style="padding:10px 12px;text-align:center;color:#6b4c38;font-size:12px;font-weight:600;text-transform:uppercase;">Cant.</th>
+            <th style="padding:10px 12px;text-align:right;color:#6b4c38;font-size:12px;font-weight:600;text-transform:uppercase;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filasProductos}
+        </tbody>
+      </table>
+      <div style="border-top:2px solid #f0e8dc;margin-top:4px;padding-top:12px;">
+        <div style="display:flex;justify-content:space-between;padding:4px 12px;color:#6b4c38;font-size:14px;">
+          <span>Subtotal</span><span>S/ ${subtotal.toFixed(2)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 12px;color:#6b4c38;font-size:14px;">
+          <span>Envío</span>
+          <span>${envio === 0 ? '🎉 Gratis' : `S/ ${Number(envio).toFixed(2)}`}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#faf6ef;border-radius:8px;margin-top:8px;">
+          <span style="font-weight:700;color:#6c2917;font-size:16px;">Total cobrado</span>
+          <span style="font-weight:700;color:#6c2917;font-size:16px;">S/ ${total.toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA admin -->
+    <div style="padding:24px 32px;text-align:center;">
+      <a href="https://www.lilyscaffe.com/admin"
+         style="display:inline-block;background:#83401d;color:#faf6ef;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:700;font-size:14px;">
+        Ver en panel de administración →
+      </a>
+    </div>
+
+    <div style="background:#6c2917;padding:16px 32px;text-align:center;">
+      <p style="margin:0;color:rgba(250,246,239,0.7);font-size:12px;">
+        Lily's Caffe — Notificación interna automática
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+    const resendRes = await fetch('https://api.resend.com/emails', {
+      method:  'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({
+        from:    "Lily's Caffe <contacto@lilyscaffe.com>",
+        to:      ['lilyscaffe26@gmail.com'],
+        subject: `🛍️ Nuevo pedido #${numeroCorto} — S/ ${total.toFixed(2)}`,
+        html,
+      }),
+    });
+
+    if (!resendRes.ok) {
+      const err = await resendRes.text();
+      console.error('Resend error (admin):', err);
+    } else {
+      console.log('Email notificación admin enviado.');
+    }
+
+  } catch (err) {
+    console.error('Error enviando email admin:', err);
   }
 }
 
@@ -214,7 +378,6 @@ Deno.serve(async (req) => {
       return errorResponse('pedido_id y culqi_token son requeridos', 400);
     }
 
-    // Obtener el pedido
     const { data: pedido, error: pedidoError } = await supabase
       .from('pedidos')
       .select('*')
@@ -226,7 +389,6 @@ Deno.serve(async (req) => {
       return errorResponse('Pedido no encontrado o ya fue procesado', 404);
     }
 
-    // Crear cargo en Culqi
     const totalCentimos = Math.round(pedido.total * 100);
 
     const culqiResponse = await fetch('https://api.culqi.com/v2/charges', {
@@ -238,7 +400,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         amount:        totalCentimos,
         currency_code: 'PEN',
-        email:         pedido.email_invitado || 'cliente@lilyscaffe.pe',
+        email:         pedido.email_invitado || 'cliente@lilyscaffe.com',
         source_id:     culqi_token,
         description:   `Pedido #${pedido_id.slice(0, 8).toUpperCase()}`,
         capture:       true,
@@ -257,7 +419,6 @@ Deno.serve(async (req) => {
       return errorResponse(culqiData.user_message ?? 'Pago rechazado', 402);
     }
 
-    // Actualizar pedido como pagado
     await supabase
       .from('pedidos')
       .update({
@@ -267,17 +428,21 @@ Deno.serve(async (req) => {
       })
       .eq('id', pedido_id);
 
-    // Descontar stock
     await supabase.rpc('decrementar_stock', { p_pedido_id: pedido_id });
 
-    // Obtener items del pedido para el email
     const { data: items } = await supabase
       .from('pedido_items')
       .select('*')
       .eq('pedido_id', pedido_id);
 
-    // Enviar email de confirmación
-    await enviarEmailConfirmacion(pedido, items ?? []);
+    // ✅ Obtener email del cliente (invitado o logueado)
+    const emailCliente = await obtenerEmailCliente(pedido);
+
+    // ✅ Enviar ambos emails en paralelo
+    await Promise.all([
+      enviarEmailConfirmacion(pedido, items ?? [], emailCliente),
+      enviarEmailAdmin(pedido, items ?? [], emailCliente),
+    ]);
 
     return new Response(JSON.stringify({
       success:   true,
