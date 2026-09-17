@@ -118,7 +118,7 @@ function Checkout() {
           }
 
           clearCart();
-          window.location.href = '/orden-exitosa';
+          window.location.href = 'https://www.lilyscaffe.com/orden-exitosa';
         } catch (err) {
           setError('Error al procesar el pago: ' + err.message);
         } finally {
