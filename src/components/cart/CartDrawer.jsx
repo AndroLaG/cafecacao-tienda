@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 function CartDrawer({ isOpen, onClose }) {
   const { items, subtotal, costoEnvio, total, removeItem, updateQty, clearCart } = useCart();
   const { user } = useAuth();
+
   return (
     <>
       {isOpen && (
@@ -65,7 +66,7 @@ function CartDrawer({ isOpen, onClose }) {
         </div>
 
         {/* Items */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem'}}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
           {items.length === 0 ? (
             <div style={{
               textAlign: 'center',
@@ -76,95 +77,100 @@ function CartDrawer({ isOpen, onClose }) {
               <p>Tu carrito está vacío</p>
             </div>
           ) : (
-            items.map(item => (
-              <div key={item.id} style={{
-                display: 'flex',
-                gap: '1rem',
-                padding: '1rem 0',
-                borderBottom: '1px solid #f0e8de',
-              }}>
-                <img
-                  src={item.imagen_url}
-                  alt={item.nombre}
-                  style={{
-                    width: '70px',
-                    height: '70px',
-                    objectFit: 'cover',
-                    borderRadius: 'var(--radius-md)',
-                  }}
-                />
-                <div style={{ flex: 1 }}>
-                  <p style={{
-                    fontWeight: '600',
-                    color: 'var(--color-marron)',
-                    fontSize: '0.9rem',
-                    marginBottom: '0.25rem',
-                  }}>
-                    {item.nombre}
-                  </p>
-                  <p style={{
-                    color: 'var(--color-texto-muted)',
-                    fontSize: '0.85rem',
-                    marginBottom: '0.5rem',
-                  }}>
-                    S/ {item.precio.toFixed(2)}
-                  </p>
+            items.map(function(item) {
+              return (
+                <div key={item.id} style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  padding: '1rem 0',
+                  borderBottom: '1px solid #f0e8de',
+                }}>
+                  <img
+                    src={item.imagen_url}
+                    alt={item.nombre}
+                    style={{
+                      width: '70px',
+                      height: '70px',
+                      objectFit: 'cover',
+                      borderRadius: 'var(--radius-md)',
+                    }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      fontWeight: '600',
+                      color: 'var(--color-marron)',
+                      fontSize: '0.9rem',
+                      marginBottom: '0.25rem',
+                    }}>
+                      {item.nombre}
+                    </p>
+                    <p style={{
+                      color: 'var(--color-texto-muted)',
+                      fontSize: '0.85rem',
+                      marginBottom: '0.5rem',
+                    }}>
+                      S/ {item.precio.toFixed(2)}
+                    </p>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <button
-                      onClick={() => updateQty(item.id, item.cantidad - 1)}
-                      style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--color-marron-claro)',
-                        backgroundColor: '#fff',
-                        color: 'var(--color-marron)',
-                        fontSize: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      −
-                    </button>
-                    <span style={{ fontWeight: '600', minWidth: '20px', textAlign: 'center' }}>
-                      {item.cantidad}
-                    </span>
-                    <button
-                      onClick={() => updateQty(item.id, item.cantidad + 1)}
-                      style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--color-marron-claro)',
-                        backgroundColor: '#fff',
-                        color: 'var(--color-marron)',
-                        fontSize: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      +
-                    </button>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      style={{
-                        marginLeft: 'auto',
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--color-granate)',
-                        fontSize: '0.8rem',
-                        opacity: 0.7,
-                      }}
-                    >
-                      Eliminar
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        onClick={function() { updateQty(item.id, item.cantidad - 1); }}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: 'var(--radius-md)',
+                          border: '1px solid var(--color-marron-claro)',
+                          backgroundColor: '#fff',
+                          color: 'var(--color-marron)',
+                          fontSize: '1rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        −
+                      </button>
+                      <span style={{ fontWeight: '600', minWidth: '20px', textAlign: 'center' }}>
+                        {item.cantidad}
+                      </span>
+                      <button
+                        onClick={function() { updateQty(item.id, item.cantidad + 1); }}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: 'var(--radius-md)',
+                          border: '1px solid var(--color-marron-claro)',
+                          backgroundColor: '#fff',
+                          color: 'var(--color-marron)',
+                          fontSize: '1rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={function() { removeItem(item.id); }}
+                        style={{
+                          marginLeft: 'auto',
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--color-granate)',
+                          fontSize: '0.8rem',
+                          opacity: 0.7,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -198,48 +204,58 @@ function CartDrawer({ isOpen, onClose }) {
               </span>
             </div>
 
+            {/* ✅ Botón Proceder al pago — verifica si está logueado */}
             <button
-            onClick={() => { onClose(); window.location.href = '/checkout'; }}
-            style={{
-              width:           '100%',
-              backgroundColor: 'var(--color-marron)',
-              color:           'var(--color-crema)',
-              border:          'none',
-              borderRadius:    'var(--radius-md)',
-              padding:         '0.875rem',
-              fontSize:        '1rem',
-              fontWeight:      '600',
-              fontFamily:      'var(--font-body)',
-            marginBottom:    '0.75rem',
-  }}
-  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)'}
-  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-marron)'}
->
-  Proceder al pago
-</button>
-<button
-  onClick={() => {
-    onClose();
-    window.location.href = user ? '/checkout' : '/auth?from=checkout';
-  }}
-  style={{
-    width:           '100%',
-    backgroundColor: 'var(--color-marron)',
-    color:           'var(--color-crema)',
-    border:          'none',
-    borderRadius:    'var(--radius-md)',
-    padding:         '0.875rem',
-    fontSize:        '1rem',
-    fontWeight:      '600',
-    fontFamily:      'var(--font-body)',
-    marginBottom:    '0.75rem',
-    cursor:          'pointer',
-  }}
-  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)'}
-  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-marron)'}
->
-  Proceder al pago
-</button>
+              onClick={function() {
+                onClose();
+                window.location.href = user ? '/checkout' : '/auth?from=checkout';
+              }}
+              style={{
+                width:           '100%',
+                backgroundColor: 'var(--color-marron)',
+                color:           'var(--color-crema)',
+                border:          'none',
+                borderRadius:    'var(--radius-md)',
+                padding:         '0.875rem',
+                fontSize:        '1rem',
+                fontWeight:      '600',
+                fontFamily:      'var(--font-body)',
+                marginBottom:    '0.75rem',
+                cursor:          'pointer',
+              }}
+              onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)'; }}
+              onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = 'var(--color-marron)'; }}
+            >
+              Proceder al pago
+            </button>
+
+            {/* ✅ NUEVO: Botón Vaciar carrito */}
+            <button
+              onClick={function() { clearCart(); }}
+              style={{
+                width:           '100%',
+                backgroundColor: 'transparent',
+                color:           'var(--color-granate)',
+                border:          '1px solid var(--color-granate)',
+                borderRadius:    'var(--radius-md)',
+                padding:         '0.75rem',
+                fontSize:        '0.9rem',
+                fontWeight:      '600',
+                fontFamily:      'var(--font-body)',
+                cursor:          'pointer',
+                transition:      'background-color 0.2s, color 0.2s',
+              }}
+              onMouseEnter={function(e) {
+                e.currentTarget.style.backgroundColor = 'var(--color-granate)';
+                e.currentTarget.style.color = '#fff';
+              }}
+              onMouseLeave={function(e) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--color-granate)';
+              }}
+            >
+              🗑️ Vaciar carrito
+            </button>
           </div>
         )}
       </div>
