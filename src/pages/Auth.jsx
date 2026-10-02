@@ -28,29 +28,29 @@ function Auth() {
   const [intentosFallidos, setIntentosFallidos] = useState(0);
 
   // Cargar Turnstile SDK
-  useEffect(() => {
+  useEffect(function() {
     if (!TURNSTILE_SITE_KEY) return;
-    const script = document.createElement('script');
+    var script = document.createElement('script');
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
 
-    window.onTurnstileSuccess = (token) => setTurnstileToken(token);
+    window.onTurnstileSuccess = function(token) { setTurnstileToken(token); };
 
-    return () => {
-      document.head.removeChild(script);
+    return function() {
+      if (document.head.contains(script)) document.head.removeChild(script);
       delete window.onTurnstileSuccess;
     };
   }, []);
 
   // Temporizador OTP
-  useEffect(() => {
+  useEffect(function() {
     if (!otpEnviado) return;
     setSegundos(60);
     setPuedeReenviar(false);
-    const intervalo = setInterval(() => {
-      setSegundos(s => {
+    var intervalo = setInterval(function() {
+      setSegundos(function(s) {
         if (s <= 1) {
           clearInterval(intervalo);
           setPuedeReenviar(true);
@@ -59,32 +59,34 @@ function Auth() {
         return s - 1;
       });
     }, 1000);
-    return () => clearInterval(intervalo);
+    return function() { clearInterval(intervalo); };
   }, [otpEnviado]);
 
   // ── LOGIN
   async function handleLogin(e) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
-    // Verificar Turnstile si hay demasiados intentos fallidos
+    // ✅ FIX: verificar Turnstile ANTES de setLoading para no congelar
     if (intentosFallidos >= 3 && !turnstileToken) {
       setError('Por favor completa la verificación de seguridad.');
-      setLoading(false);
-      return;
+      return; // No ponemos loading, así el botón queda habilitado
     }
 
+    setLoading(true);
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+
     if (error) {
-      setIntentosFallidos(f => f + 1);
+      setIntentosFallidos(function(f) { return f + 1; });
       setError('Correo o contraseña incorrectos.');
       setTurnstileToken(null);
       if (window.turnstile) window.turnstile.reset();
+      setLoading(false); // ✅ FIX: siempre desbloquear el botón
     } else {
       window.location.href = redirectTo;
+      // No hacemos setLoading(false) aquí porque redirigimos
     }
-    setLoading(false);
   }
 
   // ── REGISTRO paso 1: enviar OTP
@@ -93,24 +95,26 @@ function Auth() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
+    // ✅ FIX: usar signInWithOtp para OTP por email en lugar de signUp
+    // signUp con email confirmation deshabilitado no envía OTP
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
       options: {
-        data: { nombre_completo: nombre },
-        emailRedirectTo: undefined,
+        shouldCreateUser: true,
+        data: { nombre_completo: nombre, password },
       },
     });
 
     if (error) {
       setError(error.message);
+      setLoading(false);
     } else {
       setOtpEnviado(true);
+      setLoading(false);
     }
-    setLoading(false);
   }
 
-  // ── REGISTRO paso 2: verificar OTP
+  // ── REGISTRO paso 2: verificar OTP y luego actualizar contraseña
   async function handleVerificarOTP(e) {
     e.preventDefault();
     setLoading(true);
@@ -119,23 +123,30 @@ function Auth() {
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: otp,
-      type:  'signup',
+      type:  'email',
     });
 
     if (error) {
       setError('Código incorrecto o expirado. Intenta de nuevo.');
-    } else {
-      // Guardar nombre en tabla clientes
-      if (data?.user) {
-        await supabase.from('clientes').upsert({
-          id:              data.user.id,
-          nombre_completo: nombre,
-        }, { onConflict: 'id' });
-      }
-      // Redirigir según origen
-      window.location.href = redirectTo;
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    // Si el usuario acaba de crearse, actualizar su contraseña
+    if (data?.user) {
+      // Actualizar contraseña si se proporcionó
+      if (password) {
+        await supabase.auth.updateUser({ password });
+      }
+
+      // Guardar nombre en tabla clientes
+      await supabase.from('clientes').upsert({
+        id:              data.user.id,
+        nombre_completo: nombre,
+      }, { onConflict: 'id' });
+    }
+
+    window.location.href = redirectTo;
   }
 
   // ── REENVIAR OTP
@@ -143,7 +154,7 @@ function Auth() {
     setPuedeReenviar(false);
     setOtp('');
     setError(null);
-    await supabase.auth.resend({ type: 'signup', email });
+    await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
     setOtpEnviado(true);
   }
 
@@ -191,20 +202,22 @@ function Auth() {
     outline:         'none',
   };
 
-  const btnPrimary = (disabled) => ({
-    backgroundColor: disabled ? 'var(--color-texto-muted)' : 'var(--color-marron)',
-    color:           'var(--color-crema)',
-    border:          'none',
-    borderRadius:    'var(--radius-md)',
-    padding:         '0.875rem',
-    fontSize:        '1rem',
-    fontWeight:      '600',
-    fontFamily:      'var(--font-body)',
-    marginTop:       '0.5rem',
-    cursor:          disabled ? 'not-allowed' : 'pointer',
-    width:           '100%',
-    transition:      'background-color 0.2s',
-  });
+  function btnPrimary(disabled) {
+    return {
+      backgroundColor: disabled ? 'var(--color-texto-muted)' : 'var(--color-marron)',
+      color:           'var(--color-crema)',
+      border:          'none',
+      borderRadius:    'var(--radius-md)',
+      padding:         '0.875rem',
+      fontSize:        '1rem',
+      fontWeight:      '600',
+      fontFamily:      'var(--font-body)',
+      marginTop:       '0.5rem',
+      cursor:          disabled ? 'not-allowed' : 'pointer',
+      width:           '100%',
+      transition:      'background-color 0.2s',
+    };
+  }
 
   return (
     <div style={{
@@ -242,6 +255,9 @@ function Auth() {
                 Enviamos un código de verificación a<br />
                 <strong style={{ color: 'var(--color-marron)' }}>{email}</strong>
               </p>
+              <p style={{ color: 'var(--color-texto-muted)', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                Revisa también tu carpeta de spam.
+              </p>
             </div>
 
             <form onSubmit={handleVerificarOTP} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -254,21 +270,20 @@ function Auth() {
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   value={otp}
-                  onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={function(e) { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); }}
                   placeholder="000000"
                   required
                   maxLength={6}
                   style={{
                     ...inputStyle,
-                    fontSize:    '1.5rem',
-                    textAlign:   'center',
+                    fontSize:      '1.5rem',
+                    textAlign:     'center',
                     letterSpacing: '0.5rem',
-                    fontWeight:  '700',
+                    fontWeight:    '700',
                   }}
                 />
               </div>
 
-              {/* Temporizador */}
               <div style={{ textAlign: 'center' }}>
                 {puedeReenviar ? (
                   <button
@@ -305,7 +320,7 @@ function Auth() {
 
               <button
                 type="button"
-                onClick={() => { setOtpEnviado(false); setOtp(''); setError(null); }}
+                onClick={function() { setOtpEnviado(false); setOtp(''); setError(null); }}
                 style={{
                   background:  'none',
                   border:      'none',
@@ -322,7 +337,6 @@ function Auth() {
           </div>
 
         ) : (
-          /* ── PANTALLA PRINCIPAL ── */
           <>
             <p style={{ color: 'var(--color-texto-muted)', textAlign: 'center', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
               {modo === 'login' ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta'}
@@ -351,8 +365,8 @@ function Auth() {
                 opacity:         loadingGoogle ? 0.7 : 1,
                 transition:      'background-color 0.2s, border-color 0.2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-crema)'; e.currentTarget.style.borderColor = 'var(--color-marron)'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#e0d5c8'; }}
+              onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = 'var(--color-crema)'; e.currentTarget.style.borderColor = 'var(--color-marron)'; }}
+              onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#e0d5c8'; }}
             >
               <svg width="20" height="20" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -407,7 +421,7 @@ function Auth() {
                   <input
                     type="email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={function(e) { setEmail(e.target.value); }}
                     placeholder="correo@ejemplo.com"
                     required
                     style={inputStyle}
@@ -422,25 +436,25 @@ function Auth() {
                     <input
                       type={showPass ? 'text' : 'password'}
                       value={password}
-                      onChange={e => setPassword(e.target.value)}
+                      onChange={function(e) { setPassword(e.target.value); }}
                       placeholder="Tu contraseña"
                       required
                       style={{ ...inputStyle, paddingRight: '3rem' }}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPass(!showPass)}
+                      onClick={function() { setShowPass(!showPass); }}
                       style={{
-                        position:        'absolute',
-                        right:           '0.75rem',
-                        top:             '50%',
-                        transform:       'translateY(-50%)',
-                        background:      'none',
-                        border:          'none',
-                        cursor:          'pointer',
-                        fontSize:        '1rem',
-                        color:           'var(--color-texto-muted)',
-                        padding:         '0.25rem',
+                        position:  'absolute',
+                        right:     '0.75rem',
+                        top:       '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border:    'none',
+                        cursor:    'pointer',
+                        fontSize:  '1rem',
+                        color:     'var(--color-texto-muted)',
+                        padding:   '0.25rem',
                       }}
                     >
                       {showPass ? '🙈' : '👁️'}
@@ -504,7 +518,7 @@ function Auth() {
                   <input
                     type="text"
                     value={nombre}
-                    onChange={e => setNombre(e.target.value)}
+                    onChange={function(e) { setNombre(e.target.value); }}
                     placeholder="Andrés Sánchez"
                     required
                     style={inputStyle}
@@ -518,7 +532,7 @@ function Auth() {
                   <input
                     type="email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={function(e) { setEmail(e.target.value); }}
                     placeholder="correo@ejemplo.com"
                     required
                     style={inputStyle}
@@ -533,7 +547,7 @@ function Auth() {
                     <input
                       type={showPass ? 'text' : 'password'}
                       value={password}
-                      onChange={e => setPassword(e.target.value)}
+                      onChange={function(e) { setPassword(e.target.value); }}
                       placeholder="Mínimo 6 caracteres"
                       required
                       minLength={6}
@@ -541,7 +555,7 @@ function Auth() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPass(!showPass)}
+                      onClick={function() { setShowPass(!showPass); }}
                       style={{
                         position:  'absolute',
                         right:     '0.75rem',
