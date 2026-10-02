@@ -238,7 +238,7 @@ function Checkout() {
           <p style={{ fontSize: '0.85rem', color: '#92400e', margin: 0, lineHeight: 1.5 }}>
             <strong>Zona de cobertura:</strong> Por el momento Lily's Caffe realiza envíos
             únicamente dentro de <strong>Lima Metropolitana</strong>. Si te encuentras en
-            provincia, puedes contactarnos para coordinar una alternativa.
+            provincia, puedes escribirnos por el formulario de Contacto para coordinar el envio.
           </p>
         </div>
 

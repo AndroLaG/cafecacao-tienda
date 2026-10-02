@@ -1,8 +1,10 @@
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useCart } from '../../context/CartContext';
 
 function CartDrawer({ isOpen, onClose }) {
   const { items, subtotal, costoEnvio, total, removeItem, updateQty, clearCart } = useCart();
-
+  const { user } = useAuth();
   return (
     <>
       {isOpen && (
@@ -216,21 +218,29 @@ function CartDrawer({ isOpen, onClose }) {
 >
   Proceder al pago
 </button>
-            <button
-              onClick={clearCart}
-              style={{
-                width: '100%',
-                backgroundColor: 'transparent',
-                color: 'var(--color-texto-muted)',
-                border: '1px solid #e0d5c8',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.6rem',
-                fontSize: '0.85rem',
-                fontFamily: 'var(--font-body)',
-              }}
-            >
-              Vaciar carrito
-            </button>
+<button
+  onClick={() => {
+    onClose();
+    window.location.href = user ? '/checkout' : '/auth?from=checkout';
+  }}
+  style={{
+    width:           '100%',
+    backgroundColor: 'var(--color-marron)',
+    color:           'var(--color-crema)',
+    border:          'none',
+    borderRadius:    'var(--radius-md)',
+    padding:         '0.875rem',
+    fontSize:        '1rem',
+    fontWeight:      '600',
+    fontFamily:      'var(--font-body)',
+    marginBottom:    '0.75rem',
+    cursor:          'pointer',
+  }}
+  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-marron-claro)'}
+  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-marron)'}
+>
+  Proceder al pago
+</button>
           </div>
         )}
       </div>
