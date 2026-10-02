@@ -1,6 +1,5 @@
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../hooks/useAuth';
-import { useCart } from '../../context/CartContext';
 
 function CartDrawer({ isOpen, onClose }) {
   const { items, subtotal, costoEnvio, total, removeItem, updateQty, clearCart } = useCart();
