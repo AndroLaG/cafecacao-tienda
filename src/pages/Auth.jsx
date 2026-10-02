@@ -12,8 +12,10 @@ function Auth() {
   const [password, setPassword]       = useState('');
   const [nombre, setNombre]           = useState('');
   const [showPass, setShowPass]       = useState(false);
-  const [loading, setLoading]         = useState(false);
+  const [loadingLogin, setLoadingLogin]     = useState(false); // ✅ separado
+  const [loadingRegistro, setLoadingRegistro] = useState(false); // ✅ separado
   const [loadingGoogle, setLoadingGoogle] = useState(false);
+  const [loadingOtp, setLoadingOtp]   = useState(false); // ✅ separado
   const [error, setError]             = useState(null);
   const [mensaje, setMensaje]         = useState(null);
 
@@ -27,6 +29,15 @@ function Auth() {
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [intentosFallidos, setIntentosFallidos] = useState(0);
 
+  // Resetear errores al cambiar de tab
+  function cambiarModo(m) {
+    setModo(m);
+    setError(null);
+    setMensaje(null);
+    setLoadingLogin(false);
+    setLoadingRegistro(false);
+  }
+
   // Cargar Turnstile SDK
   useEffect(function() {
     if (!TURNSTILE_SITE_KEY) return;
@@ -35,9 +46,7 @@ function Auth() {
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
-
     window.onTurnstileSuccess = function(token) { setTurnstileToken(token); };
-
     return function() {
       if (document.head.contains(script)) document.head.removeChild(script);
       delete window.onTurnstileSuccess;
@@ -51,11 +60,7 @@ function Auth() {
     setPuedeReenviar(false);
     var intervalo = setInterval(function() {
       setSegundos(function(s) {
-        if (s <= 1) {
-          clearInterval(intervalo);
-          setPuedeReenviar(true);
-          return 0;
-        }
+        if (s <= 1) { clearInterval(intervalo); setPuedeReenviar(true); return 0; }
         return s - 1;
       });
     }, 1000);
@@ -67,13 +72,12 @@ function Auth() {
     e.preventDefault();
     setError(null);
 
-    // ✅ FIX: verificar Turnstile ANTES de setLoading para no congelar
     if (intentosFallidos >= 3 && !turnstileToken) {
       setError('Por favor completa la verificación de seguridad.');
-      return; // No ponemos loading, así el botón queda habilitado
+      return;
     }
 
-    setLoading(true);
+    setLoadingLogin(true);
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -82,42 +86,35 @@ function Auth() {
       setError('Correo o contraseña incorrectos.');
       setTurnstileToken(null);
       if (window.turnstile) window.turnstile.reset();
-      setLoading(false); // ✅ FIX: siempre desbloquear el botón
+      setLoadingLogin(false);
     } else {
       window.location.href = redirectTo;
-      // No hacemos setLoading(false) aquí porque redirigimos
     }
   }
 
   // ── REGISTRO paso 1: enviar OTP
   async function handleRegistro(e) {
     e.preventDefault();
-    setLoading(true);
+    setLoadingRegistro(true);
     setError(null);
 
-    // ✅ FIX: usar signInWithOtp para OTP por email en lugar de signUp
-    // signUp con email confirmation deshabilitado no envía OTP
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        shouldCreateUser: true,
-        data: { nombre_completo: nombre, password },
-      },
+      options: { shouldCreateUser: true },
     });
 
     if (error) {
       setError(error.message);
-      setLoading(false);
     } else {
       setOtpEnviado(true);
-      setLoading(false);
     }
+    setLoadingRegistro(false);
   }
 
-  // ── REGISTRO paso 2: verificar OTP y luego actualizar contraseña
+  // ── REGISTRO paso 2: verificar OTP
   async function handleVerificarOTP(e) {
     e.preventDefault();
-    setLoading(true);
+    setLoadingOtp(true);
     setError(null);
 
     const { data, error } = await supabase.auth.verifyOtp({
@@ -128,17 +125,15 @@ function Auth() {
 
     if (error) {
       setError('Código incorrecto o expirado. Intenta de nuevo.');
-      setLoading(false);
+      setLoadingOtp(false);
       return;
     }
 
-    // Si el usuario acaba de crearse, actualizar su contraseña
     if (data?.user) {
       // Actualizar contraseña si se proporcionó
       if (password) {
         await supabase.auth.updateUser({ password });
       }
-
       // Guardar nombre en tabla clientes
       await supabase.from('clientes').upsert({
         id:              data.user.id,
@@ -164,9 +159,7 @@ function Auth() {
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin + redirectTo,
-      },
+      options: { redirectTo: window.location.origin + redirectTo },
     });
     if (error) {
       setError('No se pudo conectar con Google.');
@@ -177,7 +170,7 @@ function Auth() {
   // ── OLVIDÉ CONTRASEÑA
   async function handleOlvidePassword() {
     if (!email) { setError('Escribe tu correo primero.'); return; }
-    setLoading(true);
+    setLoadingLogin(true);
     setError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/auth',
@@ -187,7 +180,7 @@ function Auth() {
     } else {
       setMensaje('Te enviamos un correo para restablecer tu contraseña.');
     }
-    setLoading(false);
+    setLoadingLogin(false);
   }
 
   const inputStyle = {
@@ -290,13 +283,10 @@ function Auth() {
                     type="button"
                     onClick={handleReenviarOTP}
                     style={{
-                      background:  'none',
-                      border:      'none',
-                      color:       'var(--color-marron)',
-                      fontSize:    '0.875rem',
-                      fontWeight:  '600',
-                      fontFamily:  'var(--font-body)',
-                      cursor:      'pointer',
+                      background: 'none', border: 'none',
+                      color:      'var(--color-marron)',
+                      fontSize:   '0.875rem', fontWeight: '600',
+                      fontFamily: 'var(--font-body)', cursor: 'pointer',
                     }}
                   >
                     Reenviar código
@@ -314,21 +304,18 @@ function Auth() {
                 </div>
               )}
 
-              <button type="submit" disabled={loading || otp.length < 6} style={btnPrimary(loading || otp.length < 6)}>
-                {loading ? 'Verificando...' : 'Verificar código'}
+              <button type="submit" disabled={loadingOtp || otp.length < 6} style={btnPrimary(loadingOtp || otp.length < 6)}>
+                {loadingOtp ? 'Verificando...' : 'Verificar código'}
               </button>
 
               <button
                 type="button"
                 onClick={function() { setOtpEnviado(false); setOtp(''); setError(null); }}
                 style={{
-                  background:  'none',
-                  border:      'none',
-                  color:       'var(--color-texto-muted)',
-                  fontSize:    '0.82rem',
-                  fontFamily:  'var(--font-body)',
-                  cursor:      'pointer',
-                  textAlign:   'center',
+                  background: 'none', border: 'none',
+                  color:      'var(--color-texto-muted)',
+                  fontSize:   '0.82rem', fontFamily: 'var(--font-body)',
+                  cursor:     'pointer', textAlign: 'center',
                 }}
               >
                 ← Volver
@@ -347,23 +334,15 @@ function Auth() {
               onClick={handleGoogle}
               disabled={loadingGoogle}
               style={{
-                width:           '100%',
-                display:         'flex',
-                alignItems:      'center',
-                justifyContent:  'center',
-                gap:             '0.75rem',
-                padding:         '0.75rem 1rem',
-                borderRadius:    'var(--radius-md)',
-                border:          '1px solid #e0d5c8',
-                backgroundColor: '#fff',
-                fontFamily:      'var(--font-body)',
-                fontSize:        '0.95rem',
-                fontWeight:      '500',
-                color:           'var(--color-texto)',
-                cursor:          loadingGoogle ? 'not-allowed' : 'pointer',
-                marginBottom:    '1.25rem',
-                opacity:         loadingGoogle ? 0.7 : 1,
-                transition:      'background-color 0.2s, border-color 0.2s',
+                width: '100%', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', gap: '0.75rem',
+                padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)',
+                border: '1px solid #e0d5c8', backgroundColor: '#fff',
+                fontFamily: 'var(--font-body)', fontSize: '0.95rem',
+                fontWeight: '500', color: 'var(--color-texto)',
+                cursor: loadingGoogle ? 'not-allowed' : 'pointer',
+                marginBottom: '1.25rem', opacity: loadingGoogle ? 0.7 : 1,
+                transition: 'background-color 0.2s, border-color 0.2s',
               }}
               onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = 'var(--color-crema)'; e.currentTarget.style.borderColor = 'var(--color-marron)'; }}
               onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#e0d5c8'; }}
@@ -390,19 +369,14 @@ function Auth() {
                 return (
                   <button
                     key={m}
-                    onClick={function() { setModo(m); setError(null); setMensaje(null); }}
+                    onClick={function() { cambiarModo(m); }}
                     style={{
-                      flex:            1,
-                      padding:         '0.5rem',
-                      borderRadius:    'var(--radius-md)',
-                      border:          'none',
-                      fontFamily:      'var(--font-body)',
-                      fontSize:        '0.9rem',
-                      fontWeight:      '600',
+                      flex: 1, padding: '0.5rem',
+                      borderRadius: 'var(--radius-md)', border: 'none',
+                      fontFamily: 'var(--font-body)', fontSize: '0.9rem', fontWeight: '600',
                       backgroundColor: modo === m ? 'var(--color-marron)' : 'transparent',
-                      color:           modo === m ? 'var(--color-crema)' : 'var(--color-texto-muted)',
-                      cursor:          'pointer',
-                      transition:      'all 0.2s',
+                      color: modo === m ? 'var(--color-crema)' : 'var(--color-texto-muted)',
+                      cursor: 'pointer', transition: 'all 0.2s',
                     }}
                   >
                     {m === 'login' ? 'Iniciar sesión' : 'Registrarse'}
@@ -445,16 +419,10 @@ function Auth() {
                       type="button"
                       onClick={function() { setShowPass(!showPass); }}
                       style={{
-                        position:  'absolute',
-                        right:     '0.75rem',
-                        top:       '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border:    'none',
-                        cursor:    'pointer',
-                        fontSize:  '1rem',
-                        color:     'var(--color-texto-muted)',
-                        padding:   '0.25rem',
+                        position: 'absolute', right: '0.75rem', top: '50%',
+                        transform: 'translateY(-50%)', background: 'none',
+                        border: 'none', cursor: 'pointer', fontSize: '1rem',
+                        color: 'var(--color-texto-muted)', padding: '0.25rem',
                       }}
                     >
                       {showPass ? '🙈' : '👁️'}
@@ -472,7 +440,6 @@ function Auth() {
                   </button>
                 </div>
 
-                {/* Turnstile — aparece después de 3 intentos fallidos */}
                 {intentosFallidos >= 3 && TURNSTILE_SITE_KEY && (
                   <div
                     className="cf-turnstile"
@@ -502,8 +469,8 @@ function Auth() {
                   </div>
                 )}
 
-                <button type="submit" disabled={loading} style={btnPrimary(loading)}>
-                  {loading ? 'Cargando...' : 'Iniciar sesión'}
+                <button type="submit" disabled={loadingLogin} style={btnPrimary(loadingLogin)}>
+                  {loadingLogin ? 'Cargando...' : 'Iniciar sesión'}
                 </button>
               </form>
             )}
@@ -557,16 +524,10 @@ function Auth() {
                       type="button"
                       onClick={function() { setShowPass(!showPass); }}
                       style={{
-                        position:  'absolute',
-                        right:     '0.75rem',
-                        top:       '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border:    'none',
-                        cursor:    'pointer',
-                        fontSize:  '1rem',
-                        color:     'var(--color-texto-muted)',
-                        padding:   '0.25rem',
+                        position: 'absolute', right: '0.75rem', top: '50%',
+                        transform: 'translateY(-50%)', background: 'none',
+                        border: 'none', cursor: 'pointer', fontSize: '1rem',
+                        color: 'var(--color-texto-muted)', padding: '0.25rem',
                       }}
                     >
                       {showPass ? '🙈' : '👁️'}
@@ -583,8 +544,8 @@ function Auth() {
                   </div>
                 )}
 
-                <button type="submit" disabled={loading} style={btnPrimary(loading)}>
-                  {loading ? 'Enviando código...' : 'Crear cuenta'}
+                <button type="submit" disabled={loadingRegistro} style={btnPrimary(loadingRegistro)}>
+                  {loadingRegistro ? 'Enviando código...' : 'Crear cuenta'}
                 </button>
               </form>
             )}
