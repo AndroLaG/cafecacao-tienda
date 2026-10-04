@@ -29,6 +29,7 @@ function Perfil() {
   const [loading,   setLoading]   = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [mensaje,   setMensaje]   = useState(null);
+  const [editandoDatos, setEditandoDatos] = useState(false);
 
   // Direcciones
   const [direcciones,      setDirecciones]      = useState([]);
@@ -109,6 +110,7 @@ function Perfil() {
       setMensaje({ tipo: 'error', texto: 'Error al guardar: ' + result.error.message });
     } else {
       setMensaje({ tipo: 'ok', texto: '¡Perfil actualizado correctamente!' });
+      setEditandoDatos(false);
     }
     setGuardando(false);
     setTimeout(function() { setMensaje(null); }, 4000);
@@ -298,32 +300,144 @@ function Perfil() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
           {/* Datos personales */}
-          <form onSubmit={handleSubmit} style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
-            <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1.1rem', marginBottom: '1.25rem' }}>
-              Datos personales
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={labelStyle}>Nombre completo</label>
-                <input name="nombre_completo" value={form.nombre_completo} onChange={handleChange} placeholder="Andrés Sánchez" required style={inputStyle(errores.nombre_completo)} />
-                {errores.nombre_completo && <span style={errorStyle}>{errores.nombre_completo}</span>}
-              </div>
-              <div>
-                <label style={labelStyle}>Teléfono</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-texto-muted)', fontSize: '0.9rem' }}>+51</span>
-                  <input name="telefono" value={form.telefono} onChange={handleChange} placeholder="999999999" maxLength={9} inputMode="numeric" style={{ ...inputStyle(errores.telefono), paddingLeft: '3rem' }} />
-                </div>
-                {errores.telefono
-                  ? <span style={errorStyle}>{errores.telefono}</span>
-                  : <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.3rem', display: 'block' }}>{form.telefono.length}/9 dígitos</span>
-                }
-              </div>
+          <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: editandoDatos ? '1.25rem' : 0 }}>
+              <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1.1rem', margin: 0 }}>
+                Datos personales
+              </h2>
+              <button
+                onClick={function() { setEditandoDatos(!editandoDatos); }}
+                style={{
+                  backgroundColor: editandoDatos ? 'var(--color-crema)' : 'var(--color-marron)',
+                  color:           editandoDatos ? 'var(--color-marron)' : '#fff',
+                  border:          '1px solid var(--color-marron)',
+                  borderRadius:    '8px',
+                  padding:         '0.4rem 1rem',
+                  fontSize:        '0.85rem',
+                  fontWeight:      '600',
+                  fontFamily:      'var(--font-body)',
+                  cursor:          'pointer',
+                  flexShrink:      0,
+                }}
+              >
+                {editandoDatos ? 'Cancelar' : 'Editar'}
+              </button>
             </div>
-            <button type="submit" disabled={guardando} style={{ marginTop: '1.25rem', backgroundColor: guardando ? 'var(--color-texto-muted)' : 'var(--color-marron)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.75rem 1.5rem', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'var(--font-body)', cursor: guardando ? 'not-allowed' : 'pointer' }}>
-              {guardando ? 'Guardando...' : 'Guardar cambios'}
-            </button>
-          </form>
+
+            {/* Vista solo lectura */}
+            {!editandoDatos && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.2rem' }}>Nombre completo</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--color-texto)' }}>
+                    {form.nombre_completo || '—'}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.2rem' }}>Teléfono</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--color-texto)' }}>
+                    {form.telefono ? '+51 ' + form.telefono : '—'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Formulario edición */}
+            <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: editandoDatos ? '1.25rem' : '1rem' }}>
+    <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1.1rem', margin: 0 }}>
+      Datos personales
+    </h2>
+    <button
+      onClick={function() { setEditandoDatos(!editandoDatos); }}
+      style={{
+        backgroundColor: editandoDatos ? 'var(--color-crema)' : 'var(--color-marron)',
+        color:           editandoDatos ? 'var(--color-marron)' : '#fff',
+        border:          '1px solid var(--color-marron)',
+        borderRadius:    '8px',
+        padding:         '0.4rem 1rem',
+        fontSize:        '0.85rem',
+        fontWeight:      '600',
+        fontFamily:      'var(--font-body)',
+        cursor:          'pointer',
+        flexShrink:      0,
+      }}
+    >
+      {editandoDatos ? 'Cancelar' : 'Editar'}
+    </button>
+  </div>
+
+  {!editandoDatos && (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div>
+        <span style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.2rem' }}>Nombre completo</span>
+        <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--color-texto)' }}>
+          {form.nombre_completo || '—'}
+        </span>
+      </div>
+      <div>
+        <span style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.2rem' }}>Teléfono</span>
+        <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--color-texto)' }}>
+          {form.telefono ? '+51 ' + form.telefono : '—'}
+        </span>
+      </div>
+    </div>
+  )}
+
+  {editandoDatos && (
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div>
+        <label style={labelStyle}>Nombre completo</label>
+        <input
+          name="nombre_completo"
+          value={form.nombre_completo}
+          onChange={handleChange}
+          placeholder="Andrés Sánchez"
+          required
+          style={inputStyle(errores.nombre_completo)}
+        />
+        {errores.nombre_completo && <span style={errorStyle}>{errores.nombre_completo}</span>}
+      </div>
+      <div>
+        <label style={labelStyle}>Teléfono</label>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-texto-muted)', fontSize: '0.9rem' }}>+51</span>
+          <input
+            name="telefono"
+            value={form.telefono}
+            onChange={handleChange}
+            placeholder="999999999"
+            maxLength={9}
+            inputMode="numeric"
+            style={{ ...inputStyle(errores.telefono), paddingLeft: '3rem' }}
+          />
+        </div>
+        {errores.telefono
+          ? <span style={errorStyle}>{errores.telefono}</span>
+          : <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.3rem', display: 'block' }}>{form.telefono.length}/9 dígitos</span>
+        }
+      </div>
+      <button
+        type="submit"
+        disabled={guardando}
+        style={{
+          backgroundColor: guardando ? 'var(--color-texto-muted)' : 'var(--color-marron)',
+          color:           '#fff',
+          border:          'none',
+          borderRadius:    '8px',
+          padding:         '0.75rem 1.5rem',
+          fontSize:        '0.95rem',
+          fontWeight:      '600',
+          fontFamily:      'var(--font-body)',
+          cursor:          guardando ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {guardando ? 'Guardando...' : 'Guardar cambios'}
+      </button>
+    </form>
+  )}
+</div>
+          </div>
 
           {/* Mis direcciones */}
           <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>

@@ -366,10 +366,34 @@ function Checkout() {
                             backgroundColor: seleccionada ? 'var(--color-crema)' : '#fff',
                             cursor:          'pointer',
                             transition:      'all 0.2s',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
                           }}
                           onClick={function() { handleSeleccionarDireccion(dir); }}
                         >
                           <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, marginLeft: '0.5rem' }}>
+                          <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '700', fontSize: '0.875rem', color: 'var(--color-marron)', marginBottom: '0.2rem' }}>
+                            {dir.alias}
+                            {dir.es_principal && (
+                              <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', backgroundColor: 'var(--color-oliva)', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '999px' }}>
+                                Principal
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)' }}>
+                            {dir.nombre} — {dir.telefono && '+51 ' + dir.telefono}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)' }}>
+                            {dir.direccion}, {dir.distrito}
+                          </div>
+                          {dir.referencia && (
+                            <div style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.1rem' }}>
+                              Ref: {dir.referencia}
+                            </div>
+                          )}
+                        </div>  
                           <button
                             type="button"
                             onClick={function(e) {
