@@ -23,7 +23,7 @@ function OrdenExitosa() {
         }}>
           Gracias por tu compra. Pronto recibirás un correo con los detalles de tu pedido.
         </p>
-        <a href="/" style={{
+        <a href="/#productos" style={{
           backgroundColor: 'var(--color-marron)',
           color:           'var(--color-crema)',
           padding:         '0.875rem 2rem',
