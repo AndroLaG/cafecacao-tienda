@@ -69,16 +69,17 @@ function Auth() {
 
   // ── LOGIN
   async function handleLogin(e) {
-    e.preventDefault();
-    setError(null);
+  e.preventDefault();
+  setError(null);
 
-    if (intentosFallidos >= 3 && !turnstileToken) {
-      setError('Por favor completa la verificación de seguridad.');
-      return;
-    }
+  if (intentosFallidos >= 3 && !turnstileToken) {
+    setError('Por favor completa la verificación de seguridad.');
+    return;
+  }
 
-    setLoadingLogin(true);
+  setLoadingLogin(true);
 
+  try {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
@@ -86,11 +87,15 @@ function Auth() {
       setError('Correo o contraseña incorrectos.');
       setTurnstileToken(null);
       if (window.turnstile) window.turnstile.reset();
-      setLoadingLogin(false);
     } else {
       window.location.href = redirectTo;
     }
+  } catch (err) {
+    setError('Error inesperado. Intenta de nuevo.');
+  } finally {
+    setLoadingLogin(false); // ✅ SIEMPRE se ejecuta, con error o sin él
   }
+}
 
   // ── REGISTRO paso 1: enviar OTP
   async function handleRegistro(e) {
