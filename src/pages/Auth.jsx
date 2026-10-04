@@ -118,7 +118,6 @@ function Auth() {
       if (error) {
         setError('No se pudo actualizar la contraseña. Intenta de nuevo.');
       } else {
-        await supabase.auth.signOut();
         window.location.href = '/';
       }
     } catch (err) {
@@ -150,7 +149,7 @@ function Auth() {
         window.location.href = redirectTo;
       }
     } catch (err) {
-      setError('Error inesperado. Intenta de nuevo.');
+      setError('Correo o contraseña incorrectos.');
     } finally {
       setLoadingLogin(false);
     }
