@@ -12,10 +12,12 @@ function Auth() {
   const [password, setPassword]       = useState('');
   const [nombre, setNombre]           = useState('');
   const [showPass, setShowPass]       = useState(false);
-  const [loadingLogin, setLoadingLogin]     = useState(false); // ✅ separado
-  const [loadingRegistro, setLoadingRegistro] = useState(false); // ✅ separado
-  const [loadingGoogle, setLoadingGoogle] = useState(false);
-  const [loadingOtp, setLoadingOtp]   = useState(false); // ✅ separado
+  const [showPass2, setShowPass2]     = useState(false);
+  const [loadingLogin, setLoadingLogin]         = useState(false);
+  const [loadingRegistro, setLoadingRegistro]   = useState(false);
+  const [loadingGoogle, setLoadingGoogle]       = useState(false);
+  const [loadingOtp, setLoadingOtp]             = useState(false);
+  const [loadingReset, setLoadingReset]         = useState(false);
   const [error, setError]             = useState(null);
   const [mensaje, setMensaje]         = useState(null);
 
@@ -25,9 +27,38 @@ function Auth() {
   const [segundos, setSegundos]       = useState(60);
   const [puedeReenviar, setPuedeReenviar] = useState(false);
 
+  // Reset contraseña
+  const [modoReset, setModoReset]     = useState(false);
+  const [nuevaPass, setNuevaPass]     = useState('');
+  const [confirmarPass, setConfirmarPass] = useState('');
+
   // Turnstile
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [intentosFallidos, setIntentosFallidos] = useState(0);
+
+  // ✅ Detectar token de reset en la URL
+  useEffect(function() {
+    var hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      setModoReset(true);
+    }
+
+    // Supabase también puede venir con #access_token tras el recovery
+    var hashParams = new URLSearchParams(hash.replace('#', ''));
+    var type = hashParams.get('type');
+    if (type === 'recovery') {
+      setModoReset(true);
+    }
+
+    // Escuchar evento de Supabase para recovery
+    var { data: { subscription } } = supabase.auth.onAuthStateChange(function(event) {
+      if (event === 'PASSWORD_RECOVERY') {
+        setModoReset(true);
+      }
+    });
+
+    return function() { subscription.unsubscribe(); };
+  }, []);
 
   // Resetear errores al cambiar de tab
   function cambiarModo(m) {
@@ -67,47 +98,73 @@ function Auth() {
     return function() { clearInterval(intervalo); };
   }, [otpEnviado]);
 
+  // ── RESET CONTRASEÑA
+  async function handleNuevaPassword(e) {
+    e.preventDefault();
+    setError(null);
+
+    if (nuevaPass.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+    if (nuevaPass !== confirmarPass) {
+      setError('Las contraseñas no coinciden.');
+      return;
+    }
+
+    setLoadingReset(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: nuevaPass });
+      if (error) {
+        setError('No se pudo actualizar la contraseña. Intenta de nuevo.');
+      } else {
+        await supabase.auth.signOut();
+        window.location.href = '/';
+      }
+    } catch (err) {
+      setError('Error inesperado. Intenta de nuevo.');
+    } finally {
+      setLoadingReset(false);
+    }
+  }
+
   // ── LOGIN
   async function handleLogin(e) {
-  e.preventDefault();
-  setError(null);
+    e.preventDefault();
+    setError(null);
 
-  if (intentosFallidos >= 3 && !turnstileToken) {
-    setError('Por favor completa la verificación de seguridad.');
-    return;
-  }
-
-  setLoadingLogin(true);
-
-  try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      setIntentosFallidos(function(f) { return f + 1; });
-      setError('Correo o contraseña incorrectos.');
-      setTurnstileToken(null);
-      if (window.turnstile) window.turnstile.reset();
-    } else {
-      window.location.href = redirectTo;
+    if (intentosFallidos >= 3 && !turnstileToken) {
+      setError('Por favor completa la verificación de seguridad.');
+      return;
     }
-  } catch (err) {
-    setError('Error inesperado. Intenta de nuevo.');
-  } finally {
-    setLoadingLogin(false); // ✅ SIEMPRE se ejecuta, con error o sin él
+
+    setLoadingLogin(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setIntentosFallidos(function(f) { return f + 1; });
+        setError('Correo o contraseña incorrectos.');
+        setTurnstileToken(null);
+        if (window.turnstile) window.turnstile.reset();
+      } else {
+        window.location.href = redirectTo;
+      }
+    } catch (err) {
+      setError('Error inesperado. Intenta de nuevo.');
+    } finally {
+      setLoadingLogin(false);
+    }
   }
-}
 
   // ── REGISTRO paso 1: enviar OTP
   async function handleRegistro(e) {
     e.preventDefault();
     setLoadingRegistro(true);
     setError(null);
-
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: true },
     });
-
     if (error) {
       setError(error.message);
     } else {
@@ -121,31 +178,23 @@ function Auth() {
     e.preventDefault();
     setLoadingOtp(true);
     setError(null);
-
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: otp,
       type:  'email',
     });
-
     if (error) {
       setError('Código incorrecto o expirado. Intenta de nuevo.');
       setLoadingOtp(false);
       return;
     }
-
     if (data?.user) {
-      // Actualizar contraseña si se proporcionó
-      if (password) {
-        await supabase.auth.updateUser({ password });
-      }
-      // Guardar nombre en tabla clientes
+      if (password) await supabase.auth.updateUser({ password });
       await supabase.from('clientes').upsert({
         id:              data.user.id,
         nombre_completo: nombre,
       }, { onConflict: 'id' });
     }
-
     window.location.href = redirectTo;
   }
 
@@ -244,8 +293,107 @@ function Auth() {
           Lily's Caffe
         </h1>
 
-        {/* ── PANTALLA OTP ── */}
-        {otpEnviado ? (
+        {/* ── PANTALLA NUEVA CONTRASEÑA ── */}
+        {modoReset ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔐</div>
+              <p style={{ color: 'var(--color-texto-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                Crea tu nueva contraseña
+              </p>
+            </div>
+
+            <form onSubmit={handleNuevaPassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>
+                  Nueva contraseña
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPass ? 'text' : 'password'}
+                    value={nuevaPass}
+                    onChange={function(e) { setNuevaPass(e.target.value); }}
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                    minLength={6}
+                    style={{ ...inputStyle, paddingRight: '3rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={function() { setShowPass(!showPass); }}
+                    style={{
+                      position: 'absolute', right: '0.75rem', top: '50%',
+                      transform: 'translateY(-50%)', background: 'none',
+                      border: 'none', cursor: 'pointer', fontSize: '1rem',
+                      color: 'var(--color-texto-muted)', padding: '0.25rem',
+                    }}
+                  >
+                    {showPass ? '🙈' : '👁️'}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>
+                  Confirmar contraseña
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPass2 ? 'text' : 'password'}
+                    value={confirmarPass}
+                    onChange={function(e) { setConfirmarPass(e.target.value); }}
+                    placeholder="Repite tu contraseña"
+                    required
+                    minLength={6}
+                    style={{
+                      ...inputStyle,
+                      paddingRight: '3rem',
+                      borderColor: confirmarPass && nuevaPass !== confirmarPass ? 'var(--color-granate)' : '#e0d5c8',
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={function() { setShowPass2(!showPass2); }}
+                    style={{
+                      position: 'absolute', right: '0.75rem', top: '50%',
+                      transform: 'translateY(-50%)', background: 'none',
+                      border: 'none', cursor: 'pointer', fontSize: '1rem',
+                      color: 'var(--color-texto-muted)', padding: '0.25rem',
+                    }}
+                  >
+                    {showPass2 ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                {confirmarPass && nuevaPass !== confirmarPass && (
+                  <p style={{ fontSize: '0.78rem', color: 'var(--color-granate)', marginTop: '0.3rem' }}>
+                    Las contraseñas no coinciden.
+                  </p>
+                )}
+                {confirmarPass && nuevaPass === confirmarPass && (
+                  <p style={{ fontSize: '0.78rem', color: '#166534', marginTop: '0.3rem' }}>
+                    ✓ Las contraseñas coinciden.
+                  </p>
+                )}
+              </div>
+
+              {error && (
+                <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', color: 'var(--color-granate)', fontSize: '0.875rem' }}>
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loadingReset || nuevaPass !== confirmarPass || nuevaPass.length < 6}
+                style={btnPrimary(loadingReset || nuevaPass !== confirmarPass || nuevaPass.length < 6)}
+              >
+                {loadingReset ? 'Guardando...' : 'Guardar nueva contraseña'}
+              </button>
+            </form>
+          </div>
+
+        ) : otpEnviado ? (
+          /* ── PANTALLA OTP ── */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📧</div>
@@ -284,16 +432,7 @@ function Auth() {
 
               <div style={{ textAlign: 'center' }}>
                 {puedeReenviar ? (
-                  <button
-                    type="button"
-                    onClick={handleReenviarOTP}
-                    style={{
-                      background: 'none', border: 'none',
-                      color:      'var(--color-marron)',
-                      fontSize:   '0.875rem', fontWeight: '600',
-                      fontFamily: 'var(--font-body)', cursor: 'pointer',
-                    }}
-                  >
+                  <button type="button" onClick={handleReenviarOTP} style={{ background: 'none', border: 'none', color: 'var(--color-marron)', fontSize: '0.875rem', fontWeight: '600', fontFamily: 'var(--font-body)', cursor: 'pointer' }}>
                     Reenviar código
                   </button>
                 ) : (
@@ -313,28 +452,19 @@ function Auth() {
                 {loadingOtp ? 'Verificando...' : 'Verificar código'}
               </button>
 
-              <button
-                type="button"
-                onClick={function() { setOtpEnviado(false); setOtp(''); setError(null); }}
-                style={{
-                  background: 'none', border: 'none',
-                  color:      'var(--color-texto-muted)',
-                  fontSize:   '0.82rem', fontFamily: 'var(--font-body)',
-                  cursor:     'pointer', textAlign: 'center',
-                }}
-              >
+              <button type="button" onClick={function() { setOtpEnviado(false); setOtp(''); setError(null); }} style={{ background: 'none', border: 'none', color: 'var(--color-texto-muted)', fontSize: '0.82rem', fontFamily: 'var(--font-body)', cursor: 'pointer', textAlign: 'center' }}>
                 ← Volver
               </button>
             </form>
           </div>
 
         ) : (
+          /* ── PANTALLA PRINCIPAL ── */
           <>
             <p style={{ color: 'var(--color-texto-muted)', textAlign: 'center', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
               {modo === 'login' ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta'}
             </p>
 
-            {/* Google */}
             <button
               onClick={handleGoogle}
               disabled={loadingGoogle}
@@ -361,14 +491,12 @@ function Auth() {
               {loadingGoogle ? 'Conectando...' : 'Continuar con Google'}
             </button>
 
-            {/* Divisor */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <div style={{ flex: 1, height: '1px', backgroundColor: '#e0d5c8' }} />
               <span style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)' }}>o continúa con email</span>
               <div style={{ flex: 1, height: '1px', backgroundColor: '#e0d5c8' }} />
             </div>
 
-            {/* Tabs */}
             <div style={{ display: 'flex', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-crema)', padding: '4px', marginBottom: '1.5rem' }}>
               {['login', 'registro'].map(function(m) {
                 return (
@@ -390,70 +518,29 @@ function Auth() {
               })}
             </div>
 
-            {/* Formulario LOGIN */}
             {modo === 'login' && (
               <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>
-                    Correo electrónico
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={function(e) { setEmail(e.target.value); }}
-                    placeholder="correo@ejemplo.com"
-                    required
-                    style={inputStyle}
-                  />
+                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>Correo electrónico</label>
+                  <input type="email" value={email} onChange={function(e) { setEmail(e.target.value); }} placeholder="correo@ejemplo.com" required style={inputStyle} />
                 </div>
-
                 <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>
-                    Contraseña
-                  </label>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>Contraseña</label>
                   <div style={{ position: 'relative' }}>
-                    <input
-                      type={showPass ? 'text' : 'password'}
-                      value={password}
-                      onChange={function(e) { setPassword(e.target.value); }}
-                      placeholder="Tu contraseña"
-                      required
-                      style={{ ...inputStyle, paddingRight: '3rem' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={function() { setShowPass(!showPass); }}
-                      style={{
-                        position: 'absolute', right: '0.75rem', top: '50%',
-                        transform: 'translateY(-50%)', background: 'none',
-                        border: 'none', cursor: 'pointer', fontSize: '1rem',
-                        color: 'var(--color-texto-muted)', padding: '0.25rem',
-                      }}
-                    >
+                    <input type={showPass ? 'text' : 'password'} value={password} onChange={function(e) { setPassword(e.target.value); }} placeholder="Tu contraseña" required style={{ ...inputStyle, paddingRight: '3rem' }} />
+                    <button type="button" onClick={function() { setShowPass(!showPass); }} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'var(--color-texto-muted)', padding: '0.25rem' }}>
                       {showPass ? '🙈' : '👁️'}
                     </button>
                   </div>
                 </div>
-
                 <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
-                  <button
-                    type="button"
-                    onClick={handleOlvidePassword}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-oliva)', fontSize: '0.82rem', fontFamily: 'var(--font-body)', cursor: 'pointer', padding: 0 }}
-                  >
+                  <button type="button" onClick={handleOlvidePassword} style={{ background: 'none', border: 'none', color: 'var(--color-oliva)', fontSize: '0.82rem', fontFamily: 'var(--font-body)', cursor: 'pointer', padding: 0 }}>
                     ¿Olvidaste tu contraseña?
                   </button>
                 </div>
-
                 {intentosFallidos >= 3 && TURNSTILE_SITE_KEY && (
-                  <div
-                    className="cf-turnstile"
-                    data-sitekey={TURNSTILE_SITE_KEY}
-                    data-callback="onTurnstileSuccess"
-                    data-theme="light"
-                  />
+                  <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-callback="onTurnstileSuccess" data-theme="light" />
                 )}
-
                 {error && (
                   <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', color: 'var(--color-granate)', fontSize: '0.875rem' }}>
                     {error}
@@ -467,74 +554,32 @@ function Auth() {
                     )}
                   </div>
                 )}
-
                 {mensaje && (
                   <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', color: '#166534', fontSize: '0.875rem' }}>
                     {mensaje}
                   </div>
                 )}
-
                 <button type="submit" disabled={loadingLogin} style={btnPrimary(loadingLogin)}>
                   {loadingLogin ? 'Cargando...' : 'Iniciar sesión'}
                 </button>
               </form>
             )}
 
-            {/* Formulario REGISTRO */}
             {modo === 'registro' && (
               <form onSubmit={handleRegistro} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>
-                    Nombre completo
-                  </label>
-                  <input
-                    type="text"
-                    value={nombre}
-                    onChange={function(e) { setNombre(e.target.value); }}
-                    placeholder="Andrés Sánchez"
-                    required
-                    style={inputStyle}
-                  />
+                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>Nombre completo</label>
+                  <input type="text" value={nombre} onChange={function(e) { setNombre(e.target.value); }} placeholder="Andrés Sánchez" required style={inputStyle} />
                 </div>
-
                 <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>
-                    Correo electrónico
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={function(e) { setEmail(e.target.value); }}
-                    placeholder="correo@ejemplo.com"
-                    required
-                    style={inputStyle}
-                  />
+                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>Correo electrónico</label>
+                  <input type="email" value={email} onChange={function(e) { setEmail(e.target.value); }} placeholder="correo@ejemplo.com" required style={inputStyle} />
                 </div>
-
                 <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>
-                    Contraseña
-                  </label>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.4rem' }}>Contraseña</label>
                   <div style={{ position: 'relative' }}>
-                    <input
-                      type={showPass ? 'text' : 'password'}
-                      value={password}
-                      onChange={function(e) { setPassword(e.target.value); }}
-                      placeholder="Mínimo 6 caracteres"
-                      required
-                      minLength={6}
-                      style={{ ...inputStyle, paddingRight: '3rem' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={function() { setShowPass(!showPass); }}
-                      style={{
-                        position: 'absolute', right: '0.75rem', top: '50%',
-                        transform: 'translateY(-50%)', background: 'none',
-                        border: 'none', cursor: 'pointer', fontSize: '1rem',
-                        color: 'var(--color-texto-muted)', padding: '0.25rem',
-                      }}
-                    >
+                    <input type={showPass ? 'text' : 'password'} value={password} onChange={function(e) { setPassword(e.target.value); }} placeholder="Mínimo 6 caracteres" required minLength={6} style={{ ...inputStyle, paddingRight: '3rem' }} />
+                    <button type="button" onClick={function() { setShowPass(!showPass); }} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'var(--color-texto-muted)', padding: '0.25rem' }}>
                       {showPass ? '🙈' : '👁️'}
                     </button>
                   </div>
@@ -542,13 +587,11 @@ function Auth() {
                     Te enviaremos un código de verificación a tu correo.
                   </p>
                 </div>
-
                 {error && (
                   <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', color: 'var(--color-granate)', fontSize: '0.875rem' }}>
                     {error}
                   </div>
                 )}
-
                 <button type="submit" disabled={loadingRegistro} style={btnPrimary(loadingRegistro)}>
                   {loadingRegistro ? 'Enviando código...' : 'Crear cuenta'}
                 </button>
