@@ -250,6 +250,12 @@ const IMAGENES_GALERIA = [
   // Formato: { url: 'https://...', alt: 'Descripción de la foto' }
   // Ejemplo:
   { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
+  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
+  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
+  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
+  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
+  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
+
 ];
 
 // Número de placeholders a mostrar si no hay imágenes reales
