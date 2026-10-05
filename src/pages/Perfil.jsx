@@ -21,23 +21,20 @@ function Perfil() {
   const { user, loading: authLoading } = useAuth();
 
   // Datos personales
-  const [form, setForm] = useState({
-    nombre_completo: '',
-    telefono:        '',
-  });
-  const [errores,   setErrores]   = useState({});
-  const [loading,   setLoading]   = useState(true);
-  const [guardando, setGuardando] = useState(false);
-  const [mensaje,   setMensaje]   = useState(null);
+  const [form, setForm] = useState({ nombre_completo: '', telefono: '' });
+  const [errores,       setErrores]       = useState({});
+  const [loading,       setLoading]       = useState(true);
+  const [guardando,     setGuardando]     = useState(false);
+  const [mensaje,       setMensaje]       = useState(null);
   const [editandoDatos, setEditandoDatos] = useState(false);
 
   // Direcciones
-  const [direcciones,      setDirecciones]      = useState([]);
-  const [formDir,          setFormDir]          = useState(FORM_DIR_VACIO);
-  const [editandoId,       setEditandoId]       = useState(null);
-  const [mostrarFormDir,   setMostrarFormDir]   = useState(false);
-  const [guardandoDir,     setGuardandoDir]     = useState(false);
-  const [mensajeDir,       setMensajeDir]       = useState(null);
+  const [direcciones,    setDirecciones]    = useState([]);
+  const [formDir,        setFormDir]        = useState(FORM_DIR_VACIO);
+  const [editandoId,     setEditandoId]     = useState(null);
+  const [mostrarFormDir, setMostrarFormDir] = useState(false);
+  const [guardandoDir,   setGuardandoDir]   = useState(false);
+  const [mensajeDir,     setMensajeDir]     = useState(null);
 
   // Contraseña
   const [showPassword,  setShowPassword]  = useState(false);
@@ -46,18 +43,20 @@ function Perfil() {
   const [guardandoPass, setGuardandoPass] = useState(false);
   const [mensajePass,   setMensajePass]   = useState(null);
 
-  useEffect(() => {
+  useEffect(function() {
     if (!user) return;
     cargarTodo();
   }, [user]);
 
   async function cargarTodo() {
-    const [{ data: cliente }, { data: dirs }] = await Promise.all([
+    var results = await Promise.all([
       supabase.from('clientes').select('*').eq('id', user.id).single(),
       supabase.from('direcciones').select('*').eq('cliente_id', user.id)
         .order('es_principal', { ascending: false })
         .order('created_at',   { ascending: false }),
     ]);
+    var cliente = results[0].data;
+    var dirs    = results[1].data;
     if (cliente) {
       setForm({
         nombre_completo: cliente.nombre_completo ?? '',
@@ -102,7 +101,6 @@ function Perfil() {
     });
     setErrores(nuevosErrores);
     if (Object.keys(nuevosErrores).length > 0) return;
-
     setGuardando(true);
     setMensaje(null);
     var result = await supabase.from('clientes').upsert({ id: user.id, ...form });
@@ -120,9 +118,7 @@ function Perfil() {
   function handleChangeDir(e) {
     var name  = e.target.name;
     var value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    if (name === 'codigo_postal') {
-      value = value.replace(/\D/g, '').slice(0, 5);
-    }
+    if (name === 'codigo_postal') value = value.replace(/\D/g, '').slice(0, 5);
     setFormDir(function(f) { return { ...f, [name]: value }; });
   }
 
@@ -166,7 +162,6 @@ function Perfil() {
     }
     setGuardandoDir(true);
     setMensajeDir(null);
-
     var payload = {
       cliente_id:    user.id,
       alias:         formDir.alias        || 'Mi dirección',
@@ -180,7 +175,6 @@ function Perfil() {
       codigo_postal: formDir.codigo_postal || null,
       es_principal:  formDir.es_principal,
     };
-
     var result;
     if (editandoId) {
       result = await supabase.from('direcciones').update(payload).eq('id', editandoId);
@@ -188,7 +182,6 @@ function Perfil() {
       var esPrimera = direcciones.length === 0;
       result = await supabase.from('direcciones').insert({ ...payload, es_principal: esPrimera || formDir.es_principal });
     }
-
     if (result.error) {
       setMensajeDir({ tipo: 'error', texto: 'Error al guardar: ' + result.error.message });
     } else {
@@ -214,11 +207,10 @@ function Perfil() {
 
   async function handleCambiarPassword(e) {
     e.preventDefault();
-    var errores = {};
-    if (passForm.nueva.length < 6)              errores.nueva     = 'Mínimo 6 caracteres.';
-    if (passForm.nueva !== passForm.confirmar)   errores.confirmar = 'Las contraseñas no coinciden.';
-    if (Object.keys(errores).length > 0) { setPassErrores(errores); return; }
-
+    var errs = {};
+    if (passForm.nueva.length < 6)            errs.nueva     = 'Mínimo 6 caracteres.';
+    if (passForm.nueva !== passForm.confirmar) errs.confirmar = 'Las contraseñas no coinciden.';
+    if (Object.keys(errs).length > 0) { setPassErrores(errs); return; }
     setGuardandoPass(true);
     setMensajePass(null);
     var result = await supabase.auth.updateUser({ password: passForm.nueva });
@@ -233,7 +225,7 @@ function Perfil() {
   }
 
   // ── Estilos
-  var inputStyle = function(error) {
+  function inputStyle(error) {
     return {
       width:           '100%',
       padding:         '0.75rem 1rem',
@@ -246,7 +238,7 @@ function Perfil() {
       outline:         'none',
       transition:      'border-color 0.2s',
     };
-  };
+  }
 
   var labelStyle = {
     fontSize:     '0.85rem',
@@ -299,14 +291,14 @@ function Perfil() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          {/* Datos personales */}
+          {/* ── DATOS PERSONALES ── */}
           <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: editandoDatos ? '1.25rem' : 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1.1rem', margin: 0 }}>
                 Datos personales
               </h2>
               <button
-                onClick={function() { setEditandoDatos(!editandoDatos); }}
+                onClick={function() { setEditandoDatos(!editandoDatos); setErrores({}); }}
                 style={{
                   backgroundColor: editandoDatos ? 'var(--color-crema)' : 'var(--color-marron)',
                   color:           editandoDatos ? 'var(--color-marron)' : '#fff',
@@ -326,7 +318,7 @@ function Perfil() {
 
             {/* Vista solo lectura */}
             {!editandoDatos && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div>
                   <span style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.2rem' }}>Nombre completo</span>
                   <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--color-texto)' }}>
@@ -343,103 +335,61 @@ function Perfil() {
             )}
 
             {/* Formulario edición */}
-            <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: editandoDatos ? '1.25rem' : '1rem' }}>
-    <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1.1rem', margin: 0 }}>
-      Datos personales
-    </h2>
-    <button
-      onClick={function() { setEditandoDatos(!editandoDatos); }}
-      style={{
-        backgroundColor: editandoDatos ? 'var(--color-crema)' : 'var(--color-marron)',
-        color:           editandoDatos ? 'var(--color-marron)' : '#fff',
-        border:          '1px solid var(--color-marron)',
-        borderRadius:    '8px',
-        padding:         '0.4rem 1rem',
-        fontSize:        '0.85rem',
-        fontWeight:      '600',
-        fontFamily:      'var(--font-body)',
-        cursor:          'pointer',
-        flexShrink:      0,
-      }}
-    >
-      {editandoDatos ? 'Cancelar' : 'Editar'}
-    </button>
-  </div>
-
-  {!editandoDatos && (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <div>
-        <span style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.2rem' }}>Nombre completo</span>
-        <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--color-texto)' }}>
-          {form.nombre_completo || '—'}
-        </span>
-      </div>
-      <div>
-        <span style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)', display: 'block', marginBottom: '0.2rem' }}>Teléfono</span>
-        <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--color-texto)' }}>
-          {form.telefono ? '+51 ' + form.telefono : '—'}
-        </span>
-      </div>
-    </div>
-  )}
-
-  {editandoDatos && (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div>
-        <label style={labelStyle}>Nombre completo</label>
-        <input
-          name="nombre_completo"
-          value={form.nombre_completo}
-          onChange={handleChange}
-          placeholder="Andrés Sánchez"
-          required
-          style={inputStyle(errores.nombre_completo)}
-        />
-        {errores.nombre_completo && <span style={errorStyle}>{errores.nombre_completo}</span>}
-      </div>
-      <div>
-        <label style={labelStyle}>Teléfono</label>
-        <div style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-texto-muted)', fontSize: '0.9rem' }}>+51</span>
-          <input
-            name="telefono"
-            value={form.telefono}
-            onChange={handleChange}
-            placeholder="999999999"
-            maxLength={9}
-            inputMode="numeric"
-            style={{ ...inputStyle(errores.telefono), paddingLeft: '3rem' }}
-          />
-        </div>
-        {errores.telefono
-          ? <span style={errorStyle}>{errores.telefono}</span>
-          : <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.3rem', display: 'block' }}>{form.telefono.length}/9 dígitos</span>
-        }
-      </div>
-      <button
-        type="submit"
-        disabled={guardando}
-        style={{
-          backgroundColor: guardando ? 'var(--color-texto-muted)' : 'var(--color-marron)',
-          color:           '#fff',
-          border:          'none',
-          borderRadius:    '8px',
-          padding:         '0.75rem 1.5rem',
-          fontSize:        '0.95rem',
-          fontWeight:      '600',
-          fontFamily:      'var(--font-body)',
-          cursor:          guardando ? 'not-allowed' : 'pointer',
-        }}
-      >
-        {guardando ? 'Guardando...' : 'Guardar cambios'}
-      </button>
-    </form>
-  )}
-</div>
+            {editandoDatos && (
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={labelStyle}>Nombre completo</label>
+                  <input
+                    name="nombre_completo"
+                    value={form.nombre_completo}
+                    onChange={handleChange}
+                    placeholder="Andrés Sánchez"
+                    required
+                    style={inputStyle(errores.nombre_completo)}
+                  />
+                  {errores.nombre_completo && <span style={errorStyle}>{errores.nombre_completo}</span>}
+                </div>
+                <div>
+                  <label style={labelStyle}>Teléfono</label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-texto-muted)', fontSize: '0.9rem' }}>+51</span>
+                    <input
+                      name="telefono"
+                      value={form.telefono}
+                      onChange={handleChange}
+                      placeholder="999999999"
+                      maxLength={9}
+                      inputMode="numeric"
+                      style={{ ...inputStyle(errores.telefono), paddingLeft: '3rem' }}
+                    />
+                  </div>
+                  {errores.telefono
+                    ? <span style={errorStyle}>{errores.telefono}</span>
+                    : <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.3rem', display: 'block' }}>{form.telefono.length}/9 dígitos</span>
+                  }
+                </div>
+                <button
+                  type="submit"
+                  disabled={guardando}
+                  style={{
+                    backgroundColor: guardando ? 'var(--color-texto-muted)' : 'var(--color-marron)',
+                    color:           '#fff',
+                    border:          'none',
+                    borderRadius:    '8px',
+                    padding:         '0.75rem 1.5rem',
+                    fontSize:        '0.95rem',
+                    fontWeight:      '600',
+                    fontFamily:      'var(--font-body)',
+                    cursor:          guardando ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {guardando ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+              </form>
+            )}
           </div>
 
-          {/* Mis direcciones */}
+          {/* ── MIS DIRECCIONES ── */}
           <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1.1rem', margin: 0 }}>
@@ -477,7 +427,7 @@ function Perfil() {
                             )}
                           </div>
                           <div style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)' }}>
-                            {dir.nombre} — {dir.telefono && '+51 ' + dir.telefono}
+                            {dir.nombre}{dir.telefono ? ' — +51 ' + dir.telefono : ''}
                           </div>
                           <div style={{ fontSize: '0.82rem', color: 'var(--color-texto-muted)' }}>
                             {dir.direccion}, {dir.distrito}
@@ -489,16 +439,10 @@ function Perfil() {
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, marginLeft: '0.75rem' }}>
-                          <button
-                            onClick={function() { iniciarEditarDireccion(dir); }}
-                            style={{ background: 'none', border: 'none', color: 'var(--color-oliva)', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
-                          >
+                          <button onClick={function() { iniciarEditarDireccion(dir); }} style={{ background: 'none', border: 'none', color: 'var(--color-oliva)', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                             Editar
                           </button>
-                          <button
-                            onClick={function() { handleEliminarDireccion(dir.id); }}
-                            style={{ background: 'none', border: 'none', color: 'var(--color-granate)', fontSize: '0.82rem', cursor: 'pointer', opacity: 0.8, fontFamily: 'var(--font-body)' }}
-                          >
+                          <button onClick={function() { handleEliminarDireccion(dir.id); }} style={{ background: 'none', border: 'none', color: 'var(--color-granate)', fontSize: '0.82rem', cursor: 'pointer', opacity: 0.8, fontFamily: 'var(--font-body)' }}>
                             Eliminar
                           </button>
                         </div>
@@ -584,7 +528,7 @@ function Perfil() {
             )}
           </div>
 
-          {/* Cambiar contraseña */}
+          {/* ── CAMBIAR CONTRASEÑA ── */}
           <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showPassword ? '1.25rem' : 0 }}>
               <div>
@@ -619,6 +563,7 @@ function Perfil() {
               </form>
             )}
           </div>
+
         </div>
       </main>
 

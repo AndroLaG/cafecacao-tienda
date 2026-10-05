@@ -13,13 +13,10 @@ function Checkout() {
   const { items, subtotal, costoEnvio, total, clearCart } = useCart();
   const { user } = useAuth();
 
-  // Tipo de entrega: 'envio' | 'recojo'
-  const [tipoEntrega, setTipoEntrega] = useState('envio');
-
-  // Direcciones guardadas del usuario
-  const [direcciones,       setDirecciones]       = useState([]);
-  const [direccionSelId,    setDireccionSelId]     = useState(null);
-  const [mostrarFormNueva,  setMostrarFormNueva]   = useState(false);
+  const [tipoEntrega,        setTipoEntrega]        = useState('envio');
+  const [direcciones,        setDirecciones]        = useState([]);
+  const [direccionSelId,     setDireccionSelId]     = useState(null);
+  const [mostrarFormNueva,   setMostrarFormNueva]   = useState(false);
   const [guardandoDireccion, setGuardandoDireccion] = useState(false);
 
   const [form, setForm] = useState({
@@ -38,11 +35,10 @@ function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
 
-  // Total real según tipo de entrega
-  const totalFinal  = tipoEntrega === 'recojo' ? subtotal : total;
-  const envioFinal  = tipoEntrega === 'recojo' ? 0 : costoEnvio;
+  const totalFinal = tipoEntrega === 'recojo' ? subtotal : total;
+  const envioFinal = tipoEntrega === 'recojo' ? 0 : costoEnvio;
 
-  useEffect(() => {
+  useEffect(function() {
     cargarSDKCulqi();
     if (user) {
       setForm(function(f) { return { ...f, email: user.email }; });
@@ -51,17 +47,17 @@ function Checkout() {
   }, [user]);
 
   async function cargarDirecciones() {
-    const { data } = await supabase
+    var result = await supabase
       .from('direcciones')
       .select('*')
       .eq('cliente_id', user.id)
       .order('es_principal', { ascending: false })
       .order('created_at',   { ascending: false });
 
+    var data = result.data;
     if (data && data.length > 0) {
       setDirecciones(data);
-      // Seleccionar la principal por defecto
-      const principal = data.find(function(d) { return d.es_principal; }) ?? data[0];
+      var principal = data.find(function(d) { return d.es_principal; }) ?? data[0];
       setDireccionSelId(principal.id);
       aplicarDireccion(principal);
     } else {
@@ -100,31 +96,31 @@ function Checkout() {
     setGuardandoDireccion(true);
     setError(null);
 
-    const esPrimera = direcciones.length === 0;
-    const { data, error: dbError } = await supabase
+    var esPrimera = direcciones.length === 0;
+    var result = await supabase
       .from('direcciones')
       .insert({
-        cliente_id:   user.id,
-        alias:        form.alias        || 'Mi dirección',
-        nombre:       form.nombre,
-        telefono:     form.telefono,
-        direccion:    form.direccion,
-        referencia:   form.referencia   || null,
-        distrito:     form.distrito,
-        provincia:    form.provincia,
-        departamento: form.departamento,
+        cliente_id:    user.id,
+        alias:         form.alias        || 'Mi dirección',
+        nombre:        form.nombre,
+        telefono:      form.telefono,
+        direccion:     form.direccion,
+        referencia:    form.referencia   || null,
+        distrito:      form.distrito,
+        provincia:     form.provincia,
+        departamento:  form.departamento,
         codigo_postal: form.codigo_postal || null,
-        es_principal: esPrimera,
+        es_principal:  esPrimera,
       })
       .select()
       .single();
 
-    if (dbError) {
-      setError('Error al guardar la dirección: ' + dbError.message);
+    if (result.error) {
+      setError('Error al guardar la dirección: ' + result.error.message);
     } else {
-      const nuevaLista = [...direcciones, data];
+      var nuevaLista = [...direcciones, result.data];
       setDirecciones(nuevaLista);
-      setDireccionSelId(data.id);
+      setDireccionSelId(result.data.id);
       setMostrarFormNueva(false);
     }
     setGuardandoDireccion(false);
@@ -132,7 +128,7 @@ function Checkout() {
 
   async function handleEliminarDireccion(id) {
     await supabase.from('direcciones').delete().eq('id', id);
-    const nuevaLista = direcciones.filter(function(d) { return d.id !== id; });
+    var nuevaLista = direcciones.filter(function(d) { return d.id !== id; });
     setDirecciones(nuevaLista);
     if (direccionSelId === id) {
       if (nuevaLista.length > 0) {
@@ -154,7 +150,6 @@ function Checkout() {
     setLoading(true);
     setError(null);
 
-    // Validar que haya dirección si es envío
     if (tipoEntrega === 'envio' && !form.direccion) {
       setError('Agrega una dirección de envío.');
       setLoading(false);
@@ -162,7 +157,7 @@ function Checkout() {
     }
 
     try {
-      const pedido = await crearPedido({
+      var pedido = await crearPedido({
         clienteId:     user?.id ?? null,
         emailInvitado: user ? null : form.email,
         items,
@@ -187,11 +182,11 @@ function Checkout() {
         setLoading(true);
         setError(null);
         try {
-          const { data, error: fnError } = await supabase.functions.invoke('procesar-pago', {
+          var result = await supabase.functions.invoke('procesar-pago', {
             body: { pedido_id: pedidoId, culqi_token: token },
           });
-          if (fnError) throw fnError;
-          if (data?.error) throw new Error(data.error);
+          if (result.error) throw result.error;
+          if (result.data?.error) throw new Error(result.data.error);
 
           if (user) {
             await supabase.from('clientes').upsert({
@@ -220,7 +215,7 @@ function Checkout() {
     });
   }
 
-  const inputStyle = {
+  var inputStyle = {
     width:           '100%',
     padding:         '0.75rem 1rem',
     borderRadius:    'var(--radius-md)',
@@ -232,7 +227,7 @@ function Checkout() {
     outline:         'none',
   };
 
-  const labelStyle = {
+  var labelStyle = {
     fontSize:     '0.85rem',
     fontWeight:   '600',
     color:        'var(--color-texto-muted)',
@@ -240,7 +235,7 @@ function Checkout() {
     marginBottom: '0.4rem',
   };
 
-  const opcionEntregaStyle = function(activa) {
+  function opcionEntregaStyle(activa) {
     return {
       flex:            1,
       padding:         '1rem',
@@ -251,7 +246,7 @@ function Checkout() {
       transition:      'all 0.2s',
       textAlign:       'left',
     };
-  };
+  }
 
   if (items.length === 0 && !loading) {
     return (
@@ -285,53 +280,35 @@ function Checkout() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', alignItems: 'start' }}>
 
-          {/* Columna izquierda */}
+          {/* ── Columna izquierda ── */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-            {/* Email para invitados */}
+            {/* Email invitado */}
             {!user && (
               <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-card)' }}>
                 <label style={labelStyle}>Correo electrónico</label>
-                <input
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="correo@ejemplo.com"
-                  required
-                  style={inputStyle}
-                />
+                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="correo@ejemplo.com" required style={inputStyle} />
                 <p style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)', marginTop: '0.5rem' }}>
                   ¿Ya tienes cuenta?{' '}
-                  <a href="/auth?from=checkout" style={{ color: 'var(--color-marron)', fontWeight: '600' }}>
-                    Inicia sesión
-                  </a>
+                  <a href="/auth?from=checkout" style={{ color: 'var(--color-marron)', fontWeight: '600' }}>Inicia sesión</a>
                 </p>
               </div>
             )}
 
-            {/* Opciones de entrega */}
+            {/* Tipo de entrega */}
             <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-card)' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '1rem' }}>
                 ¿Cómo quieres recibir tu pedido?
               </h3>
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button
-                  type="button"
-                  onClick={function() { setTipoEntrega('envio'); }}
-                  style={opcionEntregaStyle(tipoEntrega === 'envio')}
-                >
+                <button type="button" onClick={function() { setTipoEntrega('envio'); }} style={opcionEntregaStyle(tipoEntrega === 'envio')}>
                   <div style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>🚚</div>
                   <div style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--color-marron)' }}>Envío a domicilio</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.2rem' }}>
                     {costoEnvio === 0 ? 'Gratis' : 'S/ ' + costoEnvio.toFixed(2)}
                   </div>
                 </button>
-                <button
-                  type="button"
-                  onClick={function() { setTipoEntrega('recojo'); }}
-                  style={opcionEntregaStyle(tipoEntrega === 'recojo')}
-                >
+                <button type="button" onClick={function() { setTipoEntrega('recojo'); }} style={opcionEntregaStyle(tipoEntrega === 'recojo')}>
                   <div style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>🏪</div>
                   <div style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--color-marron)' }}>Recojo en tienda</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.2rem' }}>Gratis siempre</div>
@@ -339,19 +316,18 @@ function Checkout() {
               </div>
             </div>
 
-            {/* SECCIÓN ENVÍO A DOMICILIO */}
+            {/* ── ENVÍO A DOMICILIO ── */}
             {tipoEntrega === 'envio' && (
               <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-card)' }}>
                 <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '1rem' }}>
                   Dirección de envío
                 </h3>
 
-                {/* Aviso Lima */}
                 <div style={{ backgroundColor: '#fff8e1', border: '1px solid #f59e0b', borderRadius: 'var(--radius-md)', padding: '0.6rem 0.875rem', marginBottom: '1rem', fontSize: '0.8rem', color: '#92400e' }}>
                   🚚 Solo enviamos dentro de <strong>Lima Metropolitana</strong>.
                 </div>
 
-                {/* Direcciones guardadas */}
+                {/* Lista de direcciones guardadas */}
                 {user && direcciones.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
                     {direcciones.map(function(dir) {
@@ -359,6 +335,7 @@ function Checkout() {
                       return (
                         <div
                           key={dir.id}
+                          onClick={function() { handleSeleccionarDireccion(dir); }}
                           style={{
                             border:          seleccionada ? '2px solid var(--color-marron)' : '1px solid #e0d5c8',
                             borderRadius:    'var(--radius-md)',
@@ -366,60 +343,63 @@ function Checkout() {
                             backgroundColor: seleccionada ? 'var(--color-crema)' : '#fff',
                             cursor:          'pointer',
                             transition:      'all 0.2s',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
+                            display:         'flex',
+                            justifyContent:  'space-between',
+                            alignItems:      'flex-start',
+                            gap:             '0.75rem',
                           }}
-                          onClick={function() { handleSeleccionarDireccion(dir); }}
                         >
-                          <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, marginLeft: '0.5rem' }}>
-                          <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '700', fontSize: '0.875rem', color: 'var(--color-marron)', marginBottom: '0.2rem' }}>
-                            {dir.alias}
-                            {dir.es_principal && (
-                              <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', backgroundColor: 'var(--color-oliva)', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '999px' }}>
-                                Principal
-                              </span>
+                          {/* ✅ Contenido de la dirección */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: '700', fontSize: '0.875rem', color: 'var(--color-marron)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                              {dir.alias}
+                              {dir.es_principal && (
+                                <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--color-oliva)', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '999px' }}>
+                                  Principal
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)', marginBottom: '0.1rem' }}>
+                              {dir.nombre}{dir.telefono ? ' — +51 ' + dir.telefono : ''}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)', marginBottom: '0.1rem' }}>
+                              {dir.direccion}, {dir.distrito}
+                            </div>
+                            {dir.referencia && (
+                              <div style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)' }}>
+                                Ref: {dir.referencia}
+                              </div>
                             )}
                           </div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)' }}>
-                            {dir.nombre} — {dir.telefono && '+51 ' + dir.telefono}
+
+                          {/* ✅ Botones Editar / Eliminar — separados del contenido */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flexShrink: 0 }}>
+                            <button
+                              type="button"
+                              onClick={function(e) {
+                                e.stopPropagation();
+                                handleSeleccionarDireccion(dir);
+                                setMostrarFormNueva(true);
+                              }}
+                              style={{ background: 'none', border: 'none', color: 'var(--color-oliva)', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'right' }}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={function(e) { e.stopPropagation(); handleEliminarDireccion(dir.id); }}
+                              style={{ background: 'none', border: 'none', color: 'var(--color-granate)', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'right', opacity: 0.8 }}
+                            >
+                              Eliminar
+                            </button>
                           </div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--color-texto-muted)' }}>
-                            {dir.direccion}, {dir.distrito}
-                          </div>
-                          {dir.referencia && (
-                            <div style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', marginTop: '0.1rem' }}>
-                              Ref: {dir.referencia}
-                            </div>
-                          )}
-                        </div>  
-                          <button
-                            type="button"
-                            onClick={function(e) {
-                              e.stopPropagation();
-                              handleSeleccionarDireccion(dir);
-                              setMostrarFormNueva(true);
-                            }}
-                            style={{ background: 'none', border: 'none', color: 'var(--color-oliva)', fontSize: '0.8rem', cursor: 'pointer', opacity: 0.8 }}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={function(e) { e.stopPropagation(); handleEliminarDireccion(dir.id); }}
-                            style={{ background: 'none', border: 'none', color: 'var(--color-granate)', fontSize: '0.8rem', cursor: 'pointer', opacity: 0.7 }}
-                          >
-                            Eliminar
-                          </button>
-                        </div>
                         </div>
                       );
                     })}
                   </div>
                 )}
 
-                {/* Botón agregar nueva dirección */}
+                {/* Botón agregar nueva */}
                 {user && !mostrarFormNueva && (
                   <button
                     type="button"
@@ -451,7 +431,6 @@ function Checkout() {
                         <input name="alias" value={form.alias} onChange={handleChange} placeholder="Casa, Trabajo, etc." style={inputStyle} />
                       </div>
                     )}
-
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.875rem' }}>
                       <div>
                         <label style={labelStyle}>Nombre completo *</label>
@@ -462,17 +441,14 @@ function Checkout() {
                         <input name="telefono" value={form.telefono} onChange={handleChange} placeholder="999 999 999" required style={inputStyle} />
                       </div>
                     </div>
-
                     <div>
                       <label style={labelStyle}>Dirección *</label>
                       <input name="direccion" value={form.direccion} onChange={handleChange} placeholder="Av. Ejemplo 123, Dpto 4B" required style={inputStyle} />
                     </div>
-
                     <div>
                       <label style={labelStyle}>Referencia</label>
                       <input name="referencia" value={form.referencia} onChange={handleChange} placeholder="Frente al parque, cerca al mercado..." style={inputStyle} />
                     </div>
-
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.875rem' }}>
                       <div>
                         <label style={labelStyle}>Distrito *</label>
@@ -492,7 +468,6 @@ function Checkout() {
                       </div>
                     </div>
 
-                    {/* Botón guardar dirección (solo para logueados) */}
                     {user && (
                       <button
                         type="button"
@@ -518,7 +493,7 @@ function Checkout() {
               </div>
             )}
 
-            {/* SECCIÓN RECOJO EN TIENDA */}
+            {/* ── RECOJO EN TIENDA ── */}
             {tipoEntrega === 'recojo' && (
               <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-card)' }}>
                 <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1rem', marginBottom: '0.75rem' }}>
@@ -539,12 +514,10 @@ function Checkout() {
                     title="Ubicación de la tienda"
                   />
                 </div>
-                <div style={{ backgroundColor: 'var(--color-crema)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--color-texto-muted)' }}>
+                <div style={{ backgroundColor: 'var(--color-crema)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--color-texto-muted)', marginBottom: '1rem' }}>
                   📍 <strong>Villa San Luis, Pamplona Alta</strong> — San Juan de Miraflores, Lima
                 </div>
-
-                {/* Datos del contacto para recojo */}
-                <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.875rem' }}>
                     <div>
                       <label style={labelStyle}>Nombre completo *</label>
@@ -590,7 +563,7 @@ function Checkout() {
             </p>
           </form>
 
-          {/* Resumen del pedido */}
+          {/* ── Resumen del pedido ── */}
           <div style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', padding: '1.5rem', position: 'sticky', top: '80px' }}>
             <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-marron)', fontSize: '1.1rem', marginBottom: '1rem' }}>
               Resumen del pedido
@@ -629,6 +602,7 @@ function Checkout() {
               </div>
             </div>
           </div>
+
         </div>
       </main>
 
