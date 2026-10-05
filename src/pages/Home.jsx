@@ -249,13 +249,10 @@ const IMAGENES_GALERIA = [
   // Agrega aquí las URLs reales de tus fotos en Supabase Storage.
   // Formato: { url: 'https://...', alt: 'Descripción de la foto' }
   // Ejemplo:
-  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
-  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
-  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
-  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
-  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
-  { url: 'https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
-
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Productos/cacao-barra-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
+  //https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg
+  //https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Productos/cacao-barra-atsiri.jpg
+  
 ];
 
 // Número de placeholders a mostrar si no hay imágenes reales
