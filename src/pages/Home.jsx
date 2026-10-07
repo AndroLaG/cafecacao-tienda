@@ -18,42 +18,21 @@ const PASOS_CAFE = [
     descripcion:
       'Nuestros cafetales crecen en las tierras de Pangoa en Perú a más de 1 600 m s. n. m. Esto permite que los granos maduren lentamente, desarrollando un perfil mas aromático.',
     // reemplaza con la URL real de tu imagen en Supabase Storage:
-    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Productos/cacao-polvo-atsiri.jpg',
+    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-1-cultivo.avif',
   },
   {
     numero: '02',
     titulo: 'Cosecha selectiva',
     descripcion:
       'Solo se recogen los frutos maduros — de color rojo intenso — de forma manual. Este proceso garantiza que cada grano que llega al beneficio esté en su punto óptimo de madurez.',
-    imagen: null,
+    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-2-cosecha.avif',
   },
   {
     numero: '03',
     titulo: 'Fermentación',
     descripcion:
       'Los granos se fermentan en tinas de madera durante 36–48 horas. Este paso es clave: desarrolla los azúcares naturales que darán los matices frutales y florales del café.',
-    imagen: null,
-  },
-  {
-    numero: '04',
-    titulo: 'Secado al sol',
-    descripcion:
-      'Extendidos en camas africanas, los granos se secan lentamente bajo el sol de la selva durante 12–20 días. El secado natural preserva los aceites esenciales del grano.',
-    imagen: null,
-  },
-  {
-    numero: '05',
-    titulo: 'Selección y trilla',
-    descripcion:
-      'Se retira la cáscara seca y se seleccionan manualmente los granos, descartando los defectuosos. Solo el grano verde de primera calidad avanza.',
-    imagen: null,
-  },
-  {
-    numero: '06',
-    titulo: 'Tostado artesanal',
-    descripcion:
-      'El tostado se hace en pequeños lotes para controlar el perfil de sabor. Usamos tueste medio que resalta las notas frutales sin opacar la acidez natural.',
-    imagen: null,
+    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/videos/Hero-Cacao2.mp4',
   },
 ];
 
