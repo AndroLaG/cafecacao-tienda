@@ -260,7 +260,7 @@ const IMAGENES_GALERIA = [
 ];
 
 // Número de placeholders a mostrar si no hay imágenes reales
-const PLACEHOLDERS_GALERIA = 7;
+const PLACEHOLDERS_GALERIA = 7
 
 function Galeria() {
   const [indice, setIndice] = useState(0);
@@ -931,34 +931,54 @@ function Home() {
       </section>
 
       {/* Sección Productos */}
-      <section id="productos" style={{ backgroundColor: 'var(--color-crema)', paddingTop: '3rem' }}>
-        <h2 style={{
-          fontFamily:   'var(--font-heading)',
-          color:        'var(--color-marron)',
-          fontSize:     'clamp(1.75rem, 4vw, 2.25rem)',
-          textAlign:    'center',
-          marginBottom: '0.5rem',
-        }}>
-          Nuestros Productos
-        </h2>
-        <div style={{
-          width:           '60px',
-          height:          '3px',
-          backgroundColor: 'var(--color-oliva)',
-          margin:          '0 auto 1rem',
-          borderRadius:    'var(--radius-pill)',
-        }}/>
-        <p style={{
-          textAlign:    'center',
-          color:        'var(--color-texto-muted)',
-          marginBottom: '1rem',
-          fontSize:     '0.95rem',
-          padding:      '0 1rem',
-        }}>
-          Productos 100% orgánicos cultivados en Pangoa, Perú.
-        </p>
-        <ProductGrid />
-      </section>
+      {/* Sección Productos */}
+<section id="productos" style={{
+  paddingTop:           '4rem',
+  paddingBottom:        '2rem',
+  position:             'relative',
+  backgroundImage:      'url(https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fondo-caca-barra.png)',
+  backgroundSize:       'cover',
+  backgroundPosition:   'center',
+  backgroundAttachment: 'fixed',  /* ← el efecto parallax */
+}}>
+  {/* Capa de color encima de la imagen */}
+  <div style={{
+    position:        'absolute',
+    inset:           0,
+    backgroundColor: 'rgba(250, 246, 239, 0.88)',
+    zIndex:          0,
+  }}/>
+
+  {/* Contenido por encima de la capa */}
+  <div style={{ position: 'relative', zIndex: 1 }}>
+    <h2 style={{
+      fontFamily:   'var(--font-heading)',
+      color:        'var(--color-marron)',
+      fontSize:     'clamp(1.75rem, 4vw, 2.25rem)',
+      textAlign:    'center',
+      marginBottom: '0.5rem',
+    }}>
+      Nuestros Productos
+    </h2>
+    <div style={{
+      width:           '60px',
+      height:          '3px',
+      backgroundColor: 'var(--color-oliva)',
+      margin:          '0 auto 1rem',
+      borderRadius:    'var(--radius-pill)',
+    }}/>
+    <p style={{
+      textAlign:    'center',
+      color:        'var(--color-texto-muted)',
+      marginBottom: '1rem',
+      fontSize:     '0.95rem',
+      padding:      '0 1rem',
+    }}>
+      Productos 100% orgánicos cultivados en Pangoa, Perú.
+    </p>
+    <ProductGrid />
+  </div>
+</section>
 
       {/* Sección Nosotros — rediseñada */}
       <SeccionNosotros />
