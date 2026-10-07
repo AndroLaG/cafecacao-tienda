@@ -249,13 +249,13 @@ const IMAGENES_GALERIA = [
   // Agrega aquí las URLs reales de tus fotos en Supabase Storage.
   // Formato: { url: 'https://...', alt: 'Descripción de la foto' }
   // Ejemplo:
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-pulsera.jpg', alt: 'Flor pulsera' },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.png', alt: 'Despepar cacao' },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/vivero-cacao.jpg', alt: 'Vivero cacao' },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-morada.jpg', alt: 'Flor morada' },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/trabajo-vivero.jpg', alt: 'Trabajo en el vivero' },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/rio-niebla.jpg', alt: 'Río niebla' },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/secado-cacao.png', alt: 'Secado de cacao' }
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-pulsera.avif', alt: 'Flor pulsera' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.avif', alt: 'Despepar cacao' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/vivero-cacao.avif', alt: 'Vivero cacao' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-morada.avif', alt: 'Flor morada' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/trabajo-vivero.avif', alt: 'Trabajo en el vivero' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/rio-niebla.avif', alt: 'Río niebla' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/secado-cacao.avif', alt: 'Secado de cacao' }
 
 ];
 
@@ -936,7 +936,7 @@ function Home() {
   paddingTop:           '4rem',
   paddingBottom:        '2rem',
   position:             'relative',
-  backgroundImage:      'url(https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fondo-caca-barra.png)',
+  backgroundImage:      'url(https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fondo-caca-barra.avif)',
   backgroundSize:       'cover',
   backgroundPosition:   'center',
   backgroundAttachment: 'fixed',  /* ← el efecto parallax */
@@ -946,6 +946,7 @@ function Home() {
     position:        'absolute',
     inset:           0,
     backgroundColor: 'rgba(250, 246, 239, 0.88)',
+    opacity:         0.50,
     zIndex:          0,
   }}/>
 
