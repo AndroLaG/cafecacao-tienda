@@ -249,14 +249,18 @@ const IMAGENES_GALERIA = [
   // Agrega aquí las URLs reales de tus fotos en Supabase Storage.
   // Formato: { url: 'https://...', alt: 'Descripción de la foto' }
   // Ejemplo:
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Productos/cacao-barra-atsiri.jpg', alt: 'Cultivos de café en Pangoa' },
-  //https://supabase.com/dashboard/project/ehubruirzxvaeuktlfmz/storage/files/buckets/Productos?preview=cacao-polvo-atsiri.jpg
-  //https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Productos/cacao-barra-atsiri.jpg
-  
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-pulsera.jpg', alt: 'Flor pulsera' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.png', alt: 'Despepar cacao' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/vivero-cacao.jpg', alt: 'Vivero cacao' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-morada.jpg', alt: 'Flor morada' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/trabajo-vivero.jpg', alt: 'Trabajo en el vivero' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/rio-niebla.jpg', alt: 'Río niebla' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/secado-cacao.png', alt: 'Secado de cacao' }
+
 ];
 
 // Número de placeholders a mostrar si no hay imágenes reales
-const PLACEHOLDERS_GALERIA = 6;
+const PLACEHOLDERS_GALERIA = 7;
 
 function Galeria() {
   const [indice, setIndice] = useState(0);
