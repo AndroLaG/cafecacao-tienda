@@ -32,7 +32,7 @@ const PASOS_CAFE = [
     titulo: 'Fermentación',
     descripcion:
       'Los granos se fermentan en tinas de madera durante 36–48 horas. Este paso es clave: desarrolla los azúcares naturales que darán los matices frutales y florales del café.',
-    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/videos/Hero-Cacao2.mp4',
+    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion.avif',
   },
 ];
 
