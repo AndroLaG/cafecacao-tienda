@@ -15,24 +15,42 @@ const PASOS_CAFE = [
   {
     numero: '01',
     titulo: 'Cultivo',
-    descripcion:
-      'Nuestros cafetales crecen en las tierras de Pangoa en Perú a más de 1 600 m s. n. m. Esto permite que los granos maduren lentamente, desarrollando un perfil mas aromático.',
-    // reemplaza con la URL real de tu imagen en Supabase Storage:
-    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-1-cultivo.avif',
+    descripcion: 'Nuestros cafetales crecen en las tierras de Pangoa en Perú a más de 1 600 m s. n. m. Esto permite que los granos maduren lentamente, desarrollando un perfil más aromático.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/vivero-cacao.jpg',
+      null,
+      null,
+    ],
   },
   {
     numero: '02',
     titulo: 'Cosecha selectiva',
-    descripcion:
-      'Solo se recogen los frutos maduros — de color rojo intenso — de forma manual. Este proceso garantiza que cada grano que llega al beneficio esté en su punto óptimo de madurez.',
-    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-2-cosecha.avif',
+    descripcion: 'Solo se recogen los frutos maduros — de color rojo intenso — de forma manual. Este proceso garantiza que cada grano que llega al beneficio esté en su punto óptimo de madurez.',
+    imagenes: [null, null, null],
   },
   {
     numero: '03',
     titulo: 'Fermentación',
-    descripcion:
-      'Los granos se fermentan en tinas de madera durante 36–48 horas. Este paso es clave: desarrolla los azúcares naturales que darán los matices frutales y florales del café.',
-    imagen: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion.avif',
+    descripcion: 'Los granos se fermentan en tinas de madera durante 36–48 horas. Este paso es clave: desarrolla los azúcares naturales que darán los matices frutales y florales del café.',
+    imagenes: [null, null, null],
+  },
+  {
+    numero: '04',
+    titulo: 'Secado al sol',
+    descripcion: 'Extendidos en camas africanas, los granos se secan lentamente bajo el sol de la selva durante 12–20 días. El secado natural preserva los aceites esenciales del grano.',
+    imagenes: [null, null, null],
+  },
+  {
+    numero: '05',
+    titulo: 'Selección y trilla',
+    descripcion: 'Se retira la cáscara seca y se seleccionan manualmente los granos, descartando los defectuosos. Solo el grano verde de primera calidad avanza.',
+    imagenes: [null, null, null],
+  },
+  {
+    numero: '06',
+    titulo: 'Tostado artesanal',
+    descripcion: 'El tostado se hace en pequeños lotes para controlar el perfil de sabor. Usamos tueste medio que resalta las notas frutales sin opacar la acidez natural.',
+    imagenes: [null, null, null],
   },
 ];
 
@@ -41,85 +59,201 @@ const PASOS_CACAO = [
   {
     numero: '01',
     titulo: 'Cosecha de mazorcas',
-    descripcion:
-      'Las mazorcas de cacao se cortan a mano cuando tienen el color y peso adecuados. En Pangoa se cosecha principalmente cacao Chuncho y CCN-51 de alta calidad.',
-    imagen: null,
+    descripcion: 'Las mazorcas de cacao se cortan a mano cuando tienen el color y peso adecuados. En Pangoa se cosecha principalmente cacao Chuncho y CCN-51 de alta calidad.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.png',
+      null,
+      null,
+    ],
   },
   {
     numero: '02',
     titulo: 'Desgranado',
-    descripcion:
-      'Cada mazorca se abre y los granos rodeados de pulpa blanca son extraídos cuidadosamente para iniciar el proceso de transformación.',
-    imagen: null,
+    descripcion: 'Cada mazorca se abre y los granos rodeados de pulpa blanca son extraídos cuidadosamente para iniciar el proceso de transformación.',
+    imagenes: [null, null, null],
   },
   {
     numero: '03',
     titulo: 'Fermentación',
-    descripcion:
-      'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y los precursores del sabor se desarrollan.',
-    imagen: null,
+    descripcion: 'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y los precursores del sabor se desarrollan.',
+    imagenes: [null, null, null],
   },
   {
     numero: '04',
     titulo: 'Secado',
-    descripcion:
-      'Tras la fermentación, los granos se extienden al sol entre 7 y 10 días hasta alcanzar menos del 7 % de humedad, punto ideal para el almacenamiento y transporte.',
-    imagen: null,
+    descripcion: 'Tras la fermentación, los granos se extienden al sol entre 7 y 10 días hasta alcanzar menos del 7 % de humedad, punto ideal para el almacenamiento y transporte.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/secado-cacao.png',
+      null,
+      null,
+    ],
   },
   {
     numero: '05',
     titulo: 'Descascarillado y tostado',
-    descripcion:
-      'El grano seco se tuesta suavemente para liberar aromas, luego se descascarilla obteniendo el nibs de cacao, la base de todos nuestros productos.',
-    imagen: null,
+    descripcion: 'El grano seco se tuesta suavemente para liberar aromas, luego se descascarilla obteniendo el nibs de cacao, la base de todos nuestros productos.',
+    imagenes: [null, null, null],
   },
   {
     numero: '06',
     titulo: 'Molienda y refinado',
-    descripcion:
-      'Los nibs se muelen hasta obtener licor de cacao, que luego se prensa para separar la manteca y el cacao en polvo, o se tempera para las barras y chocolates.',
-    imagen: null,
+    descripcion: 'Los nibs se muelen hasta obtener licor de cacao, que luego se prensa para separar la manteca y el cacao en polvo, o se tempera para las barras y chocolates.',
+    imagenes: [null, null, null],
   },
 ];
 
-// Placeholder de imagen mientras no se sube la foto real
-function ImagenPaso({ imagen, alt }) {
-  if (imagen) {
-    return (
-      <img
-        src={imagen}
-        alt={alt}
-        style={{
-          width:        '100%',
-          height:       '220px',
-          objectFit:    'cover',
-          borderRadius: 'var(--radius-lg)',
-          display:      'block',
-        }}
-      />
-    );
+function CarruselPaso({ imagenes, alt }) {
+  var [indice, setIndice] = useState(0);
+
+  function anterior(e) {
+    e.stopPropagation();
+    setIndice(function(i) { return (i - 1 + imagenes.length) % imagenes.length; });
   }
+
+  function siguiente(e) {
+    e.stopPropagation();
+    setIndice(function(i) { return (i + 1) % imagenes.length; });
+  }
+
+  var imgActual = imagenes[indice];
+
   return (
-    <div style={{
-      width:           '100%',
-      height:          '220px',
-      borderRadius:    'var(--radius-lg)',
-      backgroundColor: 'rgba(131,64,29,0.08)',
-      border:          '2px dashed rgba(131,64,29,0.25)',
-      display:         'flex',
-      flexDirection:   'column',
-      alignItems:      'center',
-      justifyContent:  'center',
-      gap:             '0.5rem',
-    }}>
-      <span style={{ fontSize: '2rem', opacity: 0.35 }}>📷</span>
-      <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', opacity: 0.6 }}>
-        Imagen próximamente
-      </span>
+    <div style={{ position: 'relative', width: '100%', height: '220px', overflow: 'hidden', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}>
+
+      {/* Imagen o placeholder */}
+      {imgActual ? (
+        <img
+          src={imgActual}
+          alt={alt + ' ' + (indice + 1)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <div style={{
+          width:           '100%',
+          height:          '100%',
+          backgroundColor: 'rgba(131,64,29,0.08)',
+          border:          '2px dashed rgba(131,64,29,0.25)',
+          display:         'flex',
+          flexDirection:   'column',
+          alignItems:      'center',
+          justifyContent:  'center',
+          gap:             '0.5rem',
+        }}>
+          <span style={{ fontSize: '2rem', opacity: 0.35 }}>📷</span>
+          <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', opacity: 0.6 }}>
+            Foto {indice + 1} — próximamente
+          </span>
+        </div>
+      )}
+
+      {/* Flechas — solo si hay más de 1 imagen */}
+      {imagenes.length > 1 && (
+        <>
+          <button
+            onClick={anterior}
+            style={{
+              position:        'absolute',
+              left:            '8px',
+              top:             '50%',
+              transform:       'translateY(-50%)',
+              backgroundColor: 'rgba(250,246,239,0.88)',
+              color:           'var(--color-marron)',
+              border:          'none',
+              borderRadius:    '50%',
+              width:           '32px',
+              height:          '32px',
+              fontSize:        '1.1rem',
+              display:         'flex',
+              alignItems:      'center',
+              justifyContent:  'center',
+              cursor:          'pointer',
+              boxShadow:       '0 2px 6px rgba(0,0,0,0.15)',
+              zIndex:          2,
+              transition:      'background-color 0.2s',
+            }}
+            onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = '#fff'; }}
+            onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = 'rgba(250,246,239,0.88)'; }}
+          >
+            ‹
+          </button>
+          <button
+            onClick={siguiente}
+            style={{
+              position:        'absolute',
+              right:           '8px',
+              top:             '50%',
+              transform:       'translateY(-50%)',
+              backgroundColor: 'rgba(250,246,239,0.88)',
+              color:           'var(--color-marron)',
+              border:          'none',
+              borderRadius:    '50%',
+              width:           '32px',
+              height:          '32px',
+              fontSize:        '1.1rem',
+              display:         'flex',
+              alignItems:      'center',
+              justifyContent:  'center',
+              cursor:          'pointer',
+              boxShadow:       '0 2px 6px rgba(0,0,0,0.15)',
+              zIndex:          2,
+              transition:      'background-color 0.2s',
+            }}
+            onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = '#fff'; }}
+            onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = 'rgba(250,246,239,0.88)'; }}
+          >
+            ›
+          </button>
+        </>
+      )}
+
+      {/* Puntos indicadores */}
+      {imagenes.length > 1 && (
+        <div style={{
+          position:       'absolute',
+          bottom:         '8px',
+          left:           '50%',
+          transform:      'translateX(-50%)',
+          display:        'flex',
+          gap:            '5px',
+          zIndex:         2,
+        }}>
+          {imagenes.map(function(_, i) {
+            return (
+              <div
+                key={i}
+                onClick={function(e) { e.stopPropagation(); setIndice(i); }}
+                style={{
+                  width:           i === indice ? '18px' : '7px',
+                  height:          '7px',
+                  borderRadius:    '999px',
+                  backgroundColor: i === indice ? 'var(--color-crema)' : 'rgba(250,246,239,0.55)',
+                  transition:      'all 0.3s ease',
+                  cursor:          'pointer',
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* Contador */}
+      <div style={{
+        position:        'absolute',
+        top:             '8px',
+        right:           '10px',
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        color:           '#fff',
+        borderRadius:    '999px',
+        padding:         '0.1rem 0.55rem',
+        fontSize:        '0.7rem',
+        fontWeight:      '600',
+        zIndex:          2,
+      }}>
+        {indice + 1}/{imagenes.length}
+      </div>
     </div>
   );
 }
-
 // Sub-sección de elaboración (café o cacao)
 function SubseccionElaboracion({ titulo, icono, color, pasos }) {
   return (
@@ -185,7 +319,7 @@ function SubseccionElaboracion({ titulo, icono, color, pasos }) {
               e.currentTarget.style.boxShadow = 'var(--shadow-card)';
             }}
           >
-            <ImagenPaso imagen={paso.imagen} alt={paso.titulo} />
+            <CarruselPaso imagenes={paso.imagenes} alt={paso.titulo} />
             <div style={{ padding: '1.1rem' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', marginBottom: '0.4rem' }}>
                 <span style={{
@@ -909,7 +1043,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Sección Productos */}
       {/* Sección Productos */}
 <section id="productos" style={{
   paddingTop:           '4rem',
