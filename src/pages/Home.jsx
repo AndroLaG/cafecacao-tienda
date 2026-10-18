@@ -15,92 +15,60 @@ const PASOS_CAFE = [
   {
     numero: '01',
     titulo: 'Cultivo',
-    descripcion: 'Nuestros cafetales crecen en las tierras de Pangoa en Perú a más de 1 600 m s. n. m. Esto permite que los granos maduren lentamente, desarrollando un perfil más aromático.',
+    descripcion: 'Todo gran café comienza con la paciencia. Preparamos y nutrimos cuidadosamente la tierra antes de trasladar nuestras semillas desde el vivero, donde han sido cuidadas durante 9 meses. Una vez plantadas, aprovechamos las lluvias de temporada para su riego y realizamos un mantenimiento constante para asegurar un crecimiento sano y natural.',
     imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/vivero-cacao.jpg',
-      null,
-      null,
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-1-cultivo.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-1-cultivo.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-1-cultivo.avif',
     ],
   },
   {
     numero: '02',
     titulo: 'Cosecha selectiva',
-    descripcion: 'Solo se recogen los frutos maduros — de color rojo intenso — de forma manual. Este proceso garantiza que cada grano que llega al beneficio esté en su punto óptimo de madurez.',
-    imagenes: [null, null, null],
+    descripcion: 'Al tercer año, llegan los frutos. Durante la temporada de cosecha en junio, nuestros recolectores realizan un trabajo 100% manual, seleccionando únicamente las cerezas que han alcanzado un tono rojo perfecto de maduración. Ese mismo día, los granos frescos pasan por la despulpadora para separar la cáscara y prepararlos para el siguiente paso.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-2-cosecha.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-2-cosecha.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/paso-2-cosecha.avif'
+    ],
   },
   {
     numero: '03',
     titulo: 'Fermentación',
-    descripcion: 'Los granos se fermentan en tinas de madera durante 36–48 horas. Este paso es clave: desarrolla los azúcares naturales que darán los matices frutales y florales del café.',
-    imagenes: [null, null, null],
-  },
-  {
-    numero: '04',
-    titulo: 'Secado al sol',
-    descripcion: 'Extendidos en camas africanas, los granos se secan lentamente bajo el sol de la selva durante 12–20 días. El secado natural preserva los aceites esenciales del grano.',
-    imagenes: [null, null, null],
-  },
-  {
-    numero: '05',
-    titulo: 'Selección y trilla',
-    descripcion: 'Se retira la cáscara seca y se seleccionan manualmente los granos, descartando los defectuosos. Solo el grano verde de primera calidad avanza.',
-    imagenes: [null, null, null],
-  },
-  {
-    numero: '06',
-    titulo: 'Tostado artesanal',
-    descripcion: 'El tostado se hace en pequeños lotes para controlar el perfil de sabor. Usamos tueste medio que resalta las notas frutales sin opacar la acidez natural.',
-    imagenes: [null, null, null],
+    descripcion: 'Para desarrollar el perfil y dulzor característico de nuestra taza, los granos reposan en cajones de madera entre 36 y 48 horas en un proceso de fermentación natural. Finalmente, el café se lava y se extiende al sol durante cuatro días, removiéndolo constantemente para garantizar un secado parejo y perfecto.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion.avif'
+    ],
   },
 ];
 
 // Pasos de elaboración del CACAO
-const PASOS_CACAO = [
-  {
-    numero: '01',
-    titulo: 'Cosecha de mazorcas',
-    descripcion: 'Las mazorcas de cacao se cortan a mano cuando tienen el color y peso adecuados. En Pangoa se cosecha principalmente cacao Chuncho y CCN-51 de alta calidad.',
-    imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.png',
-      null,
-      null,
-    ],
-  },
-  {
-    numero: '02',
-    titulo: 'Desgranado',
-    descripcion: 'Cada mazorca se abre y los granos rodeados de pulpa blanca son extraídos cuidadosamente para iniciar el proceso de transformación.',
-    imagenes: [null, null, null],
-  },
-  {
-    numero: '03',
-    titulo: 'Fermentación',
-    descripcion: 'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y los precursores del sabor se desarrollan.',
-    imagenes: [null, null, null],
-  },
-  {
-    numero: '04',
-    titulo: 'Secado',
-    descripcion: 'Tras la fermentación, los granos se extienden al sol entre 7 y 10 días hasta alcanzar menos del 7 % de humedad, punto ideal para el almacenamiento y transporte.',
-    imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/secado-cacao.png',
-      null,
-      null,
-    ],
-  },
-  {
-    numero: '05',
-    titulo: 'Descascarillado y tostado',
-    descripcion: 'El grano seco se tuesta suavemente para liberar aromas, luego se descascarilla obteniendo el nibs de cacao, la base de todos nuestros productos.',
-    imagenes: [null, null, null],
-  },
-  {
-    numero: '06',
-    titulo: 'Molienda y refinado',
-    descripcion: 'Los nibs se muelen hasta obtener licor de cacao, que luego se prensa para separar la manteca y el cacao en polvo, o se tempera para las barras y chocolates.',
-    imagenes: [null, null, null],
-  },
-];
+// const PASOS_CACAO = [
+//   {
+//     numero: '01',
+//     titulo: 'Cosecha de mazorcas',
+//     descripcion: 'Las mazorcas de cacao se cortan a mano cuando tienen el color y peso adecuados. En Pangoa se cosecha principalmente cacao Chuncho y CCN-51 de alta calidad.',
+//     imagenes: [
+//       'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.png',
+//       null,
+//       null,
+//     ],
+//   },
+//   {
+//     numero: '02',
+//     titulo: 'Desgranado',
+//     descripcion: 'Cada mazorca se abre y los granos rodeados de pulpa blanca son extraídos cuidadosamente para iniciar el proceso de transformación.',
+//     imagenes: [null, null, null],
+//   },
+//   {
+//     numero: '03',
+//     titulo: 'Fermentación',
+//     descripcion: 'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y los precursores del sabor se desarrollan.',
+//     imagenes: [null, null, null],
+//   },
+// ];
 
 function CarruselPaso({ imagenes, alt }) {
   var [indice, setIndice] = useState(0);
