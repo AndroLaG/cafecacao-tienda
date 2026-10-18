@@ -45,30 +45,30 @@ const PASOS_CAFE = [
 ];
 
 // Pasos de elaboración del CACAO
-// const PASOS_CACAO = [
-//   {
-//     numero: '01',
-//     titulo: 'Cosecha de mazorcas',
-//     descripcion: 'Las mazorcas de cacao se cortan a mano cuando tienen el color y peso adecuados. En Pangoa se cosecha principalmente cacao Chuncho y CCN-51 de alta calidad.',
-//     imagenes: [
-//       'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.png',
-//       null,
-//       null,
-//     ],
-//   },
-//   {
-//     numero: '02',
-//     titulo: 'Desgranado',
-//     descripcion: 'Cada mazorca se abre y los granos rodeados de pulpa blanca son extraídos cuidadosamente para iniciar el proceso de transformación.',
-//     imagenes: [null, null, null],
-//   },
-//   {
-//     numero: '03',
-//     titulo: 'Fermentación',
-//     descripcion: 'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y los precursores del sabor se desarrollan.',
-//     imagenes: [null, null, null],
-//   },
-// ];
+const PASOS_CACAO = [
+  {
+    numero: '01',
+    titulo: 'Cosecha de mazorcas',
+    descripcion: 'Las mazorcas de cacao se cortan a mano cuando tienen el color y peso adecuados. En Pangoa se cosecha principalmente cacao Chuncho y CCN-51 de alta calidad.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.png',
+      null,
+      null,
+    ],
+  },
+  {
+    numero: '02',
+    titulo: 'Desgranado',
+    descripcion: 'Cada mazorca se abre y los granos rodeados de pulpa blanca son extraídos cuidadosamente para iniciar el proceso de transformación.',
+    imagenes: [null, null, null],
+  },
+  {
+    numero: '03',
+    titulo: 'Fermentación',
+    descripcion: 'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y los precursores del sabor se desarrollan.',
+    imagenes: [null, null, null],
+  },
+];
 
 function CarruselPaso({ imagenes, alt }) {
   var [indice, setIndice] = useState(0);
