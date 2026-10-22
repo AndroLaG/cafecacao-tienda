@@ -565,54 +565,43 @@ function SeccionNosotros() {
           }}>
             <div>
               <p style={{ lineHeight: '1.85', opacity: 0.92, marginBottom: '1.25rem', fontSize: '1rem' }}>
-                <strong style={{ color: 'var(--color-crema)' }}>Lily's Caffe</strong> nació del amor por los sabores
-                auténticos del Perú. Nuestros productos provienen de las comunidades
-                de Pangoa, en la selva central peruana, donde agricultores locales
-                cultivan café y cacao con técnicas tradicionales transmitidas de
-                generación en generación.
+                <strong style={{ color: 'var(--color-crema)' }}>Lily's Caffe</strong> nació del amor y esfuerzo de mi padre y madre. Es un proyecto familiar que busca compartir la riqueza de nuestros cultivos de café y cacao, cultivados en las fértiles tierras de Pangoa, Perú. Desde el primer día, nos propusimos ofrecer productos de alta calidad, respetando la naturaleza y las tradiciones locales.
               </p>
               <p style={{ lineHeight: '1.85', opacity: 0.92, fontSize: '1rem' }}>
-                Cada grano es seleccionado a mano, fermentado y secado al sol
+                Cada grano ha sido seleccionado a mano, fermentado y secado al sol
                 para preservar sus propiedades naturales. Creemos en el comercio
                 justo y en llevar el mejor sabor directamente desde el campo
                 hasta tu mesa, sin intermediarios.
               </p>
             </div>
 
-            {/* Estadísticas */}
+            {/* Video vertical en bucle */}
             <div style={{
-              display:             'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap:                 '1rem',
+              display:        'flex',
+              justifyContent: 'center',
+              alignItems:     'center',
             }}>
-              {[
-                { numero: '100%', texto: 'Orgánico',             icono: '🌿' },
-                { numero: '2+',   texto: 'Años de experiencia',  icono: '📅' },
-                { numero: '100+', texto: 'Clientes satisfechos', icono: '❤️'  },
-                { numero: '4',    texto: 'Productos únicos',      icono: '✨' },
-              ].map(({ numero, texto, icono }) => (
-                <div key={texto} style={{
-                  backgroundColor: 'rgba(250,246,239,0.12)',
-                  border:          '1px solid rgba(250,246,239,0.2)',
-                  borderRadius:    'var(--radius-lg)',
-                  padding:         '1.25rem',
-                  textAlign:       'center',
-                  backdropFilter:  'blur(4px)',
-                }}>
-                  <div style={{ fontSize: '1.4rem', marginBottom: '0.25rem' }}>{icono}</div>
-                  <div style={{
-                    fontFamily: 'var(--font-heading)',
-                    fontSize:   '1.75rem',
-                    fontWeight: '700',
-                    color:      'var(--color-crema)',
-                  }}>
-                    {numero}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', opacity: 0.75, marginTop: '0.2rem' }}>
-                    {texto}
-                  </div>
-                </div>
-              ))}
+              <div style={{
+                borderRadius: 'var(--radius-lg)',
+                overflow:     'hidden',
+                boxShadow:    '0 8px 32px rgba(0,0,0,0.3)',
+                maxWidth:     '280px',
+                width:        '100%',
+                border:       '3px solid rgba(250,246,239,0.2)',
+              }}>
+                <video
+                  src="https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/video-nuestra-historia.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  style={{
+                    width:     '100%',
+                    display:   'block',
+                    objectFit: 'cover',
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
