@@ -608,7 +608,22 @@ function SeccionNosotros() {
       </div>
 
       {/* ── 2. ELABORACIÓN ── */}
-      <div style={{ padding: '5rem 1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{
+        position:             'relative',
+        backgroundImage:      'url(https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cafe-fondo.avif)',
+        backgroundSize:       'cover',
+        backgroundPosition:   'center',
+        backgroundAttachment: 'fixed',
+      }}>
+        {/* Capa de color */}
+        <div style={{
+          position:        'absolute',
+          inset:           0,
+          backgroundColor: 'rgba(250, 246, 239, 0.92)',
+          zIndex:          0,
+        }}/>
+        <div style={{ position: 'relative', zIndex: 1, padding: '5rem 1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+
         <p style={{
           fontFamily:    'var(--font-body)',
           fontSize:      '0.8rem',
@@ -659,7 +674,7 @@ function SeccionNosotros() {
           pasos={PASOS_CACAO}
         />
       </div>
-
+</div>
       {/* ── 3. GALERÍA ── */}
       <div style={{
         backgroundColor: 'var(--color-crema)',
