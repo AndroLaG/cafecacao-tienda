@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCart } from '../../context/CartContext';
+import Lightbox from '../ui/Lightbox';
 
 const SABORES_CHOCOLATE = [
   'Ajonjolí',
@@ -14,6 +15,7 @@ const SABORES_CHOCOLATE = [
 const DESC_LIMITE = 100;
 
 function ProductCard({ producto }) {
+  const [lightboxAbierto, setLightboxAbierto] = useState(false);
   const { addItem } = useCart();
   const [saborSeleccionado, setSaborSeleccionado] = useState('');
   const [errorSabor, setErrorSabor]               = useState(false);
@@ -72,7 +74,16 @@ function ProductCard({ producto }) {
         <img
           src={producto.imagen_url}
           alt={producto.nombre}
-          style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+          onClick={function() { setLightboxAbierto(true); }}
+          style={{
+            width:     '100%',
+            height:    '200px',
+            objectFit: 'cover',
+            cursor:    'zoom-in',
+            transition: 'filter 0.2s',
+          }}
+          onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(1.08)'; }}
+          onMouseLeave={function(e) { e.currentTarget.style.filter = 'brightness(1)'; }}
         />
         <span style={{
           position:        'absolute',
@@ -246,6 +257,13 @@ function ProductCard({ producto }) {
           </button>
         </div>
       </div>
+      {lightboxAbierto && producto.imagen_url && (
+  <Lightbox
+    src={producto.imagen_url}
+    alt={producto.nombre}
+    onClose={function() { setLightboxAbierto(false); }}
+  />
+)}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import ProductGrid from '../components/product/ProductGrid';
+import Lightbox from '../components/ui/Lightbox';
 
 const VIDEO_URL = 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/videos/Hero-Cacao2.mp4';
 
@@ -80,6 +81,7 @@ const PASOS_CACAO = [
 
 function CarruselPaso({ imagenes, alt }) {
   var [indice, setIndice] = useState(0);
+  var [lightbox, setLightbox] = useState(false);
 
   function anterior(e) {
     e.stopPropagation();
@@ -101,7 +103,14 @@ function CarruselPaso({ imagenes, alt }) {
         <img
           src={imgActual}
           alt={alt + ' ' + (indice + 1)}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          onClick={function() { setLightbox(true); }}
+          style={{
+            width:     '100%',
+            height:    '100%',
+            objectFit: 'cover',
+            display:   'block',
+            cursor:    'zoom-in',
+          }}
         />
       ) : (
         <div style={{
@@ -227,6 +236,13 @@ function CarruselPaso({ imagenes, alt }) {
       }}>
         {indice + 1}/{imagenes.length}
       </div>
+      {lightbox && imgActual && (
+  <Lightbox
+    src={imgActual}
+    alt={alt + ' ' + (indice + 1)}
+    onClose={function() { setLightbox(false); }}
+  />
+)}
     </div>
   );
 }
@@ -354,6 +370,7 @@ const PLACEHOLDERS_GALERIA = 7
 function Galeria() {
   const [indice, setIndice] = useState(0);
   const [pausado, setPausado] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
 
   const items = IMAGENES_GALERIA.length > 0
     ? IMAGENES_GALERIA
@@ -402,11 +419,20 @@ function Galeria() {
             }}
           >
             {item.url ? (
-              <img
-                src={item.url}
-                alt={item.alt}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+                <img
+                  src={item.url}
+                  alt={item.alt}
+                  onClick={function() { setLightbox(true); }}
+                  style={{
+                    width:     '100%',
+                    height:    '100%',
+                    objectFit: 'cover',
+                    cursor:    'zoom-in',
+                    transition: 'transform 0.3s ease',
+                  }}
+                  onMouseEnter={function(e) { e.currentTarget.style.transform = 'scale(1.03)'; }}
+                  onMouseLeave={function(e) { e.currentTarget.style.transform = 'scale(1)'; }}
+                />
             ) : (
               <div style={{
                 width:           '100%',
@@ -509,6 +535,13 @@ function Galeria() {
           />
         ))}
       </div>
+      {lightbox && items[indice]?.url && (
+  <Lightbox
+    src={items[indice].url}
+    alt={items[indice].alt}
+    onClose={function() { setLightbox(false); }}
+  />
+)}
     </div>
   );
 }
