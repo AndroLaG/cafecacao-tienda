@@ -620,7 +620,7 @@ function SeccionNosotros() {
           position:        'absolute',
           inset:           0,
           backgroundColor: 'rgba(250,246,239,0.85)',
-          opacity:         0.25,
+          opacity:         0.35,
           zIndex:          0,
         }}/>
         <div style={{ position: 'relative', zIndex: 1, padding: '5rem 1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -1039,7 +1039,7 @@ function Home() {
     position:        'absolute',
     inset:           0,
     backgroundColor: 'rgba(250,246,239,0.85)',
-    opacity:         0.25,
+    opacity:         0.35,
     zIndex:          0,
   }}/>
 
