@@ -76,14 +76,30 @@ function Navbar() {
           className: "desktop-menu",
           style: { display: "flex", gap: "1.5rem", alignItems: "center" }
         },
-          ENLACES.map(function(item) {
-            return React.createElement("a", {
-              key: item.label,
-              href: item.href,
-              onClick: function(e) { handleNavClick(e, item.href); },
-              style: { color: "var(--color-crema)", fontSize: "0.95rem", textDecoration: "none", opacity: 0.9 }
-            }, item.label);
-          }),
+        
+        ENLACES.map(function(item) {
+          return React.createElement("a", {
+            key: item.label,
+            href: item.href,
+            onClick: function(e) { handleNavClick(e, item.href); },
+            style: {
+              color:          "var(--color-crema)",
+              fontSize:       "0.95rem",
+              textDecoration: "none",
+              opacity:        0.9,
+              transition:     "opacity 0.2s, transform 0.2s",
+              display:        "inline-block",
+            },
+            onMouseEnter: function(e) {
+              e.currentTarget.style.opacity   = "1";
+              e.currentTarget.style.transform = "translateY(-2px)";
+            },
+            onMouseLeave: function(e) {
+              e.currentTarget.style.opacity   = "0.9";
+              e.currentTarget.style.transform = "translateY(0)";
+            },
+          }, item.label);
+        }),
 
           user ? React.createElement("div", { ref: submenuRef, style: { position: "relative" } },
             React.createElement("button", {
