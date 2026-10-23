@@ -28,18 +28,24 @@ function ProductCard({ producto }) {
     bundle: 'var(--color-granate)',
   };
 
-  function handleAgregar() {
-    if (esChocolate && !saborSeleccionado) {
-      setErrorSabor(true);
-      return;
+    function handleAgregar() {
+      if (esChocolate && !saborSeleccionado) {
+        setErrorSabor(true);
+        return;
+      }
+      setErrorSabor(false);
+      const itemParaCarrito = esChocolate
+        ? { ...producto, nombre: `${producto.nombre} — ${saborSeleccionado}` }
+        : producto;
+      addItem(itemParaCarrito);
+
+      // ✅ NUEVO: sonido al agregar
+      var audio = new Audio('https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Audio/audio-compra.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(function() {});
+
+      if (esChocolate) setSaborSeleccionado('');
     }
-    setErrorSabor(false);
-    const itemParaCarrito = esChocolate
-      ? { ...producto, nombre: `${producto.nombre} — ${saborSeleccionado}` }
-      : producto;
-    addItem(itemParaCarrito);
-    if (esChocolate) setSaborSeleccionado('');
-  }
 
   return (
     <div
