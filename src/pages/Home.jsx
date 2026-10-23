@@ -611,6 +611,7 @@ function SeccionNosotros() {
       <div style={{
         position:             'relative',
         backgroundImage:      'url(https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cafe-fondo.avif)',
+        opacity:         0.50,
         backgroundSize:       'cover',
         backgroundPosition:   'center',
         backgroundAttachment: 'fixed',
@@ -619,7 +620,6 @@ function SeccionNosotros() {
         <div style={{
           position:        'absolute',
           inset:           0,
-          opacity:         0.50,
           zIndex:          0,
         }}/>
         <div style={{ position: 'relative', zIndex: 1, padding: '5rem 1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -1029,6 +1029,7 @@ function Home() {
   paddingBottom:        '2rem',
   position:             'relative',
   backgroundImage:      'url(https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fondo-caca-barra.avif)',
+  opacity:         0.50,
   backgroundSize:       'cover',
   backgroundPosition:   'center',
   backgroundAttachment: 'fixed',  /* ← el efecto parallax */
@@ -1037,7 +1038,6 @@ function Home() {
   <div style={{
     position:        'absolute',
     inset:           0,
-    
     zIndex:          0,
   }}/>
 
