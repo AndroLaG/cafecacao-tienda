@@ -619,7 +619,6 @@ function SeccionNosotros() {
         <div style={{
           position:        'absolute',
           inset:           0,
-          backgroundColor: 'rgba(250, 246, 239, 0.88)',
           opacity:         0.50,
           zIndex:          0,
         }}/>
