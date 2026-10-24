@@ -81,6 +81,12 @@ const PASOS_CACAO = [
 
 function CarruselPaso({ imagenes, alt }) {
   var [indice, setIndice] = useState(0);
+  useEffect(function() {
+  var intervalo = setInterval(function() {
+    setIndice(function(i) { return (i + 1) % imagenes.length; });
+  }, 3000);
+  return function() { clearInterval(intervalo); };
+}, [imagenes.length]);
   var [lightbox, setLightbox] = useState(false);
 
   function anterior(e) {
