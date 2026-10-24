@@ -10,75 +10,6 @@ const VIDEO_URL = 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/pu
 // ─────────────────────────────────────────────
 // SECCIÓN NOSOTROS — Rediseñada
 // ─────────────────────────────────────────────
-
-// Pasos de elaboración del CAFÉ
-const PASOS_CAFE = [
-  {
-    numero: '01',
-    titulo: 'Cultivo',
-    descripcion: 'Todo gran café comienza con la paciencia siempre lo dice mi padre. El se encarga de preparar la tierra antes de trasladar nuestras semillas desde el vivero, donde han sido cuidadas durante 9 meses. Una vez plantadas, aprovechamos las lluvias de temporada para su riego y realizamos el cortado de maleza constante. Recuerdo cuando corte maleza junto a mi padre, fue una semana dura pero aprendí mucho del cafe y de la vida.',
-    imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cultivo%20-%20cafe/paso-1-cultivo.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cultivo%20-%20cafe/paso-2-cultivo-cafe.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cultivo%20-%20cafe/paso-3-cultivo-cafe.avif',
-    ],
-  },
-  {
-    numero: '02',
-    titulo: 'Cosecha selectiva',
-    descripcion: 'Al tercer año, llegan los frutos. Recuerdo la primera cosecha en junio, fue bastante emocionante para la familia porque todos fuimos a ayudar. Actualmente tenemos recolectores que realizan un trabajo 100% manual, seleccionando únicamente las cerezas que han alcanzado un tono rojo perfecto de maduración. Ese mismo día, los granos frescos pasan por la despulpadora para separar la cáscara',
-    imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cafe/paso-1-cosecha-cafe.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cafe/paso-2-cosecha.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cafe/paso-3-cosecha-cafe.avif'
-    ],
-  },
-  {
-    numero: '03',
-    titulo: 'Fermentación',
-    descripcion: 'Mi padre me dijo que si quieres un buen café, los granos deben reposar al sol entre 36 y 48 horas en un proceso de fermentación natural. Finalmente, el café se lava y se extiende al sol durante cuatro días, removiéndolo constantemente para garantizar un secado parejo y perfecto.',
-    imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso%201-fermentacion.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-2-fermentacion-cafe.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-3-fermentacion-cafe.avif'
-    ],
-  },
-];
-
-// Pasos de elaboración del CACAO
-const PASOS_CACAO = [
-  {
-    numero: '01',
-    titulo: 'Cosecha de mazorcas',
-    descripcion: 'El cacao se corta con la azada por el tallo de la mazorca, evitando dañar el árbol. Mi padre me enseñó a hacerlo correctamente para no dañar el árbol y asegurar futuras cosechas. De esta manera se recolectan los cacaos aqui en Lily\'s Caffe.',
-    imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cacao/paso-1-cacao.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cacao/paso-2-cacao.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cacao/paso-3-cacao.avif',
-    ],
-  },
-  {
-    numero: '02',
-    titulo: 'Desgranado',
-    descripcion: 'Cada cacao se abre con un machete y los granos rodeados de pulpa blanca se extraen cuidadosamente y solo son separados los de buena calidad. La ultima cosecha que hubo mi abuelo y yo nos encargamos de cortar y desgranar los cacaos, fue un trabajo muy duro pero valió la pena.',
-    imagenes: [
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/desgranado-cacao/paso%201-desgranado_converted.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/desgranado-cacao/paso%202-desgranado_converted.avif',
-      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/desgranado-cacao/paso%203-desgranado_converted.avif',
-    ],
-  },
-  // {
-  //   numero: '03',
-  //   titulo: 'Fermentación',
-  //   descripcion: 'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y el sabor se desarrolla.',
-  //   imagenes: [
-  //     'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso%201-fermentacion.avif',
-  //     'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-2-fermentacion-cafe.avif',
-  //     'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-3-fermentacion-cafe.avif',
-  //   ],
-  // },
-];
-
 function CarruselPaso({ imagenes, alt, desfase }) {
   var [indice, setIndice] = useState(0);
   var [lightbox, setLightbox] = useState(false);
@@ -194,6 +125,77 @@ function CarruselPaso({ imagenes, alt, desfase }) {
     </div>
   );
 }
+
+
+// Pasos de elaboración del CAFÉ
+const PASOS_CAFE = [
+  {
+    numero: '01',
+    titulo: 'Cultivo',
+    descripcion: 'Todo gran café comienza con la paciencia siempre lo dice mi padre. El se encarga de preparar la tierra antes de trasladar nuestras semillas desde el vivero, donde han sido cuidadas durante 9 meses. Una vez plantadas, aprovechamos las lluvias de temporada para su riego y realizamos el cortado de maleza constante. Recuerdo cuando corte maleza junto a mi padre, fue una semana dura pero aprendí mucho del cafe y de la vida.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cultivo%20-%20cafe/paso-1-cultivo.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cultivo%20-%20cafe/paso-2-cultivo-cafe.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cultivo%20-%20cafe/paso-3-cultivo-cafe.avif',
+    ],
+  },
+  {
+    numero: '02',
+    titulo: 'Cosecha selectiva',
+    descripcion: 'Al tercer año, llegan los frutos. Recuerdo la primera cosecha en junio, fue bastante emocionante para la familia porque todos fuimos a ayudar. Actualmente tenemos recolectores que realizan un trabajo 100% manual, seleccionando únicamente las cerezas que han alcanzado un tono rojo perfecto de maduración. Ese mismo día, los granos frescos pasan por la despulpadora para separar la cáscara',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cafe/paso-1-cosecha-cafe.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cafe/paso-2-cosecha.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cafe/paso-3-cosecha-cafe.avif'
+    ],
+  },
+  {
+    numero: '03',
+    titulo: 'Fermentación',
+    descripcion: 'Mi padre me dijo que si quieres un buen café, los granos deben reposar al sol entre 36 y 48 horas en un proceso de fermentación natural. Finalmente, el café se lava y se extiende al sol durante cuatro días, removiéndolo constantemente para garantizar un secado parejo y perfecto.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso%201-fermentacion.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-2-fermentacion-cafe.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-3-fermentacion-cafe.avif'
+    ],
+  },
+];
+
+// Pasos de elaboración del CACAO
+const PASOS_CACAO = [
+  {
+    numero: '01',
+    titulo: 'Cosecha de mazorcas',
+    descripcion: 'El cacao se corta con la azada por el tallo de la mazorca, evitando dañar el árbol. Mi padre me enseñó a hacerlo correctamente para no dañar el árbol y asegurar futuras cosechas. De esta manera se recolectan los cacaos aqui en Lily\'s Caffe.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cacao/paso-1-cacao.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cacao/paso-2-cacao.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/cosecha-cacao/paso-3-cacao.avif',
+    ],
+  },
+  {
+    numero: '02',
+    titulo: 'Desgranado',
+    descripcion: 'Cada cacao se abre con un machete y los granos rodeados de pulpa blanca se extraen cuidadosamente y solo son separados los de buena calidad. La ultima cosecha que hubo mi abuelo y yo nos encargamos de cortar y desgranar los cacaos, fue un trabajo muy duro pero valió la pena.',
+    imagenes: [
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/desgranado-cacao/paso%201-desgranado_converted.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/desgranado-cacao/paso%202-desgranado_converted.avif',
+      'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/desgranado-cacao/paso%203-desgranado_converted.avif',
+    ],
+  },
+  // {
+  //   numero: '03',
+  //   titulo: 'Fermentación',
+  //   descripcion: 'Los granos se colocan en cajones de madera y se fermentan entre 5 y 7 días. Durante este proceso la pulpa se descompone y el sabor se desarrolla.',
+  //   imagenes: [
+  //     'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso%201-fermentacion.avif',
+  //     'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-2-fermentacion-cafe.avif',
+  //     'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/fermentacion-cafe/paso-3-fermentacion-cafe.avif',
+  //   ],
+  // },
+];
+
+
 
 // ── Galería carrusel
 const IMAGENES_GALERIA = [
