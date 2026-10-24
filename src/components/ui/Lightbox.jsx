@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 function Lightbox({ src, alt, onClose }) {
-  // Cerrar con Escape
   useEffect(function() {
     function handleKey(e) {
       if (e.key === 'Escape') onClose();
@@ -14,51 +14,58 @@ function Lightbox({ src, alt, onClose }) {
     };
   }, [onClose]);
 
-  return (
+  var contenido = (
     <div
       onClick={onClose}
       style={{
         position:        'fixed',
         inset:           0,
         backgroundColor: 'rgba(0,0,0,0.92)',
-        zIndex:          9999,
+        zIndex:          99999,
         display:         'flex',
         alignItems:      'center',
         justifyContent:  'center',
         padding:         '1rem',
         cursor:          'zoom-out',
-        animation:       'fadeIn 0.2s ease',
+        animation:       'fadeInLightbox 0.2s ease',
       }}
     >
       <style>{`
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes fadeInLightbox  { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleInLightbox { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       `}</style>
 
-      {/* Botón cerrar */}
+      {/* Botón cerrar — esquina superior derecha */}
       <button
         onClick={onClose}
         style={{
-          position:        'absolute',
+          position:        'fixed',
           top:             '1rem',
           right:           '1rem',
-          backgroundColor: 'rgba(255,255,255,0.15)',
+          backgroundColor: 'rgba(255,255,255,0.2)',
           color:           '#fff',
-          border:          'none',
+          border:          '2px solid rgba(255,255,255,0.4)',
           borderRadius:    '50%',
-          width:           '44px',
-          height:          '44px',
-          fontSize:        '1.4rem',
+          width:           '48px',
+          height:          '48px',
+          fontSize:        '1.5rem',
           lineHeight:      1,
           display:         'flex',
           alignItems:      'center',
           justifyContent:  'center',
           cursor:          'pointer',
-          zIndex:          10000,
-          transition:      'background-color 0.2s',
+          zIndex:          100000,
+          transition:      'background-color 0.2s, transform 0.15s',
+          fontFamily:      'sans-serif',
         }}
-        onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)'; }}
-        onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'; }}
+        onMouseEnter={function(e) {
+          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.35)';
+          e.currentTarget.style.transform = 'scale(1.1)';
+        }}
+        onMouseLeave={function(e) {
+          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
       >
         ✕
       </button>
@@ -75,27 +82,36 @@ function Lightbox({ src, alt, onClose }) {
           borderRadius: '8px',
           boxShadow:    '0 24px 80px rgba(0,0,0,0.6)',
           cursor:       'default',
-          animation:    'scaleIn 0.25s ease',
+          animation:    'scaleInLightbox 0.25s ease',
+          display:      'block',
         }}
       />
 
-      {/* Alt como caption */}
+      {/* Caption */}
       {alt && (
         <div style={{
-          position:   'absolute',
-          bottom:     '1.25rem',
-          left:       '50%',
-          transform:  'translateX(-50%)',
-          color:      'rgba(255,255,255,0.7)',
-          fontSize:   '0.82rem',
-          fontFamily: 'var(--font-body)',
-          whiteSpace: 'nowrap',
+          position:        'fixed',
+          bottom:          '1.25rem',
+          left:            '50%',
+          transform:       'translateX(-50%)',
+          color:           'rgba(255,255,255,0.75)',
+          fontSize:        '0.85rem',
+          fontFamily:      'var(--font-body)',
+          backgroundColor: 'rgba(0,0,0,0.4)',
+          padding:         '0.3rem 1rem',
+          borderRadius:    '999px',
+          whiteSpace:      'nowrap',
+          maxWidth:        '90vw',
+          overflow:        'hidden',
+          textOverflow:    'ellipsis',
         }}>
           {alt}
         </div>
       )}
     </div>
   );
+
+  return createPortal(contenido, document.body);
 }
 
 export default Lightbox;
