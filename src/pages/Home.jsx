@@ -117,7 +117,7 @@ function CarruselPaso({ imagenes, alt }) {
               display:    'block',
               cursor:     'zoom-in',
               //opacity:    1,
-              transition: 'opacity 0.2s ease-in-out',
+              //transition: 'opacity 0.2s ease-in-out',
               animation:  'none',
             }}
            // onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(0.08)'; }}
