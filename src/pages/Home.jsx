@@ -104,25 +104,25 @@ function CarruselPaso({ imagenes, alt }) {
   return (
     <div style={{ position: 'relative', width: '100%', height: '220px', overflow: 'hidden', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}>
 
-      {imgActual ? (
-        <img
-          key={indice}
-          src={imgActual}
-          alt={alt + ' ' + (indice + 1)}
-          onClick={function() { setLightbox(true); }}
-          style={{
-            width:      '100%',
-            height:     '100%',
-            objectFit:  'cover',
-            display:    'block',
-            cursor:     'zoom-in',
-            opacity:    1,
-            transition: 'opacity 0.8s ease-in-out',
-            animation:  'none',
-          }}
-          onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(1.08)'; }}
-          onMouseLeave={function(e) { e.currentTarget.style.filter = 'brightness(1)'; }}
-        />
+        {imgActual ? (
+          <img
+            key={indice}
+            src={imgActual}
+            alt={alt + ' ' + (indice + 1)}
+            onClick={function() { setLightbox(true); }}
+            style={{
+              width:      '100%',
+              height:     '100%',
+              objectFit:  'cover',
+              display:    'block',
+              cursor:     'zoom-in',
+              opacity:    1,
+              transition: 'opacity 0.2s ease-in-out',
+              animation:  'none',
+            }}
+            onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(1.08)'; }}
+            onMouseLeave={function(e) { e.currentTarget.style.filter = 'brightness(1)'; }}
+          />
       ) : (
         <div style={{
           width:           '100%',
