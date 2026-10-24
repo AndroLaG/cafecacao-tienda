@@ -79,15 +79,16 @@ const PASOS_CACAO = [
   // },
 ];
 
-function CarruselPaso({ imagenes, alt }) {
+function CarruselPaso({ imagenes, alt, desfase }) {
   var [indice, setIndice] = useState(0);
-  useEffect(function() {
-  var intervalo = setInterval(function() {
-    setIndice(function(i) { return (i + 1) % imagenes.length; });
-  }, 3000);
-  return function() { clearInterval(intervalo); };
-}, [imagenes.length]);
   var [lightbox, setLightbox] = useState(false);
+
+  useEffect(function() {
+    var timer = setInterval(function() {
+      setIndice(function(i) { return (i + 1) % imagenes.length; });
+    }, 3000 + (desfase || 0));
+    return function() { clearInterval(timer); };
+  }, [imagenes.length, desfase]);
 
   function anterior(e) {
     e.stopPropagation();
@@ -99,132 +100,79 @@ function CarruselPaso({ imagenes, alt }) {
     setIndice(function(i) { return (i + 1) % imagenes.length; });
   }
 
-  var imgActual = imagenes[indice];
-
   return (
     <div style={{ position: 'relative', width: '100%', height: '220px', overflow: 'hidden', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}>
 
-      {/* Imagen o placeholder */}
-      {imgActual ? (
-        <img
-          key={indice}
-          src={imgActual}
-          alt={alt + ' ' + (indice + 1)}
-          onClick={function() { setLightbox(true); }}
-          style={{
-            width:      '100%',
-            height:     '100%',
-            objectFit:  'cover',
-            display:    'block',
-            cursor:     'zoom-in',
-            animation:  'fadeCarrusel 0.6s ease',
-          }}
-          onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(1.08)'; }}
-          onMouseLeave={function(e) { e.currentTarget.style.filter = 'brightness(1)'; }}
-        />
-      ) : (
-        <div style={{
-          width:           '100%',
-          height:          '100%',
-          backgroundColor: 'rgba(131,64,29,0.08)',
-          border:          '2px dashed rgba(131,64,29,0.25)',
-          display:         'flex',
-          flexDirection:   'column',
-          alignItems:      'center',
-          justifyContent:  'center',
-          gap:             '0.5rem',
-        }}>
-          <span style={{ fontSize: '2rem', opacity: 0.35 }}>📷</span>
-          <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', opacity: 0.6 }}>
-            Foto {indice + 1} — próximamente
-          </span>
-        </div>
-      )}
+      {/* ✅ Todas las imágenes superpuestas — sin key dinámica */}
+      {imagenes.map(function(img, i) {
+        return (
+          <div
+            key={i}
+            style={{
+              position:   'absolute',
+              inset:      0,
+              opacity:    i === indice ? 1 : 0,
+              transition: 'opacity 1.2s ease-in-out', // ← suave y lento
+            }}
+          >
+            {img ? (
+              <img
+                src={img}
+                alt={alt + ' ' + (i + 1)}
+                onClick={function() { setLightbox(true); }}
+                style={{
+                  width:     '100%',
+                  height:    '100%',
+                  objectFit: 'cover',
+                  display:   'block',
+                  cursor:    'zoom-in',
+                }}
+                onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(1.08)'; }}
+                onMouseLeave={function(e) { e.currentTarget.style.filter = 'brightness(1)'; }}
+              />
+            ) : (
+              <div style={{
+                width:           '100%',
+                height:          '100%',
+                backgroundColor: 'rgba(131,64,29,0.08)',
+                border:          '2px dashed rgba(131,64,29,0.25)',
+                display:         'flex',
+                flexDirection:   'column',
+                alignItems:      'center',
+                justifyContent:  'center',
+                gap:             '0.5rem',
+              }}>
+                <span style={{ fontSize: '2rem', opacity: 0.35 }}>📷</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--color-texto-muted)', opacity: 0.6 }}>
+                  Foto {i + 1} — próximamente
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      })}
 
-      {/* Flechas — solo si hay más de 1 imagen */}
+      {/* Flechas */}
       {imagenes.length > 1 && (
         <>
-          <button
-            onClick={anterior}
-            style={{
-              position:        'absolute',
-              left:            '8px',
-              top:             '50%',
-              transform:       'translateY(-50%)',
-              backgroundColor: 'rgba(250,246,239,0.88)',
-              color:           'var(--color-marron)',
-              border:          'none',
-              borderRadius:    '50%',
-              width:           '32px',
-              height:          '32px',
-              fontSize:        '1.1rem',
-              display:         'flex',
-              alignItems:      'center',
-              justifyContent:  'center',
-              cursor:          'pointer',
-              boxShadow:       '0 2px 6px rgba(0,0,0,0.15)',
-              zIndex:          2,
-              transition:      'background-color 0.2s',
-            }}
+          <button onClick={anterior} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(250,246,239,0.88)', color: 'var(--color-marron)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.15)', zIndex: 2, transition: 'background-color 0.2s' }}
             onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = '#fff'; }}
             onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = 'rgba(250,246,239,0.88)'; }}
-          >
-            ‹
-          </button>
-          <button
-            onClick={siguiente}
-            style={{
-              position:        'absolute',
-              right:           '8px',
-              top:             '50%',
-              transform:       'translateY(-50%)',
-              backgroundColor: 'rgba(250,246,239,0.88)',
-              color:           'var(--color-marron)',
-              border:          'none',
-              borderRadius:    '50%',
-              width:           '32px',
-              height:          '32px',
-              fontSize:        '1.1rem',
-              display:         'flex',
-              alignItems:      'center',
-              justifyContent:  'center',
-              cursor:          'pointer',
-              boxShadow:       '0 2px 6px rgba(0,0,0,0.15)',
-              zIndex:          2,
-              transition:      'background-color 0.2s',
-            }}
+          >‹</button>
+          <button onClick={siguiente} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(250,246,239,0.88)', color: 'var(--color-marron)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.15)', zIndex: 2, transition: 'background-color 0.2s' }}
             onMouseEnter={function(e) { e.currentTarget.style.backgroundColor = '#fff'; }}
             onMouseLeave={function(e) { e.currentTarget.style.backgroundColor = 'rgba(250,246,239,0.88)'; }}
-          >
-            ›
-          </button>
+          >›</button>
         </>
       )}
 
-      {/* Puntos indicadores */}
+      {/* Puntos */}
       {imagenes.length > 1 && (
-        <div style={{
-          position:       'absolute',
-          bottom:         '8px',
-          left:           '50%',
-          transform:      'translateX(-50%)',
-          display:        'flex',
-          gap:            '5px',
-          zIndex:         2,
-        }}>
+        <div style={{ position: 'absolute', bottom: '8px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '5px', zIndex: 2 }}>
           {imagenes.map(function(_, i) {
             return (
-              <div
-                key={i}
-                onClick={function(e) { e.stopPropagation(); setIndice(i); }}
-                style={{
-                  width:           i === indice ? '18px' : '7px',
-                  height:          '7px',
-                  borderRadius:    '999px',
-                  backgroundColor: i === indice ? 'var(--color-crema)' : 'rgba(250,246,239,0.55)',
-                  transition:      'all 0.3s ease',
-                  cursor:          'pointer',
-                }}
+              <div key={i} onClick={function(e) { e.stopPropagation(); setIndice(i); }}
+                style={{ width: i === indice ? '18px' : '7px', height: '7px', borderRadius: '999px', backgroundColor: i === indice ? 'var(--color-crema)' : 'rgba(250,246,239,0.55)', transition: 'all 0.3s ease', cursor: 'pointer' }}
               />
             );
           })}
@@ -232,129 +180,17 @@ function CarruselPaso({ imagenes, alt }) {
       )}
 
       {/* Contador */}
-      <div style={{
-        position:        'absolute',
-        top:             '8px',
-        right:           '10px',
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        color:           '#fff',
-        borderRadius:    '999px',
-        padding:         '0.1rem 0.55rem',
-        fontSize:        '0.7rem',
-        fontWeight:      '600',
-        zIndex:          2,
-      }}>
+      <div style={{ position: 'absolute', top: '8px', right: '10px', backgroundColor: 'rgba(0,0,0,0.4)', color: '#fff', borderRadius: '999px', padding: '0.1rem 0.55rem', fontSize: '0.7rem', fontWeight: '600', zIndex: 2 }}>
         {indice + 1}/{imagenes.length}
       </div>
-      {lightbox && imgActual && (
-  <Lightbox
-    src={imgActual}
-    alt={alt + ' ' + (indice + 1)}
-    onClose={function() { setLightbox(false); }}
-  />
-)}
-    </div>
-  );
-}
-// Sub-sección de elaboración (café o cacao)
-function SubseccionElaboracion({ titulo, icono, color, pasos }) {
-  return (
-    <div style={{ marginBottom: '3.5rem' }}>
-      {/* Cabecera del producto */}
-      <div style={{
-        display:      'flex',
-        alignItems:   'center',
-        gap:          '0.75rem',
-        marginBottom: '2rem',
-      }}>
-        <div style={{
-          width:           '48px',
-          height:          '48px',
-          borderRadius:    'var(--radius-md)',
-          backgroundColor: color,
-          display:         'flex',
-          alignItems:      'center',
-          justifyContent:  'center',
-          fontSize:        '1.4rem',
-          flexShrink:      0,
-        }}>
-          {icono}
-        </div>
-        <h3 style={{
-          fontFamily: 'var(--font-heading)',
-          fontSize:   'clamp(1.1rem, 3vw, 1.4rem)',
-          color:      'var(--color-marron)',
-          margin:     0,
-        }}>
-          {titulo}
-        </h3>
-        <div style={{
-          flex:            1,
-          height:          '1px',
-          backgroundColor: 'rgba(131,64,29,0.15)',
-          marginLeft:      '0.5rem',
-        }} />
-      </div>
 
-      {/* Grid de pasos */}
-      <div style={{
-        display:             'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-        gap:                 '1.5rem',
-      }}>
-        {pasos.map(paso => (
-          <div
-            key={paso.numero}
-            style={{
-              backgroundColor: '#fff',
-              borderRadius:    'var(--radius-lg)',
-              overflow:        'hidden',
-              boxShadow:       'var(--shadow-card)',
-              transition:      'transform 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-hover)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-card)';
-            }}
-          >
-            <CarruselPaso imagenes={paso.imagenes} alt={paso.titulo} />
-            <div style={{ padding: '1.1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                <span style={{
-                  fontFamily:  'var(--font-heading)',
-                  fontSize:    '0.8rem',
-                  fontWeight:  '700',
-                  color:       color === 'rgba(131,64,29,0.12)' ? 'var(--color-marron)' : color,
-                  opacity:     0.55,
-                  letterSpacing: '0.05em',
-                }}>
-                  PASO {paso.numero}
-                </span>
-                <span style={{
-                  fontFamily: 'var(--font-heading)',
-                  fontSize:   '1rem',
-                  fontWeight: '600',
-                  color:      'var(--color-marron)',
-                }}>
-                  {paso.titulo}
-                </span>
-              </div>
-              <p style={{
-                fontSize:   '0.85rem',
-                color:      'var(--color-texto-muted)',
-                lineHeight: '1.6',
-                margin:     0,
-              }}>
-                {paso.descripcion}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+      {lightbox && (
+        <Lightbox
+          src={imagenes[indice]}
+          alt={alt}
+          onClose={function() { setLightbox(false); }}
+        />
+      )}
     </div>
   );
 }
