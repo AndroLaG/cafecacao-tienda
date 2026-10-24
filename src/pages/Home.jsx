@@ -116,7 +116,7 @@ function CarruselPaso({ imagenes, alt }) {
               objectFit:  'cover',
               display:    'block',
               cursor:     'zoom-in',
-              opacity:    1,
+              //opacity:    1,
               transition: 'opacity 0.2s ease-in-out',
               animation:  'none',
             }}
