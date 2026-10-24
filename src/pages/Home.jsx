@@ -120,8 +120,8 @@ function CarruselPaso({ imagenes, alt }) {
               transition: 'opacity 0.2s ease-in-out',
               animation:  'none',
             }}
-            onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(0.08)'; }}
-            onMouseLeave={function(e) { e.currentTarget.style.filter = 'brightness(1)'; }}
+           // onMouseEnter={function(e) { e.currentTarget.style.filter = 'brightness(0.08)'; }}
+            //onMouseLeave={function(e) { e.currentTarget.style.filter = 'brightness(1)'; }}
           />
       ) : (
         <div style={{
