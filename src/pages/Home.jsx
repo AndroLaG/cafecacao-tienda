@@ -322,7 +322,9 @@ function Galeria() {
   return (
     <div>
       {/* Collage mosaico */}
-      <div style={{
+      <div 
+      className="galeria-grid"
+      style={{
         display:             'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
         gridAutoRows:        '200px',
