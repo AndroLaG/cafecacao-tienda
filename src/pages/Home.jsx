@@ -316,182 +316,70 @@ const IMAGENES_GALERIA = [
 const PLACEHOLDERS_GALERIA = 7
 
 function Galeria() {
-  const [indice, setIndice] = useState(0);
-  const [pausado, setPausado] = useState(false);
-  const [lightbox, setLightbox] = useState(false);
-
-  const items = IMAGENES_GALERIA.length > 0
-    ? IMAGENES_GALERIA
-    : Array.from({ length: PLACEHOLDERS_GALERIA }, (_, i) => ({ url: null, alt: `Foto ${i + 1}` }));
-
-  // Auto-avance cada 4 s
-  useEffect(() => {
-    if (pausado) return;
-    const timer = setInterval(() => {
-      setIndice(prev => (prev + 1) % items.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [pausado, items.length]);
-
-  function irA(i) {
-    setIndice(i);
-    setPausado(true);
-    setTimeout(() => setPausado(false), 8000);
-  }
-  function anterior() { irA((indice - 1 + items.length) % items.length); }
-  function siguiente() { irA((indice + 1) % items.length); }
+  const [lightboxSrc, setLightboxSrc] = useState(null);
+  const [lightboxAlt, setLightboxAlt] = useState('');
 
   return (
-    <div
-      style={{ position: 'relative', userSelect: 'none' }}
-      onMouseEnter={() => setPausado(true)}
-      onMouseLeave={() => setPausado(false)}
-    >
-      {/* Slide principal */}
+    <div>
+      {/* Collage mosaico */}
+      className="galeria-grid"
       <div style={{
-        position:     'relative',
-        width:        '100%',
-        height: 'clamp(260px, 60vw, 420px)',
-        borderRadius: 'var(--radius-lg)',
-        overflow:     'hidden',
-        boxShadow:    'var(--shadow-hover)',
+        display:             'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridAutoRows:        '200px',
+        gap:                 '6px',
       }}>
-        {items.map((item, i) => (
-          <div
-            key={i}
-            style={{
-              position:   'absolute',
-              inset:      0,
-              opacity:    i === indice ? 1 : 0,
-              transition: 'opacity 0.7s ease',
-            }}
-          >
-            {item.url ? (
-                <img
-                  src={item.url}
-                  alt={item.alt}
-                  onClick={function() { setLightbox(true); }}
-                  style={{
-                    width:          '100%',
-                    height:         '100%',
-                    objectFit:      'contain',
-                    objectPosition: 'center',
-                    backgroundColor: 'var(--color-crema)',
-                    cursor:         'zoom-in',
-                    transition:     'transform 0.3s ease',
-                  }}
-                  onMouseEnter={function(e) { e.currentTarget.style.transform = 'scale(1.03)'; }}
-                  onMouseLeave={function(e) { e.currentTarget.style.transform = 'scale(1)'; }}
-                />
-            ) : (
-              <div style={{
-                width:           '100%',
-                height:          '100%',
-                backgroundColor: i % 2 === 0 ? 'rgba(131,64,29,0.07)' : 'rgba(131,116,27,0.07)',
-                display:         'flex',
-                flexDirection:   'column',
-                alignItems:      'center',
-                justifyContent:  'center',
-                gap:             '0.75rem',
-              }}>
-                <span style={{ fontSize: '3rem', opacity: 0.3 }}>🌿</span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-texto-muted)', opacity: 0.5 }}>
-                  Foto {i + 1} — próximamente
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* Flechas */}
-        {[
-          { onClick: anterior, label: '‹', side: 'left:  12px' },
-          { onClick: siguiente, label: '›', side: 'right: 12px' },
-        ].map(({ onClick, label, side }) => (
-          <button
-            key={label}
-            onClick={onClick}
-            style={{
-              position:        'absolute',
-              top:             '50%',
-              [side.split(':')[0].trim()]: side.split(':')[1].trim(),
-              transform:       'translateY(-50%)',
-              backgroundColor: 'rgba(250,246,239,0.9)',
-              color:           'var(--color-marron)',
-              border:          'none',
-              borderRadius:    'var(--radius-pill)',
-              width:           '40px',
-              height:          '40px',
-              fontSize:        '1.4rem',
-              lineHeight:      1,
-              display:         'flex',
-              alignItems:      'center',
-              justifyContent:  'center',
-              boxShadow:       '0 2px 8px rgba(0,0,0,0.15)',
-              transition:      'background-color 0.2s, transform 0.15s',
-              zIndex:          2,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#fff';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'rgba(250,246,239,0.9)';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-            }}
-          >
-            {label}
-          </button>
-        ))}
-
-        {/* Contador */}
-        <div style={{
-          position:        'absolute',
-          bottom:          '12px',
-          right:           '14px',
-          backgroundColor: 'rgba(0,0,0,0.45)',
-          color:           '#fff',
-          borderRadius:    'var(--radius-pill)',
-          padding:         '0.15rem 0.65rem',
-          fontSize:        '0.75rem',
-          fontWeight:      '600',
-          zIndex:          2,
-        }}>
-          {indice + 1} / {items.length}
-        </div>
+        {IMAGENES_GALERIA.map(function(item, i) {
+          // Cada 7 imágenes: posiciones 0 y 3 son grandes (2 filas)
+          var esFila2 = (i % 7 === 0 || i % 7 === 3);
+          return (
+            <div
+              key={i}
+              onClick={function() { setLightboxSrc(item.url); setLightboxAlt(item.alt); }}
+              style={{
+                gridRow:    esFila2 ? 'span 2' : 'span 1',
+                overflow:   'hidden',
+                cursor:     'zoom-in',
+                borderRadius: '4px',
+                position:   'relative',
+              }}
+              onMouseEnter={function(e) { e.currentTarget.querySelector('img').style.transform = 'scale(1.06)'; }}
+              onMouseLeave={function(e) { e.currentTarget.querySelector('img').style.transform = 'scale(1)'; }}
+            >
+              <img
+                src={item.url}
+                alt={item.alt}
+                style={{
+                  width:      '100%',
+                  height:     '100%',
+                  objectFit:  'cover',
+                  display:    'block',
+                  transition: 'transform 0.4s ease',
+                }}
+              />
+            </div>
+          );
+        })}
       </div>
 
-      {/* Puntos de navegación */}
-      <div style={{
-        display:        'flex',
-        justifyContent: 'center',
-        gap:            '0.5rem',
-        marginTop:      '1rem',
-      }}>
-        {items.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => irA(i)}
-            style={{
-              width:           i === indice ? '24px' : '8px',
-              height:          '8px',
-              borderRadius:    'var(--radius-pill)',
-              backgroundColor: i === indice ? 'var(--color-marron)' : 'rgba(131,64,29,0.25)',
-              border:          'none',
-              padding:         0,
-              transition:      'all 0.3s ease',
-              cursor:          'pointer',
-            }}
-          />
-        ))}
-      </div>
-      {lightbox && items[indice]?.url && (
-  <Lightbox
-    src={items[indice].url}
-    alt={items[indice].alt}
-    onClose={function() { setLightbox(false); }}
-  />
-)}
+      {/* Responsive — mobile 2 columnas */}
+      
+      <style>{`
+        @media (max-width: 640px) {
+          .galeria-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            grid-auto-rows: 160px !important;
+          }
+        }
+      `}</style>
+
+      {lightboxSrc && (
+        <Lightbox
+          src={lightboxSrc}
+          alt={lightboxAlt}
+          onClose={function() { setLightboxSrc(null); setLightboxAlt(''); }}
+        />
+      )}
     </div>
   );
 }
