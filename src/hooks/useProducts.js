@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabaseClient';
 
 export function useProducts(categoria = null) {
@@ -6,31 +6,41 @@ export function useProducts(categoria = null) {
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
 
-  useEffect(() => {
-    async function fetchProductos() {
-      setLoading(true);
-      let query = supabase
-        .from('productos')
-        .select('*')
-        .eq('activo', true)
-        .order('created_at', { ascending: false });
+  const fetchProductos = useCallback(async function(intento) {
+    setLoading(true);
+    setError(null);
 
-      if (categoria) {
-        query = query.eq('categoria', categoria);
-      }
+    var query = supabase
+      .from('productos')
+      .select('*')
+      .eq('activo', true)
+      .order('created_at', { ascending: false });
 
-      const { data, error } = await query;
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setProductos(data);
-      }
-      setLoading(false);
+    if (categoria) {
+      query = query.eq('categoria', categoria);
     }
 
-    fetchProductos();
+    var result = await query;
+
+    if (result.error) {
+      // Reintentar hasta 3 veces con delay creciente
+      if (intento < 3) {
+        setTimeout(function() {
+          fetchProductos(intento + 1);
+        }, intento * 1000); // 1s, 2s, 3s
+      } else {
+        setError(result.error.message);
+        setLoading(false);
+      }
+    } else {
+      setProductos(result.data);
+      setLoading(false);
+    }
   }, [categoria]);
+
+  useEffect(function() {
+    fetchProductos(1);
+  }, [fetchProductos]);
 
   return { productos, loading, error };
 }
