@@ -351,7 +351,7 @@ function Galeria() {
       <div style={{
         position:     'relative',
         width:        '100%',
-        height:       '420px',
+        height: 'clamp(260px, 60vw, 420px)',
         borderRadius: 'var(--radius-lg)',
         overflow:     'hidden',
         boxShadow:    'var(--shadow-hover)',
@@ -372,11 +372,13 @@ function Galeria() {
                   alt={item.alt}
                   onClick={function() { setLightbox(true); }}
                   style={{
-                    width:     '100%',
-                    height:    '100%',
-                    objectFit: 'cover',
-                    cursor:    'zoom-in',
-                    transition: 'transform 0.3s ease',
+                    width:          '100%',
+                    height:         '100%',
+                    objectFit:      'contain',
+                    objectPosition: 'center',
+                    backgroundColor: 'var(--color-crema)',
+                    cursor:         'zoom-in',
+                    transition:     'transform 0.3s ease',
                   }}
                   onMouseEnter={function(e) { e.currentTarget.style.transform = 'scale(1.03)'; }}
                   onMouseLeave={function(e) { e.currentTarget.style.transform = 'scale(1)'; }}
@@ -933,14 +935,14 @@ function Home() {
         alignItems:     'center',
         justifyContent: 'center',
       }}>
-        <video autoPlay muted loop playsInline style={{
-          position:  'absolute',
-          inset:     0,
-          width:     '100%',
-          height:    '100%',
-          objectFit: 'cover',
-          zIndex:    0,
-        }}>
+          <video autoPlay muted loop playsInline className="hero-video" style={{
+            position:  'absolute',
+            inset:     0,
+            width:     '100%',
+            height:    '100%',
+            objectFit: 'cover',
+            zIndex:    0,
+          }}>
           <source src={VIDEO_URL} type="video/mp4" />
         </video>
 
