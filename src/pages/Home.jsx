@@ -659,7 +659,7 @@ function SeccionNosotros() {
 </div>
       {/* ── 3. GALERÍA ── */}
       <div style={{
-        backgroundColor: 'var(--color-crema-1)',
+        backgroundColor: 'var(--color-crema)',
         padding:         '5rem 1.5rem',
       }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
@@ -677,7 +677,7 @@ function SeccionNosotros() {
           </p>
           <h2 style={{
             fontFamily:   'var(--font-heading)',
-            color:        'var(--color-crema)',
+            color:        'var(--color-marron)',
             fontSize:     'clamp(1.75rem, 4vw, 2.25rem)',
             marginBottom: '0.75rem',
             textAlign:    'center',
@@ -686,7 +686,7 @@ function SeccionNosotros() {
           </h2>
           <p style={{
             textAlign:    'center',
-            color:        'var(--color-crema)',
+            color:        'var(--color-texto-muted)',
             marginBottom: '2.5rem',
             fontSize:     '0.95rem',
             lineHeight:   '1.7',
