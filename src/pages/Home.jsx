@@ -659,7 +659,7 @@ function SeccionNosotros() {
 </div>
       {/* ── 3. GALERÍA ── */}
       <div style={{
-        backgroundColor: 'var(--color-crema)',
+        backgroundColor: 'var(--color-crema-1)',
         padding:         '5rem 1.5rem',
       }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>

@@ -7,6 +7,7 @@
   --color-oliva-claro:   #97862e;
   --color-granate:       #8d2535;
   --color-crema:         #faf6ef;
+  --color-crema-1:       #6c2917;
   --color-texto:         #1a0f0a;
   --color-texto-muted:   #000000;
 
@@ -67,7 +68,3 @@ img {
   h2 { font-size: 1.4rem;  }
 }
 
-@keyframes fadeCarrusel {
-  from { opacity: 0; transform: scale(1.03); }
-  to   { opacity: 1; transform: scale(1);    }
-}
