@@ -82,7 +82,7 @@ function Lightbox({ src, alt, onClose }) {
           borderRadius: '8px',
           boxShadow:    '0 24px 80px rgba(0,0,0,0.6)',
           cursor:       'default',
-          animation:    'scaleInLightbox 0.25s ease',
+          animation: 'none',
           display:      'block',
         }}
       />
