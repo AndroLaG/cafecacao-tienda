@@ -23,7 +23,7 @@ function CartDrawer({ isOpen, onClose }) {
         position: 'fixed',
         top: 0,
         right: 0,
-        height: '100vh',
+        height: '100dvh',
         width: 'min(420px, 100vw)',
         backgroundColor: '#fff',
         zIndex: 201,
@@ -178,6 +178,7 @@ function CartDrawer({ isOpen, onClose }) {
         {items.length > 0 && (
           <div style={{
             padding: '1rem',
+            paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 12px))',
             borderTop: '1px solid #f0e8de',
             backgroundColor: 'var(--color-crema)',
           }}>
