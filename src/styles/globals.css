@@ -80,7 +80,7 @@ img {
 /* Galería collage — 1 columna en móvil */
 @media (max-width: 640px) {
   .galeria-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 2fr !important;
     grid-auto-rows: 260px !important;
   }
 }
