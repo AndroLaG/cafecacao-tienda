@@ -77,3 +77,22 @@ img {
   }
 }
 
+/* Galería collage — 1 columna en móvil */
+@media (max-width: 640px) {
+  .galeria-grid {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: 260px !important;
+  }
+}
+
+/* Spinner de carga productos */
+@keyframes spinLoader {
+  to { transform: rotate(360deg); }
+}
+
+/* Fade suave entre imágenes del carrusel */
+@keyframes fadeCarrusel {
+  from { opacity: 0; transform: scale(1.03); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
