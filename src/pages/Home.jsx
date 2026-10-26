@@ -302,13 +302,13 @@ const IMAGENES_GALERIA = [
   // Agrega aquí las URLs reales de tus fotos en Supabase Storage.
   // Formato: { url: 'https://...', alt: 'Descripción de la foto' }
   // Ejemplo:
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-pulsera.avif', alt: 'Flor pulsera', loading: "lazy" },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.avif', alt: 'Despepar cacao', loading: "lazy" },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/vivero-cacao.avif', alt: 'Vivero cacao', loading: "lazy" },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-morada.avif', alt: 'Flor morada', loading: "lazy" },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/trabajo-vivero.avif', alt: 'Trabajo en el vivero', loading: "lazy" },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/rio-niebla.avif', alt: 'Río niebla', loading: "lazy" },
-  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/secado-cacao.avif', alt: 'Secado de cacao', loading: "lazy" }
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-pulsera.avif', alt: 'Flor pulsera' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/despepar-cacao.avif', alt: 'Despepar cacao' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/vivero-cacao.avif', alt: 'Vivero cacao' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/flor-morada.avif', alt: 'Flor morada' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/trabajo-vivero.avif', alt: 'Trabajo en el vivero' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/rio-niebla.avif', alt: 'Río niebla' },
+  { url: 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/secado-cacao.avif', alt: 'Secado de cacao' }
 
 ];
 
@@ -350,6 +350,7 @@ function Galeria() {
               <img
                 src={item.url}
                 alt={item.alt}
+                loading="lazy"
                 style={{
                   width:      '100%',
                   height:     '100%',
