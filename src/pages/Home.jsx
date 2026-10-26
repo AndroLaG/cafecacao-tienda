@@ -316,40 +316,47 @@ const IMAGENES_GALERIA = [
 const PLACEHOLDERS_GALERIA = 7
 
 function Galeria() {
-  const [lightboxSrc, setLightboxSrc] = useState(null);
-  const [lightboxAlt, setLightboxAlt] = useState('');
+  var [lightboxSrc, setLightboxSrc] = useState(null);
+  var [lightboxAlt, setLightboxAlt] = useState('');
 
   return (
-    <div>
-      {/* Collage mosaico */}
-      <div 
-      className="galeria-grid"
-      style={{
-        display:             'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gridAutoRows:        '200px',
-        gap:                 '6px',
-      }}>
+    <>
+      <div
+        className="galeria-grid"
+        style={{
+          display:             'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridAutoRows:        '200px',
+          gap:                 '6px',
+        }}
+      >
         {IMAGENES_GALERIA.map(function(item, i) {
-          // Cada 7 imágenes: posiciones 0 y 3 son grandes (2 filas)
           var esFila2 = (i % 7 === 0 || i % 7 === 3);
           return (
             <div
               key={i}
               onClick={function() { setLightboxSrc(item.url); setLightboxAlt(item.alt); }}
               style={{
-                gridRow:    esFila2 ? 'span 2' : 'span 1',
-                overflow:   'hidden',
-                cursor:     'zoom-in',
+                gridRow:      esFila2 ? 'span 2' : 'span 1',
+                overflow:     'hidden',
+                cursor:       'zoom-in',
                 borderRadius: '4px',
-                position:   'relative',
+                position:     'relative',
               }}
-              onMouseEnter={function(e) { e.currentTarget.querySelector('img').style.transform = 'scale(1.06)'; }}
-              onMouseLeave={function(e) { e.currentTarget.querySelector('img').style.transform = 'scale(1)'; }}
+              onMouseEnter={function(e) {
+                var img = e.currentTarget.querySelector('img');
+                if (img) img.style.transform = 'scale(1.06)';
+              }}
+              onMouseLeave={function(e) {
+                var img = e.currentTarget.querySelector('img');
+                if (img) img.style.transform = 'scale(1)';
+              }}
             >
               <img
                 src={item.url}
                 alt={item.alt}
+                loading="lazy"
+                decoding="async"
                 style={{
                   width:      '100%',
                   height:     '100%',
@@ -363,17 +370,6 @@ function Galeria() {
         })}
       </div>
 
-      {/* Responsive — mobile 2 columnas */}
-      
-      <style>{`
-        @media (max-width: 640px) {
-          .galeria-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            grid-auto-rows: 160px !important;
-          }
-        }
-      `}</style>
-
       {lightboxSrc && (
         <Lightbox
           src={lightboxSrc}
@@ -381,7 +377,7 @@ function Galeria() {
           onClose={function() { setLightboxSrc(null); setLightboxAlt(''); }}
         />
       )}
-    </div>
+    </>
   );
 }
 
