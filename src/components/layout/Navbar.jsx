@@ -66,7 +66,7 @@ function Navbar() {
               fontFamily:     "var(--font-heading)",
               color:          "var(--color-crema)",
               fontSize:       "1.4rem",
-              fontWeight:     "700",
+              fontWeight:     "1700",
               textDecoration: "none",
               flexShrink:     0,
               display:        "flex",
