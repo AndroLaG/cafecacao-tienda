@@ -60,17 +60,27 @@ function Navbar() {
           zIndex: 100,
         }
       },
-        React.createElement("a", {
-          href: "/",
-          style: {
-            fontFamily: "var(--font-heading)",
-            color: "var(--color-crema)",
-            fontSize: "1.4rem",
-            fontWeight: "700",
-            textDecoration: "none",
-            flexShrink: 0,
-          }
-        }, "Lily\'s Caffe"),
+          React.createElement("a", {
+            href: "/",
+            style: {
+              fontFamily:     "var(--font-heading)",
+              color:          "var(--color-crema)",
+              fontSize:       "1.4rem",
+              fontWeight:     "700",
+              textDecoration: "none",
+              flexShrink:     0,
+              display:        "flex",
+              alignItems:     "center",
+              gap:            "0.5rem",
+            }
+          },
+            React.createElement("img", {
+              src:    "https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/logo-lilyscaffe-2026.png",
+              alt:    "Lily's Caffe",
+              style:  { height: "36px", width: "auto", objectFit: "contain" },
+            }),
+            "Lily's Caffe"
+          ),
 
         React.createElement("div", {
           className: "desktop-menu",
