@@ -77,7 +77,7 @@ function Navbar() {
             React.createElement("img", {
               src:    "https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/logo-lilyscaffe-2026.png",
               alt:    "Lily's Caffe",
-              style:  { height: "56px", width: "auto", objectFit: "contain" },
+              style:  { height: "48px", width: "auto", objectFit: "contain" },
             }),
             "Lily's Caffe"
           ),
