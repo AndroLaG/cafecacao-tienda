@@ -53,37 +53,58 @@ function Reclamaciones() {
     return Object.keys(e).length === 0;
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!validar()) return;
+    async function handleSubmit(e) {
+      e.preventDefault();
+      if (!validar()) return;
 
-    setEnviando(true);
-    setError(null);
+      setEnviando(true);
+      setError(null);
 
-    const { data, error: dbError } = await supabase
-      .from('reclamos')
-      .insert({
-        tipo:        form.tipo,
-        nombre:      form.nombre.trim(),
-        email:       form.email.trim(),
-        telefono:    form.telefono || null,
-        dni:         form.dni || null,
-        pedido_id:   form.pedido_id || null,
-        producto:    form.producto || null,
-        descripcion: form.descripcion.trim(),
-      })
-      .select('id')
-      .single();
+      const { data, error: dbError } = await supabase
+        .from('reclamos')
+        .insert({
+          tipo:        form.tipo,
+          nombre:      form.nombre.trim(),
+          email:       form.email.trim(),
+          telefono:    form.telefono || null,
+          dni:         form.dni || null,
+          pedido_id:   form.pedido_id || null,
+          producto:    form.producto || null,
+          descripcion: form.descripcion.trim(),
+        })
+        .select('id')
+        .single();
 
-    if (dbError) {
-      setError('Error al enviar. Por favor inténtalo de nuevo.');
-    } else {
-      setNroReclamo(data.id.slice(0, 8).toUpperCase());
+      if (dbError) {
+        setError('Error al enviar. Por favor inténtalo de nuevo.');
+        setEnviando(false);
+        return;
+      }
+
+      var nro = data.id.slice(0, 8).toUpperCase();
+
+      // Enviar email de notificación al admin
+      await supabase.functions.invoke('enviar-contacto', {
+        body: {
+          nombre: form.nombre.trim(),
+          email:  form.email.trim(),
+          mensaje: `
+            <strong>Tipo:</strong> ${form.tipo.toUpperCase()}<br/>
+            <strong>Número de registro:</strong> #${nro}<br/>
+            <strong>DNI:</strong> ${form.dni || '—'}<br/>
+            <strong>Teléfono:</strong> ${form.telefono || '—'}<br/>
+            <strong>Pedido:</strong> ${form.pedido_id || '—'}<br/>
+            <strong>Producto:</strong> ${form.producto || '—'}<br/><br/>
+            <strong>Descripción:</strong><br/>
+            ${form.descripcion.trim()}
+          `,
+        },
+      });
+
+      setNroReclamo(nro);
       setEnviado(true);
+      setEnviando(false);
     }
-
-    setEnviando(false);
-  }
 
   const inputStyle = (err) => ({
     width:           '100%',
