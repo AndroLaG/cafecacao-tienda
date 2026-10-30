@@ -10,30 +10,51 @@ export function useProducts(categoria = null) {
     setLoading(true);
     setError(null);
 
-    var query = supabase
-      .from('productos')
-      .select('*')
-      .eq('activo', true)
-      .order('created_at', { ascending: false });
+    var controller = new AbortController();
+    var timer = setTimeout(function() { controller.abort(); }, 8000);
+    var mensaje = null;
+    var datos = null;
 
-    if (categoria) {
-      query = query.eq('categoria', categoria);
+    try {
+      var query = supabase
+        .from('productos')
+        .select('*')
+        .eq('activo', true);
+
+      if (categoria) {
+        query = query.eq('categoria', categoria);
+      }
+
+      query = query
+        .order('created_at', { ascending: false })
+        .abortSignal(controller.signal);
+
+      var result = await query;
+
+      if (result.error) {
+        mensaje = result.error.message || 'Error al cargar productos';
+      } else {
+        datos = result.data;
+      }
+    } catch (e) {
+      mensaje = (e && e.message) ? e.message : 'Error de conexión';
     }
 
-    var result = await query;
+    clearTimeout(timer);
 
-    if (result.error) {
-      // Reintentar hasta 3 veces con delay creciente
-      if (intento < 3) {
-        setTimeout(function() {
-          fetchProductos(intento + 1);
-        }, intento * 1000); // 1s, 2s, 3s
-      } else {
-        setError(result.error.message);
-        setLoading(false);
-      }
+    if (mensaje === null) {
+      setProductos(datos);
+      setLoading(false);
+      return;
+    }
+
+    // Reintentar hasta 3 veces con delay creciente (1s, 2s, 3s)
+    if (intento < 3) {
+      setTimeout(function() {
+        fetchProductos(intento + 1);
+      }, intento * 1000);
     } else {
-      setProductos(result.data);
+      setError(mensaje);
       setLoading(false);
     }
   }, [categoria]);

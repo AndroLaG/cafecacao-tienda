@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 
 export function useAuth() {
-  const [user,        setUser]        = useState(null);
-  const [perfil,      setPerfil]      = useState(null);
-  const [loading,     setLoading]     = useState(true);
+  const [user,    setUser]    = useState(null);
+  const [perfil,  setPerfil]  = useState(null);
+  const [loading, setLoading] = useState(true);
 
   async function cargarPerfil(userId) {
     if (!userId) { setPerfil(null); return; }
@@ -17,22 +17,32 @@ export function useAuth() {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    let activo = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
-      await cargarPerfil(u?.id);
-      setLoading(false);
+      cargarPerfil(u?.id).finally(() => {
+        if (activo) setLoading(false);
+      });
     });
 
+    // IMPORTANTE: el callback NO debe hacer await de consultas a Supabase.
+    // Se difiere con setTimeout para liberar el bloqueo interno de Auth.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         const u = session?.user ?? null;
         setUser(u);
-        await cargarPerfil(u?.id);
+        setTimeout(() => {
+          cargarPerfil(u?.id);
+        }, 0);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      activo = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function cerrarSesion() {
