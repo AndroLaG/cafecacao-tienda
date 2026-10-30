@@ -7,7 +7,10 @@ import AdminPedidos   from '../components/admin/AdminPedidos';
 import AdminProductos from '../components/admin/AdminProductos';
 import AdminReportes  from '../components/admin/AdminReportes';
 
-const ADMIN_EMAIL = 'lilyscaffe26@gmail.com';
+const ADMIN_EMAILS = [
+  'lilyscaffe26@gmail.com',
+  'lilyscaffe26+pruebas@gmail.com',
+];
 const TABS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'pedidos',   label: 'Pedidos'   },
@@ -89,7 +92,7 @@ function Admin() {
     </div>
   );
 
-  if (!user || user.email !== ADMIN_EMAIL) {
+  if (!user || ADMIN_EMAILS.indexOf(user.email) === -1) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Navbar />

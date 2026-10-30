@@ -3,7 +3,10 @@ import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../hooks/useAuth";
 import CartDrawer from "../cart/CartDrawer";
 
-const ADMIN_EMAIL = "lilyscaffe26@gmail.com";
+const ADMIN_EMAILS = [
+  'lilyscaffe26@gmail.com',
+  'lilyscaffe26+pruebas@gmail.com',
+];
 
 const ENLACES = [
   { label: "Inicio",    href: "/"          },
@@ -20,7 +23,7 @@ function Navbar() {
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const submenuRef = useRef(null);
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = !!user && ADMIN_EMAILS.indexOf(user.email) !== -1;
   const displayName = primerNombre ?? (user ? user.email.split("@")[0] : "");
 
   useEffect(() => {
@@ -75,6 +78,7 @@ function Navbar() {
             }
           },
             React.createElement("img", {
+              className: "nav-logo-img",
               src:    "https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/logo-lilyscaffe-2026.png",
               alt:    "Lily's Caffe",
               style:  { height: "48px", width: "auto", objectFit: "contain" },
@@ -222,6 +226,7 @@ function Navbar() {
         @media (max-width: 640px) {
           .desktop-menu { display: none  !important; }
           .mobile-menu  { display: flex  !important; }
+          .nav-logo-img { margin-left: -14px; }
         }
       `)
     )
