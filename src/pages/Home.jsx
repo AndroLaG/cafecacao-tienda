@@ -7,9 +7,6 @@ import Lightbox from '../components/ui/Lightbox';
 
 const VIDEO_URL = 'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/videos/Hero-Cacao2.mp4';
 
-// ─────────────────────────────────────────────
-// SECCIÓN NOSOTROS — Rediseñada
-// ─────────────────────────────────────────────
 
 // Pasos de elaboración del CAFÉ
 const PASOS_CAFE = [
@@ -433,7 +430,7 @@ function SeccionNosotros() {
           }}>
             <div>
               <p style={{ lineHeight: '1.85', opacity: 0.92, marginBottom: '1.25rem', fontSize: '1rem' }}>
-                <strong style={{ color: 'var(--color-crema)' }}>Lily's Caffe</strong> nació del amor y esfuerzo de mi padre y madre. Es un proyecto familiar que busca compartir la riqueza de nuestros cultivos de café y cacao, cultivados en las fértiles tierras de Pangoa, Perú. Desde el primer día, nos propusimos ofrecer productos de alta calidad, respetando la naturaleza y las tradiciones locales.
+                <strong style={{ color: 'var(--color-crema)' }}>Lily's Caffe</strong> nació del amor y esfuerzo de mi padre y madre. Es un proyecto familiar que busca compartir la riqueza de nuestros cultivos de café y cacao, cultivados en las fértiles tierras de Pangoa, Perú. Nuestro mision es ofrecer productos de alta calidad, respetando la naturaleza y las tradiciones locales.
               </p>
               <p style={{ lineHeight: '1.85', opacity: 0.92, fontSize: '1rem' }}>
                 Cada grano ha sido seleccionado a mano, fermentado y secado al sol
