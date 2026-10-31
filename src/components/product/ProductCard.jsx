@@ -152,7 +152,7 @@ function ProductCard({ producto }) {
         </div>
 
         {/* Notas — solo si no es chocolate */}
-        {producto.notas_cata && !esChocolate && (
+        {producto.notas_cata && producto.notas_cata.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
             {producto.notas_cata.map(nota => (
               <span key={nota} style={{
