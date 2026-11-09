@@ -67,7 +67,7 @@ export function abrirModalCulqi({ total, email, onToken, onError }) {
     appearance: {
       theme:             'default',
       hiddenCulqiLogo:   false,
-      buttonCardPayText: 'Pagar S/ ' + total.toFixed(2),
+      buttonCardPayText: 'Pagar',
       logo:              'https://ehubruirzxvaeuktlfmz.supabase.co/storage/v1/object/public/Galeria/logo-lilyscaffe-2026.png',
       defaultStyle: {
         bannerColor:      '#83401d',
