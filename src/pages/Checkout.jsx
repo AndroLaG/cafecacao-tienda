@@ -185,7 +185,14 @@ function Checkout() {
           var result = await supabase.functions.invoke('procesar-pago', {
             body: { pedido_id: pedidoId, culqi_token: token },
           });
-          if (result.error) throw result.error;
+                    if (result.error) {
+            var detalle = 'No se pudo procesar el pago.';
+            try {
+              var cuerpo = await result.error.context.json();
+              if (cuerpo && cuerpo.error) detalle = cuerpo.error;
+            } catch (e) {}
+            throw new Error(detalle);
+          }
           if (result.data?.error) throw new Error(result.data.error);
 
           if (user) {
