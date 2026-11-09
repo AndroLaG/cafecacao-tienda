@@ -3,7 +3,7 @@ const CULQI_PUBLIC_KEY = import.meta.env.VITE_CULQI_PUBLIC_KEY;
 const CULQI_SCRIPT_URL = 'https://js.culqi.com/checkout-js';
 
 // Cambiar a true cuando Culqi confirme que Yape está habilitado en el comercio
-const YAPE_HABILITADO = false;
+const YAPE_HABILITADO = true;
 
 var instanciaActual = null;
 
